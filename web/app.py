@@ -442,7 +442,6 @@ def download():
             "format": selector,
             "merge_output_format": "mkv",
             "noplaylist": True,
-            "max_downloads": 1,
             "max_filesize": download_limit,
             "extractor_retries": 1,
             "restrictfilenames": True,

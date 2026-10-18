@@ -40,6 +40,17 @@ class FakeYoutubeDL:
         return str(self.output)
 
 
+class MergeCompletingYoutubeDL(FakeYoutubeDL):
+    """yt-dlp's --max-downloads raises right after a finished download; a
+    completed merge must not be reported as a failure."""
+
+    def extract_info(self, url, download=True):
+        info = super().extract_info(url, download=download)
+        if download and self.options.get("max_downloads") is not None:
+            raise webapp.yt_dlp.utils.MaxDownloadsReached()
+        return info
+
+
 class VidNestWebTests(unittest.TestCase):
     def setUp(self):
         webapp.app.config.update(TESTING=True)
@@ -332,6 +343,38 @@ class VidNestWebTests(unittest.TestCase):
                 webapp.sweep_stale_downloads()
                 self.assertFalse(stale.exists())
                 self.assertTrue(fresh.exists())
+            finally:
+                webapp.DOWNLOAD_DIR = previous_dir
+
+
+    def test_completed_merge_download_is_not_reported_as_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            previous_dir = webapp.DOWNLOAD_DIR
+            webapp.DOWNLOAD_DIR = Path(temporary)
+            try:
+                with patch.object(webapp, "validate_media_url", return_value="https://youtube.com/watch?v=x"), \
+                     patch.object(webapp.yt_dlp, "YoutubeDL", MergeCompletingYoutubeDL):
+                    probe_id = "merge-probe"
+                    webapp.probe_cache[probe_id] = {
+                        "url": "https://youtube.com/watch?v=x",
+                        "selectors": {"137": "137+bestaudio"},
+                        "expires": time.monotonic() + 600,
+                        "title": "Video",
+                    }
+                    response = self.client.post(
+                        "/api/download",
+                        base_url=self.base_url,
+                        headers={
+                            "Origin": self.base_url,
+                            "X-VidNest-CSRF": webapp.csrf_token,
+                        },
+                        json={"url": "https://youtube.com/watch?v=x", "probeId": probe_id, "formatId": "137"},
+                    )
+                self.assertEqual(response.status_code, 200)
+                data = response.get_json()
+                self.assertRegex(data["file"], r"^[0-9a-f]{32}\.mp4$")
+                self.assertTrue((Path(temporary) / data["file"]).exists())
+                webapp.probe_cache.pop("merge-probe", None)
             finally:
                 webapp.DOWNLOAD_DIR = previous_dir
 

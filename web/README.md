@@ -36,12 +36,37 @@ job folders are removed at startup. The tool accepts one download at a time and
 requests a per-file cap of about 1 GB; streaming sources may temporarily exceed
 the cap until yt-dlp reports progress, but oversized output is rejected before
 it is published. yt-dlp's cache is disabled. The tool does not persist
-credentials or cookies. For internet-facing use, build a separate authenticated
-service with a production WSGI server, strict egress controls and per-user
-quotas; this local utility is not intended for that purpose.
+credentials or cookies. `VIDNEST_PUBLIC=1` (see below) adapts the same code for
+a small internet-facing deployment; it keeps the URL allowlist, CSRF,
+same-origin and rate-limit gates, but remains a single-node utility with
+shared quotas rather than production infrastructure.
 
 ## Tests
 
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+## Public deployment (optional)
+
+`render.yaml` in the repository root deploys this companion on Render's free
+plan (dashboard → New + → Blueprint → pick the repository). The service runs
+the Dockerfile in this directory with gunicorn and ffmpeg.
+
+Environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VIDNEST_PUBLIC` | `0` | `1` accepts the platform hostname instead of loopback only |
+| `VIDNEST_TRUST_PROXY` | `0` | `1` trusts one reverse-proxy hop (scheme, host, client IP) |
+| `VIDNEST_ALLOWED_HOSTS` | empty | Optional comma-separated Host allowlist |
+| `VIDNEST_MAX_FILE_MB` | `1000` | Per-file download cap |
+| `VIDNEST_STORAGE_MB` | `2000` | Total download storage cap |
+| `VIDNEST_STALE_MINUTES` | `45` | Unfetched downloads are deleted after this |
+| `VIDNEST_RATE_FORMATS` | `30` | Probe requests per IP per 10 minutes |
+| `VIDNEST_RATE_DOWNLOADS` | `12` | Download requests per IP per 10 minutes |
+| `VIDNEST_DOWNLOAD_DIR` | `/tmp/...` | Download storage directory |
+
+Free hosting tiers sleep when idle (the first visit can take a minute to wake)
+and cap monthly outbound bandwidth. Run this as a small personal service, not
+for open public traffic.

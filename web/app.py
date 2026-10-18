@@ -17,6 +17,16 @@ from urllib.parse import urlsplit
 
 import yt_dlp
 from flask import Flask, abort, jsonify, request, send_from_directory
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+
+def _env_int(name: str, default: int, minimum: int = 1) -> int:
+    """Read a positive integer from the environment, falling back safely."""
+    try:
+        value = int(os.environ.get(name, ""))
+    except ValueError:
+        return default
+    return value if value >= minimum else default
 
 
 DOWNLOAD_DIR = Path(
@@ -27,9 +37,20 @@ try:
     os.chmod(DOWNLOAD_DIR, 0o700)
 except OSError:
     pass
+PUBLIC_MODE = os.environ.get("VIDNEST_PUBLIC", "0") == "1"
+TRUST_PROXY = os.environ.get("VIDNEST_TRUST_PROXY", "0") == "1"
+PUBLIC_ALLOWED_HOSTS = frozenset(
+    host.strip().lower()
+    for host in os.environ.get("VIDNEST_ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+)
 MAX_URL_LENGTH = 4_096
-MAX_DOWNLOAD_BYTES = 1_000_000_000
-MAX_STORAGE_BYTES = 2_000_000_000
+MAX_DOWNLOAD_BYTES = _env_int("VIDNEST_MAX_FILE_MB", 1_000) * 1_000_000
+MAX_STORAGE_BYTES = _env_int("VIDNEST_STORAGE_MB", 2_000) * 1_000_000
+STALE_DOWNLOAD_SECONDS = _env_int("VIDNEST_STALE_MINUTES", 45) * 60
+RATE_LIMIT_WINDOW_SECONDS = 600
+RATE_LIMIT_FORMATS = _env_int("VIDNEST_RATE_FORMATS", 30)
+RATE_LIMIT_DOWNLOADS = _env_int("VIDNEST_RATE_DOWNLOADS", 12)
 LOCAL_AUTHORITIES = {"localhost:5000", "127.0.0.1:5000", "[::1]:5000"}
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 ALLOWED_MEDIA_DOMAINS = (
@@ -54,6 +75,36 @@ probe_cache: dict[str, dict[str, object]] = {}
 PROBE_TTL_SECONDS = 600
 
 
+class SlidingWindowLimiter:
+    """Tiny in-memory per-key limiter for a single-process WSGI deployment."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._events: dict[str, list[float]] = {}
+
+    def allow(self, key: str, limit: int, window_seconds: float) -> bool:
+        now = time.monotonic()
+        cutoff = now - window_seconds
+        with self._lock:
+            events = self._events.setdefault(key, [])
+            while events and events[0] <= cutoff:
+                events.pop(0)
+            if len(events) >= limit:
+                return False
+            events.append(now)
+            if len(self._events) > 4_096:
+                for bucket in [name for name, stamps in self._events.items() if not stamps]:
+                    self._events.pop(bucket, None)
+            return True
+
+    def reset(self) -> None:
+        with self._lock:
+            self._events.clear()
+
+
+rate_limiter = SlidingWindowLimiter()
+
+
 def cleanup_orphaned_jobs() -> None:
     """Remove interrupted private work dirs left by a killed prior process."""
     for entry in DOWNLOAD_DIR.iterdir():
@@ -61,19 +112,46 @@ def cleanup_orphaned_jobs() -> None:
             shutil.rmtree(entry, ignore_errors=True)
 
 
+def sweep_stale_downloads() -> None:
+    """Delete finished downloads nobody fetched, keeping a small disk free."""
+    cutoff = time.time() - STALE_DOWNLOAD_SECONDS
+    for entry in DOWNLOAD_DIR.iterdir():
+        try:
+            if entry.is_file() and not entry.is_symlink() and entry.stat().st_mtime < cutoff:
+                entry.unlink()
+        except OSError:
+            continue
+
+
 cleanup_orphaned_jobs()
+sweep_stale_downloads()
+
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 16_384
 app.logger.setLevel(logging.INFO)
+if TRUST_PROXY:
+    # Hosting platforms terminate TLS in front of gunicorn; trust their single
+    # proxy hop so request.scheme, request.host and request.remote_addr are
+    # accurate for the origin checks and rate limiting below.
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
 @app.before_request
-def require_local_browser_origin():
-    # A loopback-only tool, not a LAN or public service. Also reject DNS-rebinding
-    # Host headers so a hostile website cannot turn localhost into its origin.
+def guard_request_origin():
+    # Local builds stay loopback-only: foreign Host headers are rejected so a
+    # hostile page cannot DNS-rebind localhost into its own origin. The public
+    # deployment (VIDNEST_PUBLIC=1) serves its own hostname instead and keeps
+    # the Origin, Sec-Fetch-Site and CSRF gates, so cross-site pages still
+    # cannot drive this API.
+    if request.path == "/healthz":
+        return None
+
     authority = request.host.lower()
-    if authority not in LOCAL_AUTHORITIES:
+    if PUBLIC_MODE:
+        if PUBLIC_ALLOWED_HOSTS and authority not in PUBLIC_ALLOWED_HOSTS:
+            abort(400)
+    elif authority not in LOCAL_AUTHORITIES:
         abort(400)
 
     if request.headers.get("Sec-Fetch-Site", "").lower() == "cross-site":
@@ -85,18 +163,33 @@ def require_local_browser_origin():
             parsed = urlsplit(origin)
             origin_host = (parsed.hostname or "").lower()
             origin_port = parsed.port or (443 if parsed.scheme == "https" else 80)
+            origin_scheme = parsed.scheme.lower()
         except ValueError:
             abort(403)
-        origin_authority = f"[{origin_host}]:{origin_port}" if ":" in origin_host else f"{origin_host}:{origin_port}"
-        if (
-            parsed.scheme != "http"
-            or origin_host not in LOCAL_HOSTS
-            or origin_port != 5000
-            or origin_authority != authority
-        ):
-            abort(403)
+        if PUBLIC_MODE:
+            # Same-origin only: an Origin header must match the host we serve.
+            normalized_origin = f"{origin_scheme}://{origin_host}"
+            if origin_port != (443 if origin_scheme == "https" else 80):
+                normalized_origin += f":{origin_port}"
+            if normalized_origin != f"{request.scheme.lower()}://{request.host.lower()}":
+                abort(403)
+        else:
+            origin_authority = f"[{origin_host}]:{origin_port}" if ":" in origin_host else f"{origin_host}:{origin_port}"
+            if (
+                origin_scheme != "http"
+                or origin_host not in LOCAL_HOSTS
+                or origin_port != 5000
+                or origin_authority != authority
+            ):
+                abort(403)
 
     if request.path in {"/api/formats", "/api/download"} and request.method == "POST":
+        limit = RATE_LIMIT_FORMATS if request.path == "/api/formats" else RATE_LIMIT_DOWNLOADS
+        bucket = f"{request.remote_addr or 'unknown'}:{request.path}"
+        if not rate_limiter.allow(bucket, limit, RATE_LIMIT_WINDOW_SECONDS):
+            response = jsonify(error="Too many requests. Wait a moment and try again.")
+            response.headers["Retry-After"] = "60"
+            return response, 429
         supplied_token = request.headers.get("X-VidNest-CSRF", "")
         if not supplied_token.isascii() or not hmac.compare_digest(supplied_token, csrf_token):
             abort(403)
@@ -160,6 +253,12 @@ def security_headers(response):
 @app.errorhandler(413)
 def request_too_large(_error):
     return jsonify(error="Request is too large."), 413
+
+
+@app.get("/healthz")
+def healthz():
+    """Liveness endpoint for platform health checks and wake-up pings."""
+    return jsonify(ok=True, service="vidnest-web")
 
 
 def parse_api_payload() -> dict:
@@ -326,14 +425,17 @@ def download():
     job_id = uuid.uuid4().hex
     job_dir: Path | None = None
     try:
+        sweep_stale_downloads()
         used_bytes = sum(
             path.stat().st_size
             for path in DOWNLOAD_DIR.rglob("*")
             if path.is_file() and not path.is_symlink()
         )
-        download_limit = min(MAX_DOWNLOAD_BYTES, MAX_STORAGE_BYTES - used_bytes)
+        # Leave headroom for yt-dlp's temporary streams and the merge step,
+        # which can briefly need about twice the final file size on disk.
+        download_limit = min(MAX_DOWNLOAD_BYTES, max(0, MAX_STORAGE_BYTES - used_bytes) // 2)
         if download_limit <= 0:
-            return jsonify(error="Local download storage is full. Remove old files and try again."), 507
+            return jsonify(error="Download storage is full right now. Try again in a few minutes."), 507
         job_dir = Path(tempfile.mkdtemp(prefix=f".{job_id}-", dir=DOWNLOAD_DIR))
         options = {
             "outtmpl": str(job_dir / "media.%(ext)s"),

@@ -1,0 +1,25 @@
+# Render Blueprint — free public deployment of the VidNest web companion.
+# Apply: Render dashboard → New + → Blueprint → pick this repository.
+services:
+  - type: web
+    name: vidnest-web
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: web
+    healthCheckPath: /healthz
+    envVars:
+      - key: VIDNEST_PUBLIC
+        value: "1"
+      - key: VIDNEST_TRUST_PROXY
+        value: "1"
+      - key: VIDNEST_MAX_FILE_MB
+        value: "600"
+      - key: VIDNEST_STORAGE_MB
+        value: "1200"
+      - key: VIDNEST_RATE_FORMATS
+        value: "30"
+      - key: VIDNEST_RATE_DOWNLOADS
+        value: "12"
+      - key: PYTHONUNBUFFERED
+        value: "1"

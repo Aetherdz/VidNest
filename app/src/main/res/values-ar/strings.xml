@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VidNest</string>
+
+    <!-- General -->
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_retry">إعادة المحاولة</string>
+    <string name="action_delete">حذف</string>
+    <string name="designer_credit">تصميم zaikabdou</string>
+
+    <!-- Appearance -->
+    <string name="appearance_title">المظهر</string>
+    <string name="appearance_change">تغيير المظهر</string>
+    <string name="theme_system">حسب النظام</string>
+    <string name="theme_light">نهاري</string>
+    <string name="theme_dark">ليلي</string>
+
+    <!-- Language -->
+    <string name="language_change">اللغة</string>
+    <string name="language_change_desc">تغيير لغة التطبيق</string>
+    <string name="language_title">اللغة</string>
+    <string name="language_system">حسب النظام</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_short_en">EN</string>
+    <string name="language_short_ar">ع</string>
+    <string name="settings_title">الإعدادات</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="action_done">تم</string>
+
+    <!-- Fetch / downloads -->
+    <string name="fetch_title">الرئيسية</string>
+    <string name="fetch_headline">ماذا تريد أن تحمّل اليوم؟</string>
+    <string name="fetch_recent_title">الأخيرة</string>
+    <string name="fetch_url_label">رابط الفيديو</string>
+    <string name="fetch_url_hint">https://…</string>
+    <string name="fetch_add">تنزيل</string>
+    <string name="fetch_probing">جارٍ التحقق من الجودات…</string>
+    <string name="fetch_probe_failed">تعذّرت قراءة معلومات الفيديو. تحقق من الرابط وحاول مجدداً.</string>
+    <string name="fetch_copy_error_details">نسخ تفاصيل الخطأ</string>
+    <string name="fetch_update_engine">تحديث محرّك التنزيل</string>
+    <string name="fetch_engine_update_done">تم تحديث محرّك التنزيل</string>
+    <string name="fetch_engine_update_failed">تعذّر تحديث محرّك التنزيل</string>
+    <string name="fetch_engine_updating">جارٍ تحديث محرّك التنزيل…</string>
+    <string name="fetch_engine_version">إصدار yt-dlp: %1$s</string>
+    <string name="fetch_quality_title">اختر الجودة</string>
+    <string name="fetch_quality_best">أفضل جودة</string>
+    <string name="fetch_quality_p">%1$sp</string>
+    <string name="fetch_quality_audio">صوت فقط (MP3)</string>
+    <string name="fetch_paste">لصق الرابط</string>
+    <string name="fetch_clipboard_empty">لا يوجد رابط في الحافظة</string>
+    <string name="fetch_no_link">لا يوجد رابط في النص المشارَك</string>
+    <string name="fetch_state_queued">قيد الانتظار</string>
+    <string name="fetch_state_running">جارٍ التنزيل…</string>
+    <string name="fetch_state_paused">متوقف مؤقتاً</string>
+    <string name="fetch_state_done">تم</string>
+    <string name="fetch_state_failed">فشل</string>
+    <string name="fetch_state_need_cookies">يتطلب تسجيل الدخول</string>
+    <string name="fetch_state_cancelled">أُلغي</string>
+    <string name="download_progress_percent">%1$d٪</string>
+
+    <!-- Download notifications -->
+    <string name="notif_channel_downloads">التنزيلات</string>
+    <string name="notif_preparing">جارٍ التحضير…</string>
+    <string name="notif_downloading_percent">جارٍ التنزيل… %1$d%%</string>
+    <string name="notif_downloading_named">%1$s - %2$d%%</string>
+    <string name="notif_download_done">اكتمل التنزيل</string>
+    <string name="notif_download_failed">فشل التنزيل (%1$s)</string>
+    <string name="notif_permission_hint">الإشعارات معطّلة، لذا لن تظهر تنبيهات التنزيل.</string>
+    <string name="notif_err_need_cookies">يتطلب تسجيل الدخول</string>
+    <string name="notif_err_unavailable">الفيديو غير متاح</string>
+    <string name="notif_err_geo">محجوب في منطقتك</string>
+    <string name="notif_err_access">تم رفض الوصول</string>
+    <string name="notif_err_network">خطأ في الشبكة</string>
+    <string name="notif_err_disk">مساحة التخزين ممتلئة</string>
+    <string name="notif_err_unsupported">هذا الموقع غير مدعوم</string>
+    <string name="notif_err_engine_outdated">حدّث محرّك التنزيل ثم حاول مجدداً</string>
+    <string name="notif_err_extractor">خلل مؤقت في الموقع - حاول لاحقاً</string>
+    <string name="notif_err_unknown">خطأ غير معروف</string>
+
+    <!-- Player -->
+    <string name="player_play">تشغيل</string>
+    <string name="player_pause">إيقاف مؤقت</string>
+    <string name="player_back">رجوع</string>
+    <string name="player_pip">صورة داخل صورة</string>
+    <string name="player_subtitles">الترجمة</string>
+    <string name="player_speed">السرعة</string>
+    <string name="player_speed_value">%1$sx</string>
+    <string name="player_seek_forward">+10 ث</string>
+    <string name="player_seek_back">-10 ث</string>
+    <string name="player_error">تعذّر تشغيل هذا الملف.</string>
+</resources>

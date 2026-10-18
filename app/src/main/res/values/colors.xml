@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="movid_window_bg">#FFF7F5FF</color>
+    <color name="vidnest_icon_bg">#FF123B3A</color>
+    <color name="movid_brand_purple">#FF6D3BFF</color>
+    <color name="movid_brand_mint">#FF3DDBB0</color>
+</resources>

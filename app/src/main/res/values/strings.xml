@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VidNest</string>
+
+    <!-- General -->
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_delete">Delete</string>
+    <string name="designer_credit">Designed by zaikabdou</string>
+
+    <!-- Appearance -->
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_change">Change appearance</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- Language -->
+    <string name="language_change">Language</string>
+    <string name="language_change_desc">Change app language</string>
+    <string name="language_title">Language</string>
+    <string name="language_system">Follow system</string>
+    <string name="language_english">English</string>
+    <string name="language_arabic">العربية</string>
+    <string name="language_short_en">EN</string>
+    <string name="language_short_ar">ع</string>
+    <string name="settings_title">Settings</string>
+    <string name="menu_settings">Settings</string>
+    <string name="action_done">Done</string>
+
+    <!-- Fetch / downloads -->
+    <string name="fetch_title">Home</string>
+    <string name="fetch_headline">What would you like to download today?</string>
+    <string name="fetch_recent_title">Recent</string>
+    <string name="fetch_url_label">Video link</string>
+    <string name="fetch_url_hint">https://…</string>
+    <string name="fetch_add">Download</string>
+    <string name="fetch_probing">Checking qualities…</string>
+    <string name="fetch_probe_failed">Could not read the video info. Check the link and try again.</string>
+    <string name="fetch_copy_error_details">Copy error details</string>
+    <string name="fetch_update_engine">Update engine</string>
+    <string name="fetch_engine_update_done">Download engine updated</string>
+    <string name="fetch_engine_update_failed">Could not update the download engine</string>
+    <string name="fetch_engine_updating">Updating download engine…</string>
+    <string name="fetch_engine_version">yt-dlp version: %1$s</string>
+    <string name="fetch_quality_title">Choose quality</string>
+    <string name="fetch_quality_best">Best quality</string>
+    <string name="fetch_quality_p">%1$sp</string>
+    <string name="fetch_quality_audio">Audio only (MP3)</string>
+    <string name="fetch_paste">Paste link</string>
+    <string name="fetch_clipboard_empty">No link found in the clipboard</string>
+    <string name="fetch_no_link">No link found in the shared text</string>
+    <string name="fetch_state_queued">Queued</string>
+    <string name="fetch_state_running">Downloading…</string>
+    <string name="fetch_state_paused">Paused</string>
+    <string name="fetch_state_done">Done</string>
+    <string name="fetch_state_failed">Failed</string>
+    <string name="fetch_state_need_cookies">Sign-in required</string>
+    <string name="fetch_state_cancelled">Cancelled</string>
+    <string name="download_progress_percent">%1$d%%</string>
+
+    <!-- Download notifications -->
+    <string name="notif_channel_downloads">Downloads</string>
+    <string name="notif_preparing">Preparing…</string>
+    <string name="notif_downloading_percent">Downloading… %1$d%%</string>
+    <string name="notif_downloading_named">%1$s - %2$d%%</string>
+    <string name="notif_download_done">Download complete</string>
+    <string name="notif_download_failed">Download failed (%1$s)</string>
+    <string name="notif_permission_hint">Notifications are off, so download alerts will not appear.</string>
+    <string name="notif_err_need_cookies">Sign-in required</string>
+    <string name="notif_err_unavailable">Video unavailable</string>
+    <string name="notif_err_geo">Blocked in your region</string>
+    <string name="notif_err_access">Access denied</string>
+    <string name="notif_err_network">Network error</string>
+    <string name="notif_err_disk">Storage full</string>
+    <string name="notif_err_unsupported">This site is not supported</string>
+    <string name="notif_err_engine_outdated">Update the download engine and try again</string>
+    <string name="notif_err_extractor">Temporary site issue - try again later</string>
+    <string name="notif_err_unknown">Unknown error</string>
+
+    <!-- Player -->
+    <string name="player_play">Play</string>
+    <string name="player_pause">Pause</string>
+    <string name="player_back">Back</string>
+    <string name="player_pip">Picture in picture</string>
+    <string name="player_subtitles">Subtitles</string>
+    <string name="player_speed">Speed</string>
+    <string name="player_speed_value">%1$sx</string>
+    <string name="player_seek_forward">+10s</string>
+    <string name="player_seek_back">-10s</string>
+    <string name="player_error">This file cannot be played.</string>
+</resources>

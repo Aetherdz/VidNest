@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="vidnest-csrf" content="__VIDNEST_CSRF_TOKEN__">
+  <title>VidNest — احفظ ما تشاهده</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="VidNest">
+        <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M5 16c1.4 14.6 8 23 19 25 11-2 17.6-10.4 19-25M11 23c1.5 9.2 5.8 14.5 13 16 7.2-1.5 11.5-6.8 13-16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="m20 9 13 7.5L20 24z" fill="currentColor"/>
+        </svg>
+        <span>VidNest</span>
+      </a>
+      <div class="top-actions">
+        <span class="local-badge"><span class="status-dot"></span><span data-copy="localBadge">محلي وخاص</span></span>
+        <button id="language" class="language-button" type="button" aria-label="Switch language">EN</button>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="headline">
+      <p class="eyebrow"><span class="eyebrow-line"></span><span data-copy="eyebrow">مساحة بسيطة لوسائطك</span></p>
+      <h1 id="headline"><span data-copy="headline">اختر ما يناسبك.</span><br><span class="headline-muted" data-copy="headlineAccent">واحتفظ به.</span></h1>
+      <p class="intro" data-copy="intro">الصق رابطًا عامًا، استعرض الجودات المتاحة، ثم نزّل النسخة التي تريدها.</p>
+
+      <form id="download-form" class="download-form">
+        <label class="sr-only" for="url" data-copy="urlLabel">رابط الفيديو</label>
+        <div class="url-field">
+          <svg class="link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l3-3A5 5 0 0 0 13 2.9l-1.7 1.7M14 11a5 5 0 0 0-7.1 0l-3 3A5 5 0 0 0 11 21.1l1.7-1.7"/></svg>
+          <input id="url" name="url" type="url" inputmode="url" dir="ltr" autocomplete="url" maxlength="4096" placeholder="https://…" required>
+          <button id="paste" class="paste-button" type="button" data-copy="paste">لصق</button>
+        </div>
+        <button id="inspect" class="inspect-button" type="submit" disabled>
+          <span data-copy="inspect">استعراض الجودات</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+        </button>
+      </form>
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+
+      <section id="formats-panel" class="formats-panel" aria-labelledby="formats-title" hidden>
+        <div class="formats-heading">
+          <div><p class="eyebrow compact" data-copy="availableLabel">متاح لهذا الرابط</p><h2 id="formats-title" data-copy="formatsTitle">اختر الجودة</h2></div>
+          <span id="format-count" class="format-count"></span>
+        </div>
+        <p id="media-title" class="media-title"></p>
+        <div id="format-list" class="format-list" role="radiogroup" aria-label="Available formats"></div>
+        <button id="download" class="download-button" type="button" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M5 17v3h14v-3"/></svg>
+          <span data-copy="download">تنزيل الاختيار</span>
+        </button>
+        <p class="format-footnote" data-copy="formatFootnote">الجودات المعروضة يحددها المصدر، وقد تختلف حسب الرابط.</p>
+      </section>
+
+      <div class="trust-note">
+        <span class="lock-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3"/></svg></span>
+        <span data-copy="privacy">المعالجة على جهازك. نزّل فقط المحتوى الذي تملك الإذن بحفظه.</span>
+      </div>
+    </section>
+
+    <section id="recent-section" class="recent" aria-labelledby="recent-title" hidden>
+      <div class="section-heading"><h2 id="recent-title" data-copy="recent">آخر الملفات</h2><button id="clear-recent" class="clear-button" type="button" data-copy="clear">مسح السجل</button></div>
+      <ul id="recent-list" class="recent-list"></ul>
+    </section>
+    <footer><span class="footer-brand">VidNest<span class="footer-period">.</span></span><span data-copy="footer">مصمم لحفظ ما يستحق العودة إليه.</span></footer>
+  </main>
+</body>
+</html>

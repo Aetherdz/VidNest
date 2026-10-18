@@ -5,6 +5,8 @@
 **VidNest** تطبيق أندرويد لتنزيل الوسائط، عربي أولاً واتجاه RTL كامل.
 الصم الهادئ: بدون إعلانات ولا متتبعات ولا إيموجي.
 
+**جرّب نسخة الويب:** [vidnest-web.onrender.com](https://vidnest-web.onrender.com) — الصق رابط وسائط عاماً، اختر الجودة، ونزّل الملف من المتصفح مباشرة. (استضافة مجانية: أول زيارة بعد خمول قد تأخذ حتى دقيقة للاستيقاظ.)
+
 **ما هو:** الصق رابطاً أو شاركه إلى التطبيق، اختر الجودة، يُنزَّل الملف مباشرة إلى
 مجلد `Movies` أو `Music` على الجهاز، ثم شغّله من المشغّل المدمج.
 
@@ -41,6 +43,8 @@ tools/smart_build.sh send      # الإصدار مع التسليم عبر تي�
 
 **VidNest** is an Arabic-first Android media downloader with full RTL support.
 Quiet by design: no ads, no trackers, no emojis.
+
+**Try the web companion:** [vidnest-web.onrender.com](https://vidnest-web.onrender.com) — paste a public media link, pick a quality, and download from the browser. (Free-tier hosting: the first visit after idle can take up to a minute to wake.)
 
 **What it is:** paste a link or share one into the app, pick a quality, and the
 file lands in the device's `Movies` / `Music` folder, ready to play in the

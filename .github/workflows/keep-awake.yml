@@ -1,0 +1,30 @@
+name: keep-awake
+
+# Pings the free Render service so it does not spin down between visitors.
+# Render's 750 free instance hours per month cover one service running 24/7,
+# so the ping just keeps the service inside that budget. Soft-fails when the
+# service is offline so the workflow never shows as a broken build.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: keep-awake
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping VidNest health endpoint
+        run: |
+          if curl -fsS --max-time 100 --retry 2 --retry-delay 10 https://vidnest-web.onrender.com/healthz; then
+            echo "service is awake"
+          else
+            echo "health ping failed (service asleep, suspended, or renamed)"
+          fi

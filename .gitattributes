@@ -1,0 +1,11 @@
+# GitHub Linguist language detection overrides
+mobile-expo/**/*.tsx linguist-language=TypeScript linguist-detectable=true
+mobile-expo/**/*.ts linguist-language=TypeScript linguist-detectable=true
+mobile-expo/**/*.mjs linguist-language=JavaScript linguist-detectable=true
+web/**/*.py linguist-language=Python linguist-detectable=true
+bot/**/*.py linguist-language=Python linguist-detectable=true
+
+# Mark documentation, vendored assets, and mockups so they do not skew language stats
+design/** linguist-documentation=true
+docs/** linguist-documentation=true
+web/static/fonts/** linguist-vendored=true

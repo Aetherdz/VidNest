@@ -1,0 +1,125 @@
+# VidNest
+
+> VidNest is a quiet, ad-free media extraction and playback ecosystem designed by Atheerium (https://atheerium.com). It enables users to download and organize public media from 1,800+ supported video and audio platforms across web, mobile Expo, and Telegram bot clients.
+
+## Overview & Philosophy
+- **Creator / Organization**: Atheerium (https://atheerium.com)
+- **Design Philosophy**: Violet Instrument v4 aesthetic, calm typography, distraction-free utility.
+- **Zero-Ad Policy**: No advertisements, no trackers, no surveillance cookies, no third-party telemetry scripts.
+- **Zero-Emoji UI**: Purpose-built minimal geometric SVG iconography.
+- **Bilingual Core**: Native Arabic-first (RTL) and English (LTR) interface and typography with self-hosted IBM Plex Sans Arabic.
+
+## Architecture & Ecosystem
+VidNest operates across three complementary form factors:
+
+### 1. Web Application (`web/`)
+- Universal media inspection and on-demand stream extraction ("Violet Instrument v4").
+- Single-page interface built with vanilla semantic HTML5, pure CSS3 (custom properties, responsive grid/flexbox), and vanilla ES2022 JavaScript.
+- Backend powered by Flask, NetGuard SSRF filter, and yt-dlp + FFmpeg.
+- Secure CSRF protection (`X-VidNest-CSRF`), rate-limiting, and ephemeral storage cleanup.
+- Self-hosted fonts (`IBM Plex Sans Arabic`, OFL license).
+- Zero external CDNs, strict Content Security Policy (`font-src 'self'`).
+
+### 2. Cross-Platform Mobile & Web App (`mobile-expo/`)
+- Universal application built with React Native + Expo SDK 54 and TypeScript.
+- Violet Instrument v4 dark/light theme designed with Astryx Design and StyleX design tokens (`src/theme/tokens.ts`).
+- Centered Download Instrument (`App.tsx`, `CenteredDownloadInstrument.tsx`) supporting video/audio downloads, format inspection, and platform auto-detection.
+- Native device integration: local caching, share sheet invocation, and offline recent downloads management.
+- Full RTL Arabic interface, WCAG AA compliance, and accessible touch targets (>= 48dp).
+
+### 3. Telegram Bot Companion (`web/bot.py`)
+- Direct chat-based download assistant supporting single-file links and video extraction.
+- Asynchronous polling or webhook delivery mode with secret token verification (`X-Telegram-Bot-Api-Secret-Token`).
+- Smart format selection with automated size compression fallback for Telegram's 50MB bot upload ceiling.
+
+## Supported Platforms (1,800+)
+VidNest extracts video and audio streams from over 1,800 global web services, including:
+- **YouTube** (Shorts, standard videos, high-bitrate audio, up to 4K/60fps)
+- **TikTok** (Watermark-free video and original sound)
+- **Instagram** (Reels, stories, video posts)
+- **X / Twitter** (Native video and audio spaces)
+- **Facebook** (Reels, public watch videos, stories)
+- **Vimeo** (HD/4K high-quality video streams)
+- **Dailymotion** (Standard and high-definition video)
+- **SoundCloud** (Original audio tracks, high-bitrate MP3/AAC)
+- **Twitch** (Clips and VOD streams)
+- **Reddit** (Reddit hosted videos with merged audio)
+- **Pinterest** (Video pins)
+- **Bilibili** (High-quality video and audio)
+- **VK** (Video clips and posts)
+- **1,800+ Additional Platforms** via the yt-dlp extraction engine
+
+## Web API Endpoints
+
+### Format Probe
+- **Method**: `POST /api/formats`
+- **Headers**:
+  - `Content-Type: application/json`
+  - `X-VidNest-CSRF: <csrf_token>`
+- **Body**: `{"url": "https://..."}`
+- **Response**:
+  ```json
+  {
+    "probeId": "string",
+    "title": "string",
+    "uploader": "string",
+    "extractor": "string",
+    "duration": 185,
+    "formats": [
+      {
+        "id": "137",
+        "ext": "mp4",
+        "quality": "1080p",
+        "width": 1920,
+        "height": 1080,
+        "filesize": 25400000,
+        "hasAudio": false,
+        "hasVideo": true,
+        "format": "1080p - 25MB"
+      }
+    ]
+  }
+  ```
+
+### Media Download
+- **Method**: `POST /api/download`
+- **Headers**:
+  - `Content-Type: application/json`
+  - `X-VidNest-CSRF: <csrf_token>`
+- **Body**: `{"url": "https://...", "probeId": "string", "formatId": "string"}`
+- **Response**: `{"title": "string", "file": "<uuid>.<ext>"}`
+
+### Quick Download
+- **Method**: `POST /api/quick-download`
+- **Headers**:
+  - `Content-Type: application/json`
+  - `X-VidNest-CSRF: <csrf_token>`
+- **Body**: `{"url": "https://...", "mode": "video|audio|1080|720|480|360"}`
+- **Response**: `{"title": "string", "file": "<uuid>.<ext>", "mode": "video", "formatId": "137"}`
+
+### File Retrieval
+- **Method**: `GET /files/<uuid>.<ext>`
+- **Response**: Binary media stream (`Content-Disposition: attachment`).
+
+### Health Check
+- **Method**: `GET /healthz`
+- **Response**: `{"ok": true, "service": "vidnest-web"}`
+
+## Security Model & Safeguards
+- **NetGuard SSRF Gate**: Blocks loopback, RFC1918 private subnets, link-local, carrier-grade NAT, multicast, and cloud metadata IP addresses (e.g., 169.254.169.254).
+- **Anti-CSRF**: Mandatory cryptographically random CSRF tokens for all state-changing endpoints.
+- **Strict Host & Origin Validation**: Prevents DNS rebinding and cross-site scripting/POST abuse.
+- **Content Security Policy (CSP)**: Disallows unauthorized inline scripts, object-src, and frame embedding (`frame-ancestors: 'none'`). Self-hosted fonts only (`font-src 'self'`).
+- **Safe Output Storage**: Downloads are saved to randomized UUID filenames; path traversal attempts are strictly rejected.
+- **Ephemeral Storage**: Background and startup routines sweep completed files after expiration to prevent disk exhaustion.
+
+## Frequently Asked Questions (FAQ)
+
+### Is VidNest free and ad-free?
+Yes. VidNest is open-source, completely free, and contains zero advertisements, trackers, or commercial monetization scripts.
+
+### Can VidNest download videos in 4K resolution?
+Yes. For sources that provide 4K (2160p) streams, VidNest automatically pairs high-resolution video with the highest-bitrate audio stream using server-side FFmpeg multiplexing.
+
+### How are user files handled?
+VidNest does not log personal activity or build viewing profiles. On the web client, media files are stored temporarily in a private temporary directory and deleted automatically after expiration. On the mobile Expo app, files are saved directly to local device cache and shared via the native system share sheet.

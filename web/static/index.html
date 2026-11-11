@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F2A24">
+  <meta name="vidnest-csrf" content="__VIDNEST_CSRF_TOKEN__">
+  <meta name="description" content="أداة تنزيل وسائط سريعة وهادئة وخاصة تدعم أكثر من 1,800 موقع عالمي، بتصميم Violet Instrument وبدون إعلانات.">
+  <meta name="keywords" content="تنزيل فيديو, يوتيوب, تيك توك, انستغرام, فيسبوك, Atheerium, VidNest">
+  <meta name="author" content="Atheerium">
+  <link rel="canonical" href="/">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="VidNest — Violet Instrument v4 | Atheerium">
+  <meta property="og:description" content="تنزيل فوري لأكثر من 1,800 موقع عالمي بأعلى جودة وبدون إعلانات. تصميم Atheerium.">
+
+  <title>VidNest — Violet Instrument v4 | Atheerium</title>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "VidNest",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web, Android, iOS",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Organization", "name": "Atheerium", "url": "https://atheerium.com" }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "كيف يضمن VidNest خصوصية المستخدم؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "لا يقوم VidNest بتسجيل بياناتك الشخصية أو بناء ملفات تتبع، وتُمسح الملفات المؤقتة تلقائيًا بعد اكتمال التنزيل."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل الخدمة مجانية تمامًا وبدون إعلانات؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، VidNest أداة مفتوحة ومجانية تمامًا وبدون أي إعلانات أو نوافذ منبثقة أو أدوات تتبع تجارية."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل يدعم تنزيل الفيديوهات بدقة 4K؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، للمصادر التي تدعم دقة 4K، يدمج محرك VidNest تدفق الفيديو الفائق مع أفضل جودة صوت عبر خوادم آمنة."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true">
+    <defs>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></symbol>
+      <symbol id="i-lib" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M10 9.5v5l4-2.5z"/></symbol>
+      <symbol id="i-clip" viewBox="0 0 24 24"><path d="M9 3.5h6V7H9zM8 5.5H6a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1h-2"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19 8 5" fill="currentColor"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+      <symbol id="i-clear" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+      <symbol id="i-apk" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+      <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M12 3l2.8 5.6L21 11.4l-4.5 4.4 1.1 6.2L12 19l-5.6 3 1.1-6.2L3 11.4l6.2-2.8L12 3z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app-container">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="VidNest">
+        <span class="brand-logo-wrap">
+          <svg class="brand-logo" viewBox="0 0 136 136" width="30" height="30" aria-hidden="true">
+            <rect width="136" height="136" rx="36" fill="#0F2A24"/>
+            <path d="M29 49c5 28 19 49 39 52 20-3 34-24 39-52" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M41 65c6 17 16 27 27 28 11-1 21-11 27-28" fill="none" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="57 45 83 60 57 75" fill="#C8F36A"/>
+          </svg>
+        </span>
+        <span class="brand-text">VidNest</span>
+        <span class="brand-badge" data-copy="designerCredit">by Atheerium</span>
+      </a>
+
+      <div class="top-actions">
+        <span class="status-pill">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span data-copy="statusPill">+1,800 موقع · بدون إعلانات</span>
+        </span>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="تبديل المظهر">
+          <svg class="icon"><use href="#i-sun"/></svg>
+        </button>
+        <button id="language" class="language-button" type="button" aria-label="Switch language">EN</button>
+      </div>
+    </header>
+
+    <main class="main-shell">
+      <!-- VIEW 1: HOME -->
+      <section id="view-home" class="view active" aria-labelledby="home-headline">
+        <div class="hero-section">
+          <p class="eyebrow">
+            <span class="eyebrow-line" aria-hidden="true"></span>
+            <span data-copy="eyebrow">أداة الوسائط الهادئة v4</span>
+          </p>
+          <h1 id="home-headline" data-copy="headline">ماذا تريد أن تحمّل اليوم؟</h1>
+          <p class="intro" data-copy="intro">الصق رابط فيديو أو مقطع صوتي، استعرض خيارات الدقة فورًا، ثم احفظ الملف مباشرة في جهازك دون إعلانات وبأعلى جودة.</p>
+
+          <form id="download-form" class="url-form" novalidate>
+            <div class="input-container">
+              <input id="url" name="url" type="url" dir="ltr" inputmode="url" autocomplete="off" maxlength="4096" placeholder="https://..." aria-label="رابط الفيديو أو الصوت" class="url-input" required>
+              <button id="clear-url" class="clear-btn" type="button" aria-label="مسح الرابط" hidden>
+                <svg class="icon"><use href="#i-clear"/></svg>
+              </button>
+              <button id="paste" class="paste-btn" type="button" aria-label="لصق">
+                <svg class="icon"><use href="#i-clip"/></svg>
+              </button>
+            </div>
+
+            <!-- Platform Detect Chips -->
+            <div class="chips-group" role="group" aria-label="المنصات المدعومة">
+              <button type="button" class="chip" data-platform="youtube" data-url="https://www.youtube.com/watch?v=aqz-KE-bpKQ">
+                <span class="chip-dot dot-yt" aria-hidden="true"></span>YouTube
+              </button>
+              <button type="button" class="chip" data-platform="tiktok" data-url="https://www.tiktok.com/@tiktok/video/7106594312292453678">
+                <span class="chip-dot dot-tt" aria-hidden="true"></span>TikTok
+              </button>
+              <button type="button" class="chip" data-platform="instagram" data-url="https://www.instagram.com/reel/C8r_Bv3M-Q0/">
+                <span class="chip-dot dot-ig" aria-hidden="true"></span>Instagram
+              </button>
+              <button type="button" class="chip" data-platform="x" data-url="https://x.com/Twitter/status/1234567890">
+                <span class="chip-dot dot-x" aria-hidden="true"></span>X
+              </button>
+              <button type="button" class="chip" data-platform="facebook" data-url="https://www.facebook.com/watch/?v=10153231379946729">
+                <span class="chip-dot dot-fb" aria-hidden="true"></span>Facebook
+              </button>
+              <button type="button" class="chip" data-platform="vimeo" data-url="https://vimeo.com/76979871">
+                <span class="chip-dot dot-vm" aria-hidden="true"></span>Vimeo
+              </button>
+              <button type="button" class="chip" data-platform="soundcloud" data-url="https://soundcloud.com/forss/flickermood">
+                <span class="chip-dot dot-sc" aria-hidden="true"></span>SoundCloud
+              </button>
+              <button type="button" class="chip" data-platform="universal">
+                <span class="chip-dot dot-all" aria-hidden="true"></span>+1,800
+              </button>
+            </div>
+
+            <div class="form-actions">
+              <button id="inspect" class="btn-primary" type="submit" disabled>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+                <svg class="icon"><use href="#i-search"/></svg>
+                <span class="btn-text" data-copy="inspect">استعراض الجودات</span>
+              </button>
+              <button id="quick-download-btn" class="btn-secondary" type="button" disabled>
+                <span class="btn-spinner" hidden aria-hidden="true"></span>
+                <svg class="icon"><use href="#i-down"/></svg>
+                <span class="btn-text" data-copy="quickDownload">تنزيل مباشر</span>
+              </button>
+            </div>
+          </form>
+
+          <p id="message" class="message-banner" role="status" aria-live="polite"></p>
+
+          <!-- FORMATS PANEL -->
+          <section id="formats-panel" class="formats-panel" aria-labelledby="formats-heading" hidden>
+            <div class="panel-header">
+              <div>
+                <p class="panel-eyebrow" data-copy="availableLabel">متاح لهذا الرابط</p>
+                <h2 id="formats-heading" data-copy="formatsTitle">اختر الجودة المطلوبة</h2>
+              </div>
+              <span id="format-count" class="format-count"></span>
+            </div>
+
+            <!-- Preview Card -->
+            <div class="preview-card">
+              <div id="preview-thumbnail" class="preview-thumbnail">
+                <svg class="preview-play-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"/></svg>
+                <span id="preview-duration" class="preview-duration">--:--</span>
+              </div>
+              <div class="preview-info">
+                <h3 id="media-title" class="media-title"></h3>
+                <p id="media-meta" class="media-meta"></p>
+              </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs" role="tablist" aria-label="تصفية الجودات">
+              <button id="filter-all" class="filter-tab active" type="button" role="tab" aria-selected="true" data-filter="all" data-copy="filterAll">الكل</button>
+              <button id="filter-video" class="filter-tab" type="button" role="tab" aria-selected="false" data-filter="video" data-copy="filterVideo">فيديو</button>
+              <button id="filter-audio" class="filter-tab" type="button" role="tab" aria-selected="false" data-filter="audio" data-copy="filterAudio">صوت فقط</button>
+            </div>
+
+            <div id="format-list" class="format-list" role="radiogroup" aria-label="Available formats"></div>
+
+            <button id="download" class="btn-primary" type="button" disabled>
+              <span class="btn-spinner" hidden aria-hidden="true"></span>
+              <svg class="icon"><use href="#i-down"/></svg>
+              <span class="btn-text" data-copy="download">ابدأ التنزيل</span>
+            </button>
+            <p class="format-footnote" data-copy="formatFootnote">الجودات المعروضة مستخرجة مباشرة من المصدر الأصلي بدون ضغط إضافي.</p>
+          </section>
+
+          <!-- Recent on Home -->
+          <section class="home-recent" aria-labelledby="home-recent-title">
+            <div class="section-title-wrap">
+              <h2 id="home-recent-title" data-copy="recentDownloads">آخر التنزيلات</h2>
+              <button id="view-all-downloads-link" class="link-btn" type="button" data-copy="viewAll">عرض الكل</button>
+            </div>
+            <div id="home-recent-list" class="recent-rows"></div>
+          </section>
+
+          <!-- Marketing 3-Step Section -->
+          <section class="marketing-steps" aria-labelledby="steps-heading">
+            <h2 id="steps-heading" class="section-heading" data-copy="stepsHeading">ثلاث خطوات بسيطة لحفظ أي محتوى</h2>
+            <div class="steps-grid">
+              <div class="step-card">
+                <span class="step-num">01</span>
+                <h3 data-copy="step1Title">الصق الرابط</h3>
+                <p data-copy="step1Desc">انسخ رابط أي فيديو أو ملف صوتي من منصتك المفضلة والصقه في مربع البحث.</p>
+              </div>
+              <div class="step-card">
+                <span class="step-num">02</span>
+                <h3 data-copy="step2Title">اختر الدقة</h3>
+                <p data-copy="step2Desc">استعرض خيارات الدقة المتاحة من 4K وحتى المقاطع الصوتية عالية النقاوة.</p>
+              </div>
+              <div class="step-card">
+                <span class="step-num">03</span>
+                <h3 data-copy="step3Title">احفظ واستمتع</h3>
+                <p data-copy="step3Desc">نزّل الملف لجهازك واستمتع بالمشاهدة والاستماع في أي وقت وبدون انترنت.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Features Grid -->
+          <section class="features-section" aria-labelledby="features-heading">
+            <h2 id="features-heading" class="section-heading" data-copy="featuresHeading">لماذا تختار VidNest؟</h2>
+            <div class="features-grid">
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg class="icon"><use href="#i-bolt"/></svg>
+                </div>
+                <h3 data-copy="feat1Title">سرعة استخراج فائقة</h3>
+                <p data-copy="feat1Desc">معالجة فورية وتوليد روابط التنزيل المباشرة في أقل من ثانية.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg class="icon"><use href="#i-shield"/></svg>
+                </div>
+                <h3 data-copy="feat2Title">خصوصية وأمان تام</h3>
+                <p data-copy="feat2Desc">بدون تسجيل حساب، بدون ملفات تعريف ارتباط للتعقب، وخالٍ من الإعلانات تمامًا.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg class="icon"><use href="#i-globe"/></svg>
+                </div>
+                <h3 data-copy="feat3Title">+1,800 موقع مدعوم</h3>
+                <p data-copy="feat3Desc">تغطية عالمية تشمل كبرى منصات الفيديو وشبكات التواصل وبودكاست الصوت.</p>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <svg class="icon"><use href="#i-sparkles"/></svg>
+                </div>
+                <h3 data-copy="feat4Title">دمج ذكي للصوت والفيديو</h3>
+                <p data-copy="feat4Desc">دمج تلقائي لأعلى دقة تصوير مع أفضل دفق صوتي متاح من خلال خوارزميات FFmpeg.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- APK CTA Banner -->
+          <section class="apk-banner" aria-labelledby="apk-heading">
+            <div class="apk-content">
+              <h2 id="apk-heading" data-copy="apkTitle">حمّل تطبيق VidNest للأندرويد</h2>
+              <p data-copy="apkDesc">تجربة أصيلة ومتكاملة على جهازك المحمول، مع مشغل وسائط مدمج وتشغيل في الخلفية ومكتبة منظمة.</p>
+              <a id="apk-download" class="apk-cta-btn" href="/download/apk">
+                <svg class="icon"><use href="#i-apk"/></svg>
+                <span data-copy="apkCta">تنزيل حزمة APK الرسمية</span>
+              </a>
+            </div>
+          </section>
+
+          <!-- FAQ Accordion -->
+          <section class="faq-section" aria-labelledby="faq-heading">
+            <h2 id="faq-heading" class="section-heading" data-copy="faqHeading">الأسئلة الشائعة</h2>
+            <div class="faq-accordion">
+              <details class="faq-item">
+                <summary class="faq-question">
+                  <span data-copy="faq1Q">كيف يضمن VidNest خصوصية المستخدم؟</span>
+                  <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+                </summary>
+                <div class="faq-answer">
+                  <p data-copy="faq1A">لا يقوم VidNest بتسجيل بياناتك الشخصية أو بناء ملفات تتبع، وتُمسح الملفات المؤقتة تلقائيًا بعد اكتمال التنزيل.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-question">
+                  <span data-copy="faq2Q">هل الخدمة مجانية تمامًا وبدون إعلانات؟</span>
+                  <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+                </summary>
+                <div class="faq-answer">
+                  <p data-copy="faq2A">نعم، VidNest أداة مفتوحة ومجانية تمامًا وبدون أي إعلانات أو نوافذ منبثقة أو أدوات تتبع تجارية.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary class="faq-question">
+                  <span data-copy="faq3Q">هل يدعم تنزيل الفيديوهات بدقة 4K؟</span>
+                  <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
+                </summary>
+                <div class="faq-answer">
+                  <p data-copy="faq3A">نعم، للمصادر التي تدعم دقة 4K، يدمج محرك VidNest تدفق الفيديو الفائق مع أفضل جودة صوت عبر خوادم آمنة.</p>
+                </div>
+              </details>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- VIEW 2: DOWNLOADS -->
+      <section id="view-downloads" class="view" aria-labelledby="dl-title" hidden>
+        <div class="view-header">
+          <h2 id="dl-title" data-copy="downloadsTitle">التنزيلات</h2>
+          <p class="view-subtitle" data-copy="downloadsHint">تُحفظ الملفات في مجلد التنزيلات على جهازك ويمكنك تنزيلها أو الرجوع إليها.</p>
+          <div class="view-actions">
+            <button id="clear-downloads-btn" class="secondary-btn" type="button" data-copy="clear">مسح السجل</button>
+          </div>
+        </div>
+        <div id="downloads-list" class="downloads-container"></div>
+      </section>
+
+      <!-- VIEW 3: LIBRARY -->
+      <section id="view-library" class="view" aria-labelledby="lib-title" hidden>
+        <div class="view-header">
+          <h2 id="lib-title" data-copy="libraryTitle">المكتبة</h2>
+          <p class="view-subtitle" data-copy="libraryHint">مكتبتك المحلية من مقاطع الفيديو والصوتيات الجاهزة للتشغيل المباشر.</p>
+        </div>
+        <div id="library-grid" class="library-grid"></div>
+      </section>
+    </main>
+
+    <!-- Floating Navigation Pill -->
+    <nav class="floating-nav" aria-label="التنقل الرئيسي">
+      <div id="nav-indicator" class="nav-indicator" aria-hidden="true"></div>
+      <button id="nav-btn-home" class="nav-tab active" type="button" aria-controls="view-home" aria-current="page" data-view="home">
+        <span class="nav-icon"><svg class="icon"><use href="#i-home"/></svg></span>
+        <span class="nav-text" data-copy="navHome">الرئيسية</span>
+      </button>
+      <button id="nav-btn-downloads" class="nav-tab" type="button" aria-controls="view-downloads" data-view="downloads">
+        <span class="nav-icon"><svg class="icon"><use href="#i-down"/></svg></span>
+        <span class="nav-text" data-copy="navDownloads">التنزيلات</span>
+      </button>
+      <button id="nav-btn-library" class="nav-tab" type="button" aria-controls="view-library" data-view="library">
+        <span class="nav-icon"><svg class="icon"><use href="#i-lib"/></svg></span>
+        <span class="nav-text" data-copy="navLibrary">المكتبة</span>
+      </button>
+    </nav>
+
+    <!-- Toasts Region -->
+    <div id="toast-region" class="toast-region" role="region" aria-live="polite"></div>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-wrap">
+        <div>
+          <span>VidNest · Designed by </span>
+          <a class="designer-link" href="https://atheerium.com" target="_blank" rel="noopener">Atheerium</a>
+        </div>
+        <div>
+          <span>Violet Instrument v4 · </span>
+          <a class="footer-link" href="/static/fonts/OFL.txt" target="_blank">IBM Plex Sans Arabic (OFL)</a>
+          <span> · </span>
+          <a class="footer-link" href="/llms.txt">llms.txt</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

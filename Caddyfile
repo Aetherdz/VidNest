@@ -1,0 +1,53 @@
+# VidNest — zero-sleep self-hosted edge.
+#
+# Caddy terminates TLS (automatic certificates), compresses responses and
+# proxies to the containerised gunicorn app. Set VIDNEST_DOMAIN to the real
+# hostname in production; the default keeps local docker-compose usable.
+{
+	admin off
+	email {$VIDNEST_ACME_EMAIL:admin@example.com}
+}
+
+{$VIDNEST_DOMAIN:localhost} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		-Server
+	}
+
+	# Large media streams must never be buffered: flush every chunk so the
+	# browser receives the first bytes immediately and memory stays flat.
+	handle /files/* {
+		reverse_proxy vidnest-web:8000 {
+			flush_interval -1
+			header_up X-Accel-Buffering no
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	# Health checks stay tiny and uncached.
+	handle /healthz {
+		reverse_proxy vidnest-web:8000 {
+			flush_interval -1
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	handle {
+		reverse_proxy vidnest-web:8000 {
+			header_up X-Forwarded-Proto {scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

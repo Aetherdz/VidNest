@@ -1,0 +1,44 @@
+# robots.txt for VidNest
+# Universal Media Downloader & Player Instrument
+# Designed by Atheerium (https://atheerium.com)
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /files/
+
+# Search Engine Crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# AI Crawlers & LLM Indexers
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Sitemaps & Machine-Readable Guides
+Sitemap: /sitemap.xml
+# LLMs: /llms.txt

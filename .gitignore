@@ -1,0 +1,44 @@
+# Dependencies & Environments
+node_modules/
+node_modules
+**/node_modules/
+**/node_modules
+.venv/
+.expo/
+.skills/
+.opencode/
+
+# Python cache & logs
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# Build artifacts & binaries
+bin/
+dist/
+build/
+**/build/
+*.apk
+*.idsig
+*.sha256
+
+# Agent & Team temporary artifacts
+.team/
+.team
+**/.team/
+**/.team
+design/uploads/
+
+# IDE & OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.swp
+local.properties
+
+# Secrets
+.env
+.env.*
+!.env.example

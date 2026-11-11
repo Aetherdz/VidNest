@@ -1,0 +1,49 @@
+# VidNest — local/self-hosted compose stack.
+# The web companion stays on loopback; put Caddy in front for public traffic.
+# The bot runs in polling mode and is opt-in via the "bot-polling" profile:
+#   docker compose --profile bot-polling up -d
+
+services:
+  vidnest-web:
+    build: ./web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      PORT: "8000"
+      VIDNEST_PUBLIC: "${VIDNEST_PUBLIC:-1}"
+      VIDNEST_TRUST_PROXY: "${VIDNEST_TRUST_PROXY:-1}"
+      VIDNEST_ALLOWED_HOSTS: "${VIDNEST_ALLOWED_HOSTS:-localhost,127.0.0.1}"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+      TELEGRAM_WEBHOOK_SECRET: "${TELEGRAM_WEBHOOK_SECRET:-}"
+    volumes:
+      - vidnest_downloads:/tmp/vidnest-downloads
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+
+  vidnest-bot:
+    build: ./web
+    command: ["python", "-m", "bot.telegram_bot"]
+    restart: unless-stopped
+    profiles:
+      - bot-polling
+    volumes:
+      - ./bot:/srv/vidnest/bot:ro
+      - vidnest_downloads:/tmp/vidnest-downloads
+    environment:
+      PYTHONPATH: "/srv/vidnest"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+
+volumes:
+  vidnest_downloads:

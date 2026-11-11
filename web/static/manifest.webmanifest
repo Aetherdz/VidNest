@@ -1,0 +1,14 @@
+{
+  "name": "VidNest — Violet Instrument",
+  "short_name": "VidNest",
+  "description": "Universal Media Downloader & Player Instrument by Atheerium",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "ar",
+  "theme_color": "#0F2A24",
+  "background_color": "#0E0C18",
+  "categories": ["utilities", "multimedia"]
+}

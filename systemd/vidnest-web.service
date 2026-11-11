@@ -1,0 +1,47 @@
+[Unit]
+Description=VidNest web companion (gunicorn, zero-sleep)
+Documentation=https://github.com/Aetherdz/VidNest
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vidnest
+Group=vidnest
+WorkingDirectory=/srv/vidnest
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PORT=8000
+Environment=VIDNEST_PUBLIC=1
+Environment=VIDNEST_TRUST_PROXY=1
+Environment=VIDNEST_DOWNLOAD_DIR=/tmp/vidnest-downloads
+Environment=VIDNEST_MAX_FILE_MB=1000
+Environment=VIDNEST_STORAGE_MB=4000
+Environment=VIDNEST_THREADS=16
+EnvironmentFile=-/etc/vidnest/vidnest.env
+ExecStartPre=+/usr/bin/install -d -o vidnest -g vidnest -m 0700 /tmp/vidnest-downloads
+# Loopback only: VIDNEST_TRUST_PROXY=1 trusts X-Forwarded-* headers, so the
+# app must be reachable solely through the local reverse proxy (Caddy).
+ExecStart=/srv/vidnest/.venv/bin/gunicorn --config /srv/vidnest/gunicorn.conf.py --bind 127.0.0.1:8000 wsgi:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillSignal=SIGTERM
+TimeoutStopSec=30
+Restart=always
+RestartSec=3
+
+# Sandboxing: the service never needs root, extra capabilities or a shared /tmp.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictSUIDSGID=true
+LockPersonality=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

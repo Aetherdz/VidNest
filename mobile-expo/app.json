@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "VidNest",
+    "slug": "vidnest",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "supportsRTL": true,
+    "designer": "Atheerium",
+    "ios": { "bundleIdentifier": "com.atheerium.vidnest", "supportsTablet": true },
+    "android": { "package": "com.atheerium.vidnest", "supportsRTL": true },
+    "web": { "bundler": "metro" }
+  }
+}

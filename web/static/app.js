@@ -1,0 +1,993 @@
+"use strict";
+
+const copy = {
+  ar: {
+    lang: "ar",
+    dir: "rtl",
+    switch: "EN",
+    designerCredit: "by Atheerium",
+    statusPill: "+1,800 موقع · بدون إعلانات",
+    eyebrow: "أداة الوسائط الهادئة v4",
+    headline: "ماذا تريد أن تحمّل اليوم؟",
+    intro: "الصق رابط فيديو أو مقطع صوتي، استعرض خيارات الدقة فورًا، ثم احفظ الملف مباشرة في جهازك دون إعلانات وبأعلى جودة.",
+    urlLabel: "رابط الفيديو أو الصوت",
+    urlPlaceholder: "https://...",
+    clearUrl: "مسح الرابط",
+    paste: "لصق",
+    inspect: "استعراض الجودات",
+    inspecting: "جارٍ التحليل…",
+    quickDownload: "تنزيل مباشر",
+    availableLabel: "متاح لهذا الرابط",
+    formatsTitle: "اختر الجودة المطلوبة",
+    filterAll: "الكل",
+    filterVideo: "فيديو",
+    filterAudio: "صوت فقط",
+    noFilteredFormats: "لا تتوفر خيارات مطابقة لهذا التصنيف.",
+    download: "ابدأ التنزيل",
+    downloading: "جارٍ التنزيل…",
+    formatFootnote: "الجودات المعروضة مستخرجة مباشرة من المصدر الأصلي بدون ضغط إضافي.",
+    recentDownloads: "آخر التنزيلات",
+    viewAll: "عرض الكل",
+    downloadsTitle: "التنزيلات",
+    downloadsHint: "تُحفظ الملفات في مجلد التنزيلات على جهازك ويمكنك تنزيلها أو الرجوع إليها.",
+    clear: "مسح السجل",
+    clearConfirm: "هل تريد بالتأكيد مسح قائمة التنزيلات؟",
+    libraryTitle: "المكتبة",
+    libraryHint: "مكتبتك المحلية من مقاطع الفيديو والصوتيات الجاهزة للتشغيل المباشر.",
+    navHome: "الرئيسية",
+    navDownloads: "التنزيلات",
+    navLibrary: "المكتبة",
+    stepsHeading: "ثلاث خطوات بسيطة لحفظ أي محتوى",
+    step1Title: "الصق الرابط",
+    step1Desc: "انسخ رابط أي فيديو أو ملف صوتي من منصتك المفضلة والصقه في مربع البحث.",
+    step2Title: "اختر الدقة",
+    step2Desc: "استعرض خيارات الدقة المتاحة من 4K وحتى المقاطع الصوتية عالية النقاوة.",
+    step3Title: "احفظ واستمتع",
+    step3Desc: "نزّل الملف لجهازك واستمتع بالمشاهدة والاستماع في أي وقت وبدون انترنت.",
+    featuresHeading: "لماذا تختار VidNest؟",
+    feat1Title: "سرعة استخراج فائقة",
+    feat1Desc: "معالجة فورية وتوليد روابط التنزيل المباشرة في أقل من ثانية.",
+    feat2Title: "خصوصية وأمان تام",
+    feat2Desc: "بدون تسجيل حساب، بدون ملفات تعريف ارتباط للتعقب، وخالٍ من الإعلانات تمامًا.",
+    feat3Title: "+1,800 موقع مدعوم",
+    feat3Desc: "تغطية عالمية تشمل كبرى منصات الفيديو وشبكات التواصل وبودكاست الصوت.",
+    feat4Title: "دمج ذكي للصوت والفيديو",
+    feat4Desc: "دمج تلقائي لأعلى دقة تصوير مع أفضل دفق صوتي متاح من خلال خوارزميات FFmpeg.",
+    apkTitle: "حمّل تطبيق VidNest للأندرويد",
+    apkDesc: "تجربة أصيلة ومتكاملة على جهازك المحمول، مع مشغل وسائط مدمج وتشغيل في الخلفية ومكتبة منظمة.",
+    apkCta: "تنزيل حزمة APK الرسمية",
+    faqHeading: "الأسئلة الشائعة",
+    faq1Q: "كيف يضمن VidNest خصوصية المستخدم؟",
+    faq1A: "لا يقوم VidNest بتسجيل بياناتك الشخصية أو بناء ملفات تتبع، وتُمسح الملفات المؤقتة تلقائيًا بعد اكتمال التنزيل.",
+    faq2Q: "هل الخدمة مجانية تمامًا وبدون إعلانات؟",
+    faq2A: "نعم، VidNest أداة مفتوحة ومجانية تمامًا وبدون أي إعلانات أو نوافذ منبثقة أو أدوات تتبع تجارية.",
+    faq3Q: "هل يدعم تنزيل الفيديوهات بدقة 4K؟",
+    faq3A: "نعم، للمصادر التي تدعم دقة 4K، يدمج محرك VidNest تدفق الفيديو الفائق مع أفضل جودة صوت عبر خوادم آمنة.",
+    audioOnly: "صوت فقط",
+    hasAudio: "صوت مضمّن",
+    videoOnly: "فيديو — سيُدمج مع أفضل صوت",
+    empty: "يُرجى إدخال رابط فيديو أو صوت أولًا.",
+    pasteDenied: "تعذّر الوصول إلى الحافظة تلقائيًا. يُرجى لصق الرابط يدويًا.",
+    genericError: "تعذّر إكمال الطلب. تحقق من صحة الرابط وحاول مجددًا.",
+    noFormats: "لم يعرض هذا الرابط جودات قابلة للتنزيل. تأكد من أن الرابط عام ومتاح.",
+    successToast: "أُضيف إلى التنزيلات",
+    analyzingStage: "جارٍ فحص الرابط والاتصال بالمصدر…",
+    downloadingStage: "جارٍ استخراج وتنزيل تدفق الوسائط…",
+    finalizingStage: "جارٍ المعالجة النهائية والدمج…",
+    completeStage: "اكتمل التنزيل بنجاح",
+    errorStage: "فشل التنزيل",
+    emptyDownloads: "لا توجد تنزيلات حتى الآن.",
+    emptyLibrary: "المكتبة فارغة. قم بتنزيل ملفات لتظهر هنا.",
+    saveFile: "حفظ الملف",
+    retry: "إعادة المحاولة",
+    countText: (n) => `${n} جودة متاحة`,
+  },
+  en: {
+    lang: "en",
+    dir: "ltr",
+    switch: "عربي",
+    designerCredit: "by Atheerium",
+    statusPill: "1,800+ Sites · Zero Ads",
+    eyebrow: "Quiet Media Instrument v4",
+    headline: "Keep what matters.",
+    intro: "Paste a video or audio link, inspect available qualities instantly, and download the format that fits your device in one clean click.",
+    urlLabel: "Video or audio link",
+    urlPlaceholder: "https://...",
+    clearUrl: "Clear link",
+    paste: "Paste",
+    inspect: "Inspect qualities",
+    inspecting: "Analyzing…",
+    quickDownload: "Quick download",
+    availableLabel: "Available for this link",
+    formatsTitle: "Choose quality",
+    filterAll: "All",
+    filterVideo: "Video",
+    filterAudio: "Audio only",
+    noFilteredFormats: "No formats match this filter.",
+    download: "Start download",
+    downloading: "Downloading…",
+    formatFootnote: "Qualities are extracted directly from the original source with zero added compression.",
+    recentDownloads: "Recent downloads",
+    viewAll: "View all",
+    downloadsTitle: "Downloads",
+    downloadsHint: "Files are saved to your device and can be retrieved or downloaded at any time.",
+    clear: "Clear history",
+    clearConfirm: "Are you sure you want to clear your download history?",
+    libraryTitle: "Library",
+    libraryHint: "Your collection of saved audio and video files ready for direct playback.",
+    navHome: "Home",
+    navDownloads: "Downloads",
+    navLibrary: "Library",
+    stepsHeading: "Three simple steps to save any media",
+    step1Title: "Paste link",
+    step1Desc: "Copy any video or audio link from your favorite platform and paste it into the box.",
+    step2Title: "Choose quality",
+    step2Desc: "Inspect available resolution options from 4K down to lossless audio streams.",
+    step3Title: "Save & enjoy",
+    step3Desc: "Download directly to your device and enjoy offline playback with zero ads.",
+    featuresHeading: "Why VidNest?",
+    feat1Title: "Ultra-fast extraction",
+    feat1Desc: "Instant processing and stream extraction delivered in under a second.",
+    feat2Title: "Quiet & private",
+    feat3Title: "1,800+ supported sites",
+    feat3Desc: "Universal coverage across major video networks, social media, and podcasts.",
+    feat4Title: "Smart FFmpeg multiplexing",
+    feat4Desc: "Automatic merging of top video resolution with the highest bitrate audio channel.",
+    apkTitle: "Get VidNest for Android",
+    apkDesc: "A complete mobile companion with background playback, picture-in-picture, and an offline media library.",
+    apkCta: "Download Official APK",
+    faqHeading: "Frequently Asked Questions",
+    faq1Q: "How does VidNest ensure user privacy?",
+    faq1A: "VidNest does not log personal activity or build user profiles. Temporary files are removed automatically.",
+    faq2Q: "Is VidNest completely free and ad-free?",
+    faq2A: "Yes. VidNest is open-source, completely free, and contains zero advertisements or commercial trackers.",
+    faq3Q: "Does VidNest support 4K video downloads?",
+    faq3A: "Yes. When sources offer 4K streams, VidNest pairs high-resolution video with best audio automatically.",
+    audioOnly: "Audio only",
+    hasAudio: "Audio included",
+    videoOnly: "Video — best audio will be merged",
+    empty: "Please enter a video or audio link first.",
+    pasteDenied: "Clipboard access was denied. Please paste the link manually.",
+    genericError: "The request failed. Please verify the link and try again.",
+    noFormats: "No downloadable formats were found for this link. Ensure the link is public.",
+    successToast: "Added to downloads",
+    analyzingStage: "Analyzing link and connecting to host…",
+    downloadingStage: "Extracting and downloading media stream…",
+    finalizingStage: "Finalizing and merging media…",
+    completeStage: "Download complete",
+    errorStage: "Download failed",
+    emptyDownloads: "No downloads yet.",
+    emptyLibrary: "Your library is empty. Download files to see them here.",
+    saveFile: "Save file",
+    retry: "Retry",
+    countText: (n) => `${n} qualities available`,
+  },
+};
+
+const GRADIENTS = [
+  ["#6A4CFF", "#2FD4A0"],
+  ["#FF7A59", "#6A4CFF"],
+  ["#0F2A24", "#2FD4A0"],
+  ["#FFB347", "#E1306C"],
+  ["#3A86FF", "#8338EC"],
+  ["#06D6A0", "#0F2A24"],
+];
+
+function getGradient(seedText) {
+  let hash = 0;
+  const str = String(seedText || "VidNest");
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+  }
+  const pair = GRADIENTS[hash % GRADIENTS.length];
+  return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
+}
+
+// DOM References
+const $ = (id) => document.getElementById(id);
+const form = $("download-form");
+const input = $("url");
+const clearUrlButton = $("clear-url");
+const pasteButton = $("paste");
+const inspectButton = $("inspect");
+const quickButton = $("quick-download-btn");
+const downloadButton = $("download");
+const message = $("message");
+const themeToggleButton = $("theme-toggle");
+const languageButton = $("language");
+const filterAllButton = $("filter-all");
+const filterVideoButton = $("filter-video");
+const filterAudioButton = $("filter-audio");
+const navIndicator = $("nav-indicator");
+
+// State
+let language = localStorage.getItem("vidnest-lang") === "en" ? "en" : "ar";
+let theme = localStorage.getItem("vidnest-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+let activeView = "home";
+let activeFilter = "all";
+let probe = null;
+let selectedFormat = null;
+let requestInProgress = false;
+let activeJobId = null;
+
+function t(key) {
+  return copy[language][key] || "";
+}
+
+function readRecent() {
+  try {
+    const raw = localStorage.getItem("vidnest-recent");
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) {
+      return parsed.filter((item) => item && typeof item.file === "string" && typeof item.title === "string").slice(0, 30);
+    }
+  } catch {
+    /* ignore parse errors */
+  }
+  return [];
+}
+
+let recent = readRecent();
+
+function saveRecent() {
+  try {
+    localStorage.setItem("vidnest-recent", JSON.stringify(recent.slice(0, 30)));
+  } catch {
+    /* quota error fallback */
+  }
+}
+
+function getCsrfToken() {
+  const meta = document.querySelector('meta[name="vidnest-csrf"]');
+  return meta ? meta.getAttribute("content") || "" : "";
+}
+
+function setMessage(textMsg, isError = false) {
+  if (!message) return;
+  message.textContent = textMsg;
+  message.dataset.error = isError ? "true" : "false";
+}
+
+function showToast(toastText) {
+  const region = $("toast-region");
+  if (!region) return;
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = toastText;
+  region.replaceChildren(toast);
+  setTimeout(() => {
+    toast.classList.add("toast-out");
+    setTimeout(() => {
+      if (toast.parentElement) toast.remove();
+    }, 240);
+  }, 2200);
+}
+
+function formatDuration(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
+  const sec = Math.floor(seconds % 60);
+  const min = Math.floor((seconds / 60) % 60);
+  const hrs = Math.floor(seconds / 3600);
+  if (hrs > 0) {
+    return `${hrs}:${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  }
+  return `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
+function formatSize(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unit = 0;
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024;
+    unit += 1;
+  }
+  return `${size < 10 && unit > 0 ? size.toFixed(1) : Math.round(size)} ${units[unit]}`;
+}
+
+function detectPlatform(urlString) {
+  if (!urlString || typeof urlString !== "string") return null;
+  let host = "";
+  try {
+    const parsed = new URL(urlString.trim());
+    host = parsed.hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") return "youtube";
+  if (host === "tiktok.com" || host.endsWith(".tiktok.com")) return "tiktok";
+  if (host === "instagram.com" || host.endsWith(".instagram.com")) return "instagram";
+  if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) return "x";
+  if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.com" || host === "fb.watch") return "facebook";
+  if (host === "vimeo.com" || host.endsWith(".vimeo.com")) return "vimeo";
+  if (host === "soundcloud.com" || host.endsWith(".soundcloud.com")) return "soundcloud";
+  return "universal";
+}
+
+function updatePlatformChips() {
+  const currentUrl = input ? input.value.trim() : "";
+  const detected = detectPlatform(currentUrl);
+  document.querySelectorAll(".chip").forEach((chip) => {
+    const platform = chip.dataset.platform;
+    const isMatch = Boolean(detected && (platform === detected || (detected !== "universal" && platform === detected)));
+    chip.classList.toggle("active", isMatch);
+  });
+}
+
+function updateInspect() {
+  const val = input ? input.value.trim() : "";
+  const hasText = val.length > 0;
+  if (clearUrlButton) clearUrlButton.hidden = !hasText;
+  const isReady = val.length >= 8 && val.startsWith("https://");
+  if (inspectButton) inspectButton.disabled = requestInProgress || !isReady;
+  if (quickButton) quickButton.disabled = requestInProgress || !isReady;
+  updatePlatformChips();
+}
+
+function resetFormats() {
+  probe = null;
+  selectedFormat = null;
+  const panel = $("formats-panel");
+  if (panel) panel.hidden = true;
+}
+
+function createSvgIcon(iconId) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "icon");
+  svg.setAttribute("aria-hidden", "true");
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  use.setAttribute("href", `#i-${iconId}`);
+  svg.append(use);
+  return svg;
+}
+
+// Navigation & Pill Indicator
+function setView(viewName) {
+  activeView = viewName;
+  const views = ["home", "downloads", "library"];
+  const viewIndex = views.indexOf(viewName);
+
+  document.querySelectorAll(".view").forEach((v) => {
+    const isTarget = v.id === `view-${viewName}`;
+    v.classList.toggle("active", isTarget);
+    if (isTarget) {
+      v.removeAttribute("hidden");
+    } else {
+      v.setAttribute("hidden", "");
+    }
+  });
+
+  document.querySelectorAll(".nav-tab").forEach((tab) => {
+    const isTarget = tab.dataset.view === viewName;
+    tab.classList.toggle("active", isTarget);
+    if (isTarget) {
+      tab.setAttribute("aria-current", "page");
+    } else {
+      tab.removeAttribute("aria-current");
+    }
+  });
+
+  if (navIndicator && viewIndex >= 0) {
+    navIndicator.style.insetInlineStart = `calc(6px + ${viewIndex} * (100% - 12px) / 3)`;
+  }
+
+  if (viewName === "downloads") {
+    renderDownloads();
+  } else if (viewName === "library") {
+    renderLibrary();
+  }
+}
+
+// Render Formats Radiogroup
+function renderFormats(result) {
+  const list = $("format-list");
+  if (!list) return;
+  list.replaceChildren();
+
+  const titleEl = $("media-title");
+  if (titleEl) titleEl.textContent = result.title || "";
+
+  const metaEl = $("media-meta");
+  if (metaEl) {
+    const parts = [result.uploader, result.extractor].filter(Boolean);
+    metaEl.textContent = parts.join(" · ");
+  }
+
+  const durationEl = $("preview-duration");
+  if (durationEl) {
+    durationEl.textContent = formatDuration(result.duration);
+  }
+
+  const thumbEl = $("preview-thumbnail");
+  if (thumbEl) {
+    thumbEl.style.setProperty("background", getGradient(result.title));
+  }
+
+  const filtered = result.formats.filter((format) => {
+    if (activeFilter === "video") return format.hasVideo;
+    if (activeFilter === "audio") return !format.hasVideo;
+    return true;
+  });
+
+  const countEl = $("format-count");
+  if (countEl) {
+    countEl.textContent = typeof t("countText") === "function" ? t("countText")(filtered.length) : `${filtered.length}`;
+  }
+
+  if (filtered.length === 0) {
+    const emptyNotice = document.createElement("p");
+    emptyNotice.className = "message-banner";
+    emptyNotice.dataset.error = "false";
+    emptyNotice.textContent = t("noFilteredFormats");
+    list.append(emptyNotice);
+    selectedFormat = null;
+    if (downloadButton) downloadButton.disabled = true;
+    $("formats-panel").hidden = false;
+    return;
+  }
+
+  if (!filtered.some((f) => f.id === selectedFormat)) {
+    selectedFormat = filtered[0].id;
+  }
+
+  filtered.forEach((format) => {
+    const wrapper = document.createElement("label");
+    wrapper.className = "format-option";
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "media-format";
+    radio.value = format.id;
+    radio.checked = format.id === selectedFormat;
+
+    const card = document.createElement("span");
+    card.className = "format-card";
+
+    const main = document.createElement("span");
+    main.className = "format-main";
+
+    const qualityText = document.createElement("span");
+    qualityText.className = "format-quality";
+    qualityText.textContent = format.hasVideo ? (format.quality || "Video") : t("audioOnly");
+
+    const details = document.createElement("span");
+    details.className = "format-details";
+    const audioDetail = format.hasVideo ? (format.hasAudio ? t("hasAudio") : t("videoOnly")) : "";
+    details.textContent = [format.ext ? format.ext.toUpperCase() : "", audioDetail].filter(Boolean).join(" · ");
+
+    main.append(qualityText, details);
+
+    const size = document.createElement("span");
+    size.className = "format-size";
+    size.textContent = formatSize(format.filesize);
+
+    card.append(main, size);
+    wrapper.append(radio, card);
+
+    radio.addEventListener("change", () => {
+      selectedFormat = format.id;
+      if (downloadButton) downloadButton.disabled = requestInProgress || !selectedFormat;
+    });
+
+    list.append(wrapper);
+  });
+
+  if (downloadButton) downloadButton.disabled = requestInProgress || !selectedFormat;
+  const panel = $("formats-panel");
+  if (panel) {
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+function setFilter(filterType) {
+  activeFilter = filterType;
+  [filterAllButton, filterVideoButton, filterAudioButton].forEach((btn) => {
+    if (!btn) return;
+    const isTarget = btn.dataset.filter === filterType;
+    btn.classList.toggle("active", isTarget);
+    btn.setAttribute("aria-selected", isTarget ? "true" : "false");
+  });
+  if (probe) {
+    renderFormats(probe);
+  }
+}
+
+// Media Row Builder (Home Recent, Downloads, Library)
+function createMediaRow(item, isActiveDownloading = false, stageText = "") {
+  const row = document.createElement("div");
+  row.className = "media-row";
+
+  const thumb = document.createElement("div");
+  thumb.className = "media-thumb";
+  thumb.style.setProperty("background", getGradient(item.title));
+  thumb.append(createSvgIcon(item.kind === "audio" ? "play" : "play"));
+
+  const content = document.createElement("div");
+  content.className = "media-content";
+
+  const title = document.createElement("span");
+  title.className = "media-row-title";
+  title.textContent = item.title;
+
+  const meta = document.createElement("span");
+  meta.className = "media-row-meta";
+  const metaParts = [item.source || "VidNest"];
+  if (item.size) metaParts.push(item.size);
+  meta.textContent = metaParts.join(" · ");
+
+  content.append(title, meta);
+
+  if (isActiveDownloading) {
+    const progWrap = document.createElement("div");
+    progWrap.className = "progress-bar-wrap";
+
+    const track = document.createElement("div");
+    track.className = "progress-track";
+
+    const ind = document.createElement("div");
+    ind.className = "progress-indeterminate";
+    track.append(ind);
+
+    const stageEl = document.createElement("div");
+    stageEl.className = "progress-stage-text";
+    stageEl.textContent = stageText || t("downloadingStage");
+
+    progWrap.append(track, stageEl);
+    content.append(progWrap);
+
+    const badge = document.createElement("span");
+    badge.className = "media-row-badge badge-soft";
+    const spinner = document.createElement("span");
+    spinner.className = "btn-spinner";
+    badge.append(spinner);
+    row.append(thumb, content, badge);
+  } else {
+    const badge = document.createElement("a");
+    badge.className = "media-row-badge badge-mint badge-link";
+    badge.href = `/files/${encodeURIComponent(item.file)}`;
+    badge.download = "";
+    badge.setAttribute("aria-label", t("saveFile"));
+    badge.append(createSvgIcon("check"));
+    row.append(thumb, content, badge);
+  }
+
+  return row;
+}
+
+function renderHomeRecent() {
+  const container = $("home-recent-list");
+  if (!container) return;
+  container.replaceChildren();
+
+  const slice = recent.slice(0, 2);
+  if (slice.length === 0) {
+    const emptyNotice = document.createElement("p");
+    emptyNotice.className = "empty-state";
+    emptyNotice.textContent = t("emptyDownloads");
+    container.append(emptyNotice);
+    return;
+  }
+
+  slice.forEach((item) => {
+    container.append(createMediaRow(item));
+  });
+}
+
+function renderDownloads() {
+  const container = $("downloads-list");
+  if (!container) return;
+  container.replaceChildren();
+
+  if (activeJob) {
+    container.append(createMediaRow(activeJob, true, activeJob.stage));
+  }
+
+  if (recent.length === 0 && !activeJob) {
+    const emptyNotice = document.createElement("div");
+    emptyNotice.className = "empty-state";
+    emptyNotice.append(createSvgIcon("down"));
+    const p = document.createElement("p");
+    p.textContent = t("emptyDownloads");
+    emptyNotice.append(p);
+    container.append(emptyNotice);
+    return;
+  }
+
+  recent.forEach((item) => {
+    container.append(createMediaRow(item));
+  });
+}
+
+function renderLibrary() {
+  const grid = $("library-grid");
+  if (!grid) return;
+  grid.replaceChildren();
+
+  if (recent.length === 0) {
+    const emptyNotice = document.createElement("div");
+    emptyNotice.className = "empty-state";
+    emptyNotice.append(createSvgIcon("lib"));
+    const p = document.createElement("p");
+    p.textContent = t("emptyLibrary");
+    emptyNotice.append(p);
+    grid.append(emptyNotice);
+    return;
+  }
+
+  recent.forEach((item) => {
+    const tile = document.createElement("a");
+    tile.className = "library-tile";
+    tile.href = `/files/${encodeURIComponent(item.file)}`;
+    tile.download = "";
+
+    const thumb = document.createElement("div");
+    thumb.className = "tile-thumb";
+    thumb.style.setProperty("background", getGradient(item.title));
+    thumb.append(createSvgIcon("play"));
+
+    if (item.duration) {
+      const dur = document.createElement("span");
+      dur.className = "tile-duration";
+      dur.textContent = item.duration;
+      thumb.append(dur);
+    }
+
+    const title = document.createElement("h3");
+    title.className = "tile-title";
+    title.textContent = item.title;
+
+    tile.append(thumb, title);
+    grid.append(tile);
+  });
+}
+
+let activeJob = null;
+
+async function postJson(path, body) {
+  const csrfValue = getCsrfToken();
+  const response = await fetch(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-VidNest-CSRF": csrfValue,
+    },
+    body: JSON.stringify(body),
+  });
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error(t("genericError"));
+  }
+
+  if (!response.ok) {
+    throw new Error(typeof result.error === "string" ? result.error : t("genericError"));
+  }
+  return result;
+}
+
+// Download Lifecycle with Staged Progress States
+async function triggerDownloadExecution(payload, downloadTitle, downloadSource, durationText) {
+  requestInProgress = true;
+  updateInspect();
+
+  activeJob = {
+    title: downloadTitle || "Media",
+    source: downloadSource || "VidNest",
+    stage: t("analyzingStage"),
+    duration: durationText || "",
+  };
+
+  showToast(t("successToast"));
+  setView("downloads");
+
+  // Advance stages cleanly without fake numbers
+  const stageTimer1 = setTimeout(() => {
+    if (activeJob) {
+      activeJob.stage = t("downloadingStage");
+      renderDownloads();
+    }
+  }, 700);
+
+  const stageTimer2 = setTimeout(() => {
+    if (activeJob) {
+      activeJob.stage = t("finalizingStage");
+      renderDownloads();
+    }
+  }, 2200);
+
+  try {
+    const endpoint = payload.mode ? "/api/quick-download" : "/api/download";
+    const result = await postJson(endpoint, payload);
+
+    clearTimeout(stageTimer1);
+    clearTimeout(stageTimer2);
+
+    const savedItem = {
+      title: (result.title || downloadTitle || "Media").slice(0, 200),
+      file: result.file,
+      kind: payload.mode === "audio" ? "audio" : "video",
+      ts: Date.now(),
+      duration: durationText || "",
+      source: downloadSource || "VidNest",
+    };
+
+    activeJob = null;
+    recent.unshift(savedItem);
+    recent = recent.slice(0, 30);
+    saveRecent();
+
+    renderHomeRecent();
+    renderDownloads();
+    renderLibrary();
+
+    // Trigger direct browser save
+    const anchor = document.createElement("a");
+    anchor.href = `/files/${encodeURIComponent(result.file)}`;
+    anchor.download = "";
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+
+    if (input) {
+      input.value = "";
+      updateInspect();
+    }
+    resetFormats();
+    setMessage("");
+  } catch (error) {
+    clearTimeout(stageTimer1);
+    clearTimeout(stageTimer2);
+    activeJob = null;
+    renderDownloads();
+    const errMsg = error instanceof Error ? error.message : t("genericError");
+    setMessage(errMsg, true);
+    showToast(errMsg);
+  } finally {
+    requestInProgress = false;
+    updateInspect();
+  }
+}
+
+// Event Listeners
+if (input) {
+  input.addEventListener("input", () => {
+    resetFormats();
+    setMessage("");
+    updateInspect();
+  });
+}
+
+if (clearUrlButton) {
+  clearUrlButton.addEventListener("click", () => {
+    if (!input) return;
+    input.value = "";
+    resetFormats();
+    setMessage("");
+    updateInspect();
+    input.focus();
+  });
+}
+
+if (pasteButton) {
+  pasteButton.addEventListener("click", async () => {
+    try {
+      if (!input) return;
+      const textFromClipboard = await navigator.clipboard.readText();
+      if (textFromClipboard && textFromClipboard.trim()) {
+        input.value = textFromClipboard.trim();
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+      } else {
+        input.value = "https://www.youtube.com/watch?v=aqz-KE-bpKQ";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+      }
+    } catch {
+      if (input && !input.value.trim()) {
+        input.value = "https://www.youtube.com/watch?v=aqz-KE-bpKQ";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.focus();
+      } else {
+        setMessage(t("pasteDenied"), true);
+      }
+    }
+  });
+}
+
+document.querySelectorAll(".chip").forEach((chip) => {
+  chip.addEventListener("click", () => {
+    if (!input) return;
+    const url = chip.dataset.url;
+    if (url) {
+      input.value = url;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    }
+  });
+});
+
+if (themeToggleButton) {
+  themeToggleButton.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    try {
+      localStorage.setItem("vidnest-theme", nextTheme);
+    } catch {
+      /* storage fallback */
+    }
+  });
+}
+
+function applyLanguage() {
+  document.documentElement.lang = t("lang");
+  document.documentElement.dir = t("dir");
+
+  document.querySelectorAll("[data-copy]").forEach((el) => {
+    const key = el.dataset.copy;
+    const val = t(key);
+    if (typeof val === "string") {
+      el.textContent = val;
+    }
+  });
+
+  if (languageButton) languageButton.textContent = t("switch");
+  if (input) input.setAttribute("placeholder", t("urlPlaceholder"));
+
+  renderHomeRecent();
+  renderDownloads();
+  renderLibrary();
+  if (probe) renderFormats(probe);
+}
+
+if (languageButton) {
+  languageButton.addEventListener("click", () => {
+    language = language === "ar" ? "en" : "ar";
+    try {
+      localStorage.setItem("vidnest-lang", language);
+    } catch {
+      /* storage fallback */
+    }
+    applyLanguage();
+  });
+}
+
+if (filterAllButton) filterAllButton.addEventListener("click", () => setFilter("all"));
+if (filterVideoButton) filterVideoButton.addEventListener("click", () => setFilter("video"));
+if (filterAudioButton) filterAudioButton.addEventListener("click", () => setFilter("audio"));
+
+document.querySelectorAll(".nav-tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.view;
+    if (target) setView(target);
+  });
+});
+
+const viewAllLink = $("view-all-downloads-link");
+if (viewAllLink) {
+  viewAllLink.addEventListener("click", () => setView("downloads"));
+}
+
+const clearDownloadsBtn = $("clear-downloads-btn");
+if (clearDownloadsBtn) {
+  clearDownloadsBtn.addEventListener("click", () => {
+    if (!window.confirm(t("clearConfirm"))) return;
+    recent = [];
+    saveRecent();
+    renderHomeRecent();
+    renderDownloads();
+    renderLibrary();
+  });
+}
+
+// Form Submit: Format Probe
+if (form) {
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (requestInProgress) return;
+
+    const url = input ? input.value.trim() : "";
+    if (!url) {
+      setMessage(t("empty"), true);
+      return;
+    }
+
+    requestInProgress = true;
+    if (inspectButton) {
+      inspectButton.setAttribute("aria-busy", "true");
+      const sp = inspectButton.querySelector(".btn-spinner");
+      if (sp) sp.hidden = false;
+      const tx = inspectButton.querySelector(".btn-text");
+      if (tx) tx.textContent = t("inspecting");
+    }
+    updateInspect();
+    resetFormats();
+    setMessage("");
+
+    try {
+      const result = await postJson("/api/formats", { url });
+      if (!Array.isArray(result.formats) || result.formats.length === 0 || typeof result.probeId !== "string") {
+        throw new Error(t("noFormats"));
+      }
+      probe = { ...result, url };
+      renderFormats(probe);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : t("genericError"), true);
+    } finally {
+      requestInProgress = false;
+      if (inspectButton) {
+        inspectButton.removeAttribute("aria-busy");
+        const sp = inspectButton.querySelector(".btn-spinner");
+        if (sp) sp.hidden = true;
+        const tx = inspectButton.querySelector(".btn-text");
+        if (tx) tx.textContent = t("inspect");
+      }
+      updateInspect();
+    }
+  });
+}
+
+// Direct / Quick Download Button
+if (quickButton) {
+  quickButton.addEventListener("click", async () => {
+    const url = input ? input.value.trim() : "";
+    if (requestInProgress || !url) {
+      setMessage(t("empty"), true);
+      return;
+    }
+    const detected = detectPlatform(url) || "universal";
+    await triggerDownloadExecution(
+      { url, mode: "video" },
+      url.split("/").filter(Boolean).pop() || "Media",
+      detected,
+      ""
+    );
+  });
+}
+
+// Download Selected Format
+if (downloadButton) {
+  downloadButton.addEventListener("click", async () => {
+    if (!probe || !selectedFormat || requestInProgress) return;
+    const chosenFormat = probe.formats.find((f) => f.id === selectedFormat);
+    await triggerDownloadExecution(
+      {
+        url: probe.url,
+        probeId: probe.probeId,
+        formatId: selectedFormat,
+      },
+      probe.title,
+      probe.uploader || probe.extractor,
+      formatDuration(probe.duration)
+    );
+  });
+}
+
+// IntersectionObserver for Section Reveal
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll(".step-card, .feature-card, .faq-item, .apk-banner").forEach((el) => {
+    observer.observe(el);
+  });
+}
+
+// Initial setup
+document.documentElement.setAttribute("data-theme", theme);
+applyLanguage();
+updateInspect();
+setView("home");

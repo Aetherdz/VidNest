@@ -191,30 +191,17 @@ export function useDownloader(initialServerUrl: string) {
     testConnection();
   }, [testConnection]);
 
-  // Paste from clipboard
-  const pasteFromClipboard = useCallback(async () => {
-    try {
-      const text = await Clipboard.getStringAsync();
-      const extracted = extractUrlFromText(text);
-      if (extracted) {
-        setUrl(extracted);
-        setErrorMessage('');
-        setPreview(null);
-        return extracted;
-      }
-    } catch {
-      // Fallback sample link if clipboard access denied or empty
-    }
-    const sample = 'https://youtu.be/atlas-trip';
-    setUrl(sample);
-    setErrorMessage('');
+  // Clear URL input and reset preview
+  const clearUrl = useCallback(() => {
+    setUrl('');
     setPreview(null);
-    return sample;
+    setErrorMessage('');
   }, []);
 
   // Analyze URL and display format preview
-  const analyzeUrl = useCallback(async () => {
-    const checked = validatePublicHttpsUrl(url);
+  const analyzeUrl = useCallback(async (customUrl?: string) => {
+    const target = typeof customUrl === 'string' && customUrl.trim() ? customUrl.trim() : url.trim();
+    const checked = validatePublicHttpsUrl(target);
     if (!checked.valid || !checked.normalized) {
       setErrorMessage(checked.error ?? 'رابط غير صالح');
       return null;
@@ -276,6 +263,11 @@ export function useDownloader(initialServerUrl: string) {
         }
       }
 
+      const isAudioPlatform = platform === 'SoundCloud' || checked.normalized.toLowerCase().includes('soundcloud');
+      const bestDefaultId = isAudioPlatform
+        ? (options.find((o) => o.mode === 'audio')?.id ?? options[0].id)
+        : (options.find((o) => o.height === 1080)?.id ?? options[0].id);
+
       const previewData: PreviewData = {
         url: checked.normalized,
         title,
@@ -283,10 +275,10 @@ export function useDownloader(initialServerUrl: string) {
         duration: '03:32',
         gradientIndex: gradientIdx,
         options,
-        selectedOptionId: options[0].id,
+        selectedOptionId: bestDefaultId,
       };
 
-      // Slight natural pause matching design (~1000ms)
+      // Slight natural pause matching design (~800ms)
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       setPreview(previewData);
@@ -298,6 +290,46 @@ export function useDownloader(initialServerUrl: string) {
       return null;
     }
   }, [client, url]);
+
+  // Paste from clipboard and auto-inspect
+  const pasteFromClipboard = useCallback(async () => {
+    try {
+      const text = await Clipboard.getStringAsync();
+      const extracted = extractUrlFromText(text);
+      if (extracted) {
+        setUrl(extracted);
+        setErrorMessage('');
+        setPreview(null);
+        analyzeUrl(extracted);
+        return extracted;
+      }
+    } catch {
+      // Fallback sample link if clipboard access denied or empty
+    }
+    const sample = 'https://youtu.be/atlas-trip';
+    setUrl(sample);
+    setErrorMessage('');
+    setPreview(null);
+    analyzeUrl(sample);
+    return sample;
+  }, [analyzeUrl]);
+
+  // Direct change handler for typing/pasting
+  const onUrlChange = useCallback((newText: string) => {
+    const extracted = extractUrlFromText(newText);
+    if (extracted && extracted !== newText.trim()) {
+      setUrl(extracted);
+      setErrorMessage('');
+      setPreview(null);
+      analyzeUrl(extracted);
+      return;
+    }
+    setUrl(newText);
+    setErrorMessage('');
+    if (!newText.trim()) {
+      setPreview(null);
+    }
+  }, [analyzeUrl]);
 
   // Select a quality option inside preview card
   const selectQualityOption = useCallback((optionId: string) => {
@@ -412,6 +444,9 @@ export function useDownloader(initialServerUrl: string) {
     serverUrl,
     setServerUrl,
     pasteFromClipboard,
+    onUrlChange,
+    clearUrl,
+    clear: clearUrl,
     analyzeUrl,
     selectQualityOption,
     startDownload,

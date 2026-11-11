@@ -92,6 +92,8 @@ export default function App() {
   const {
     url,
     setUrl,
+    onUrlChange,
+    clearUrl,
     isAnalyzing,
     preview,
     downloads,
@@ -125,9 +127,10 @@ export default function App() {
           <HomeScreen
             themeMode={themeMode}
             url={url}
-            onUrlChange={setUrl}
+            onUrlChange={onUrlChange}
+            onClear={clearUrl}
             onPaste={pasteFromClipboard}
-            onAnalyze={analyzeUrl}
+            onAnalyze={() => analyzeUrl()}
             isAnalyzing={isAnalyzing}
             preview={preview}
             onSelectOption={selectQualityOption}

@@ -334,8 +334,8 @@ def validate_media_url(raw_url: object) -> str:
 def security_headers(response):
     response.headers.setdefault(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; "
-        "connect-src 'self' https://vidnest-web.onrender.com https://vidnest-six.vercel.app https://pipedapi.kavin.rocks https://pipedapi.adminforge.de https://inv.nadeko.net https://invidious.nerdvpn.de; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+        "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:; "
+        "connect-src 'self' https://vidnest-web.onrender.com https://vidnest-six.vercel.app https://www.tikwm.com https://api.fxtwitter.com https://api.vxtwitter.com https://pipedapi.kavin.rocks https://pipedapi.adminforge.de https://inv.nadeko.net https://invidious.nerdvpn.de; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
     )
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
@@ -555,6 +555,106 @@ def _probe_or_fetch_youtube_federated(
     if not YOUTUBE_VIDEO_ID_RE.fullmatch(video_id or ""):
         return None
 
+    # First try YouTube Innertube IOS client with fresh visitorData from /youtubei/v1/guide
+    try:
+        validate_media_url("https://www.youtube.com/youtubei/v1/guide?prettyPrint=false")
+        guide_req = _urlreq.Request(
+            "https://www.youtube.com/youtubei/v1/guide?prettyPrint=false",
+            data=_json.dumps({
+                "context": {"client": {"clientName": "WEB", "clientVersion": "2.20250312.04.00"}}
+            }).encode("utf-8"),
+            headers={"Content-Type": "application/json", "User-Agent": "VidNest/4.0"},
+            method="POST",
+        )
+        with _urlreq.urlopen(guide_req, timeout=8) as g_resp:
+            g_data = _json.loads(g_resp.read(500_000).decode("utf-8", "replace"))
+        visitor_data = (g_data.get("responseContext") or {}).get("visitorData")
+        ios_ua = "com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)"
+        ios_client = {
+            "clientName": "IOS",
+            "clientVersion": "20.10.4",
+            "deviceMake": "Apple",
+            "deviceModel": "iPhone16,2",
+            "osName": "iPhone",
+            "osVersion": "18.3.2.22D82",
+            "userAgent": ios_ua,
+        }
+        if visitor_data:
+            ios_client["visitorData"] = visitor_data
+        p_headers = {"Content-Type": "application/json", "User-Agent": ios_ua}
+        if visitor_data:
+            p_headers["X-Goog-Visitor-Id"] = visitor_data
+        player_req = _urlreq.Request(
+            "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+            data=_json.dumps({
+                "videoId": video_id,
+                "context": {"client": ios_client},
+                "contentCheckOk": True,
+                "racyCheckOk": True,
+            }).encode("utf-8"),
+            headers=p_headers,
+            method="POST",
+        )
+        with _urlreq.urlopen(player_req, timeout=10) as p_resp:
+            p_data = _json.loads(p_resp.read(2_000_000).decode("utf-8", "replace"))
+        streaming = p_data.get("streamingData") or {}
+        raw_streams = (streaming.get("formats") or []) + (streaming.get("adaptiveFormats") or [])
+        ios_formats: list[dict] = []
+        ios_urls: dict[str, tuple[str, str]] = {}
+        for idx, fs in enumerate(raw_streams):
+            if not isinstance(fs, dict) or not isinstance(fs.get("url"), str):
+                continue
+            fid = str(fs.get("itag") or f"ios{idx}")
+            mime = str(fs.get("mimeType") or "").lower()
+            is_audio = mime.startswith("audio/")
+            ext = "m4a" if (is_audio and "mp4" in mime) else "webm" if "webm" in mime else "mp4"
+            height = fs.get("height") if isinstance(fs.get("height"), int) else None
+            clen = str(fs.get("contentLength") or "")
+            fsize = int(clen) if clen.isdigit() else None
+            ios_formats.append({
+                "format_id": fid,
+                "ext": ext,
+                "height": height,
+                "width": fs.get("width") if isinstance(fs.get("width"), int) else None,
+                "filesize": fsize,
+                "vcodec": "none" if is_audio else "avc1",
+                "acodec": "mp4a" if (is_audio or fs.get("audioQuality")) else "none",
+                "abr": 128 if is_audio else None,
+                "format": f"{fid} - {height or 'audio'}",
+            })
+            ios_urls[fid] = (fs["url"], ext)
+        if ios_formats:
+            if download_dir is not None:
+                chosen_key = (target_format_id or "").split("+")[0]
+                if chosen_key not in ios_urls:
+                    chosen_key = next(iter(ios_urls.keys()))
+                stream_url, ext = ios_urls[chosen_key]
+                validate_media_url(stream_url)
+                out_file = download_dir / f"media.{ext}"
+                req = _urlreq.Request(stream_url, headers={"User-Agent": ios_ua})
+                total = 0
+                limit = max_bytes or MAX_DOWNLOAD_BYTES
+                with _urlreq.urlopen(req, timeout=25) as resp, open(out_file, "wb") as fh:
+                    while True:
+                        chunk = resp.read(65536)
+                        if not chunk:
+                            break
+                        total += len(chunk)
+                        if total > limit:
+                            raise RuntimeError("The file exceeds the download size limit.")
+                        fh.write(chunk)
+            vdetails = p_data.get("videoDetails") or {}
+            dur_str = str(vdetails.get("lengthSeconds") or "")
+            return {
+                "title": str(vdetails.get("title") or "YouTube Video")[:200],
+                "uploader": str(vdetails.get("author") or "YouTube")[:120],
+                "extractor_key": "YoutubeInnertubeIOS",
+                "duration": int(dur_str) if dur_str.isdigit() else None,
+                "formats": ios_formats,
+            }
+    except Exception:
+        pass
+
     for kind, base_url in YOUTUBE_FEDERATED_INSTANCES:
         api_url = (
             f"{base_url}/streams/{video_id}"
@@ -665,6 +765,260 @@ def _probe_or_fetch_youtube_federated(
     return None
 
 
+def _is_tiktok_url(link: str) -> bool:
+    try:
+        host = (urlsplit(link).hostname or "").lower()
+    except Exception:
+        return False
+    return host == "tiktok.com" or host.endswith(".tiktok.com")
+
+
+def _probe_or_fetch_tiktok_fallback(
+    link: str,
+    download_dir: Path | None = None,
+    target_format_id: str | None = None,
+    max_bytes: int | None = None,
+) -> dict | None:
+    """TikTok HD No-Watermark fallback via TikWM when yt-dlp fails on datacenter IPs or short links."""
+    import json as _json
+    import urllib.parse as _urlparse
+    import urllib.request as _urlreq
+
+    if not _is_tiktok_url(link):
+        return None
+    try:
+        api_url = f"https://www.tikwm.com/api/?url={_urlparse.quote(link, safe='')}&hd=1"
+        validate_media_url(api_url)
+        req = _urlreq.Request(
+            api_url,
+            headers={"User-Agent": "VidNest/4.0", "Accept": "application/json"},
+        )
+        with _urlreq.urlopen(req, timeout=10) as resp:
+            payload = _json.loads(resp.read(2_000_000).decode("utf-8", "replace"))
+        if not isinstance(payload, dict) or payload.get("code") != 0 or not isinstance(payload.get("data"), dict):
+            return None
+        d = payload["data"]
+
+        def _abs_url(u: object) -> str:
+            if not isinstance(u, str) or not u:
+                return ""
+            if u.startswith(("http://", "https://")):
+                return u
+            return f"https://www.tikwm.com{'' if u.startswith('/') else '/'}{u}"
+
+        hd_url = _abs_url(d.get("hdplay") or d.get("play"))
+        sd_url = _abs_url(d.get("play"))
+        wm_url = _abs_url(d.get("wmplay"))
+        audio_url = _abs_url(d.get("music"))
+        formats_out: list[dict] = []
+        stream_urls: dict[str, tuple[str, str]] = {}
+        if hd_url:
+            formats_out.append({
+                "format_id": "hd",
+                "ext": "mp4",
+                "height": 1080,
+                "width": 1080,
+                "filesize": d.get("hd_size") if isinstance(d.get("hd_size"), int) and d.get("hd_size") > 0 else d.get("size") if isinstance(d.get("size"), int) else None,
+                "vcodec": "avc1",
+                "acodec": "mp4a",
+                "format": "HD No-Watermark (MP4)",
+            })
+            stream_urls["hd"] = (hd_url, "mp4")
+        if sd_url and sd_url != hd_url:
+            formats_out.append({
+                "format_id": "sd",
+                "ext": "mp4",
+                "height": 720,
+                "width": 720,
+                "filesize": d.get("size") if isinstance(d.get("size"), int) else None,
+                "vcodec": "avc1",
+                "acodec": "mp4a",
+                "format": "Standard No-Watermark (MP4)",
+            })
+            stream_urls["sd"] = (sd_url, "mp4")
+        if wm_url:
+            formats_out.append({
+                "format_id": "wm",
+                "ext": "mp4",
+                "height": 540,
+                "width": 540,
+                "filesize": d.get("wm_size") if isinstance(d.get("wm_size"), int) else None,
+                "vcodec": "avc1",
+                "acodec": "mp4a",
+                "format": "Watermarked (MP4)",
+            })
+            stream_urls["wm"] = (wm_url, "mp4")
+        if audio_url:
+            formats_out.append({
+                "format_id": "audio",
+                "ext": "mp3",
+                "vcodec": "none",
+                "acodec": "mp3",
+                "abr": 128,
+                "format": "Original Audio (MP3)",
+            })
+            stream_urls["audio"] = (audio_url, "mp3")
+        if not formats_out:
+            return None
+        if download_dir is not None:
+            chosen_key = (target_format_id or "").split("+")[0]
+            if chosen_key not in stream_urls:
+                chosen_key = next(iter(stream_urls.keys()))
+            stream_url, ext = stream_urls[chosen_key]
+            validate_media_url(stream_url)
+            out_file = download_dir / f"media.{ext}"
+            dl_req = _urlreq.Request(stream_url, headers={"User-Agent": "VidNest/4.0"})
+            total = 0
+            limit = max_bytes or MAX_DOWNLOAD_BYTES
+            with _urlreq.urlopen(dl_req, timeout=25) as s_resp, open(out_file, "wb") as fh:
+                while True:
+                    chunk = s_resp.read(65536)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > limit:
+                        raise RuntimeError("The file exceeds the download size limit.")
+                    fh.write(chunk)
+        author = d.get("author") if isinstance(d.get("author"), dict) else {}
+        return {
+            "title": str(d.get("title") or "TikTok Video")[:200],
+            "uploader": str(author.get("nickname") or author.get("unique_id") or "TikTok")[:120],
+            "extractor_key": "TikTok",
+            "duration": d.get("duration") if isinstance(d.get("duration"), (int, float)) else None,
+            "formats": formats_out,
+        }
+    except Exception:
+        return None
+
+
+TWITTER_STATUS_RE = re.compile(r"/status(?:es)?/(\d{1,25})")
+
+
+def _extract_twitter_status_id(link: str) -> str | None:
+    try:
+        parsed = urlsplit(link)
+    except Exception:
+        return None
+    host = (parsed.hostname or "").lower()
+    for prefix in ("www.", "m.", "mobile."):
+        if host.startswith(prefix):
+            host = host[len(prefix):]
+    if host not in {"x.com", "twitter.com", "fxtwitter.com", "vxtwitter.com"}:
+        return None
+    match = TWITTER_STATUS_RE.search(parsed.path or "")
+    return match.group(1) if match else None
+
+
+def _probe_or_fetch_twitter_fallback(
+    link: str,
+    download_dir: Path | None = None,
+    target_format_id: str | None = None,
+    max_bytes: int | None = None,
+) -> dict | None:
+    """X / Twitter direct MP4 stream fallback via fxtwitter / vxtwitter APIs."""
+    import json as _json
+    import urllib.request as _urlreq
+
+    tweet_id = _extract_twitter_status_id(link)
+    if not tweet_id:
+        return None
+    try:
+        api_url = f"https://api.fxtwitter.com/i/status/{tweet_id}"
+        validate_media_url(api_url)
+        req = _urlreq.Request(api_url, headers={"User-Agent": "VidNest/4.0", "Accept": "application/json"})
+        with _urlreq.urlopen(req, timeout=10) as resp:
+            fx_data = _json.loads(resp.read(2_000_000).decode("utf-8", "replace"))
+        tweet = fx_data.get("tweet") if isinstance(fx_data, dict) else None
+        media = (tweet or {}).get("media") if isinstance(tweet, dict) else None
+        videos = (media or {}).get("videos") if isinstance(media, dict) else None
+        if isinstance(videos, list) and videos:
+            formats_out: list[dict] = []
+            stream_urls: dict[str, tuple[str, str]] = {}
+            for idx, v in enumerate(videos):
+                if not isinstance(v, dict) or not isinstance(v.get("url"), str):
+                    continue
+                fid = f"x{idx}"
+                height = v.get("height") if isinstance(v.get("height"), int) else 720
+                formats_out.append({
+                    "format_id": fid,
+                    "ext": "mp4",
+                    "height": height,
+                    "width": v.get("width") if isinstance(v.get("width"), int) else None,
+                    "vcodec": "avc1",
+                    "acodec": "mp4a",
+                    "format": f"{height}p (MP4)",
+                })
+                stream_urls[fid] = (v["url"], "mp4")
+            if formats_out:
+                if download_dir is not None:
+                    chosen_key = (target_format_id or "").split("+")[0]
+                    if chosen_key not in stream_urls:
+                        chosen_key = next(iter(stream_urls.keys()))
+                    stream_url, ext = stream_urls[chosen_key]
+                    validate_media_url(stream_url)
+                    out_file = download_dir / f"media.{ext}"
+                    dl_req = _urlreq.Request(stream_url, headers={"User-Agent": "VidNest/4.0"})
+                    total = 0
+                    limit = max_bytes or MAX_DOWNLOAD_BYTES
+                    with _urlreq.urlopen(dl_req, timeout=25) as s_resp, open(out_file, "wb") as fh:
+                        while True:
+                            chunk = s_resp.read(65536)
+                            if not chunk:
+                                break
+                            total += len(chunk)
+                            if total > limit:
+                                raise RuntimeError("The file exceeds the download size limit.")
+                            fh.write(chunk)
+                author = (tweet or {}).get("author") if isinstance((tweet or {}).get("author"), dict) else {}
+                return {
+                    "title": str((tweet or {}).get("text") or "X Video")[:200],
+                    "uploader": str(author.get("name") or author.get("screen_name") or "X")[:120],
+                    "extractor_key": "X",
+                    "duration": videos[0].get("duration") if isinstance(videos[0].get("duration"), (int, float)) else None,
+                    "formats": formats_out,
+                }
+    except Exception:
+        pass
+    return None
+
+
+def _probe_or_fetch_platform_fallback(
+    link: str,
+    download_dir: Path | None = None,
+    target_format_id: str | None = None,
+    max_bytes: int | None = None,
+) -> dict | None:
+    yt_vid = _extract_youtube_video_id(link)
+    if yt_vid:
+        res = _probe_or_fetch_youtube_federated(
+            yt_vid,
+            download_dir=download_dir,
+            target_format_id=target_format_id,
+            max_bytes=max_bytes,
+        )
+        if res is not None:
+            return res
+    if _is_tiktok_url(link):
+        res = _probe_or_fetch_tiktok_fallback(
+            link,
+            download_dir=download_dir,
+            target_format_id=target_format_id,
+            max_bytes=max_bytes,
+        )
+        if res is not None:
+            return res
+    if _extract_twitter_status_id(link):
+        res = _probe_or_fetch_twitter_fallback(
+            link,
+            download_dir=download_dir,
+            target_format_id=target_format_id,
+            max_bytes=max_bytes,
+        )
+        if res is not None:
+            return res
+    return None
+
+
 def yt_dlp_options(**overrides):
     options = {
         "noplaylist": True,
@@ -674,6 +1028,10 @@ def yt_dlp_options(**overrides):
         "quiet": True,
         "no_warnings": True,
         "cachedir": False,
+        "geo_bypass": True,
+        "http_headers": {
+            "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
+        },
         "extractor_args": {
             "youtube": {
                 "player_client": ["android_vr", "tv_embedded", "mweb", "ios", "web"],

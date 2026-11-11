@@ -10,5 +10,14 @@
   "lang": "ar",
   "theme_color": "#0F172A",
   "background_color": "#0B0F19",
-  "categories": ["utilities", "multimedia"]
+  "categories": ["utilities", "multimedia"],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

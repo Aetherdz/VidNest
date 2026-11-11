@@ -9,7 +9,17 @@
     "supportsRTL": true,
     "designer": "Atheerium",
     "ios": { "bundleIdentifier": "com.atheerium.vidnest", "supportsTablet": true },
-    "android": { "package": "com.atheerium.vidnest", "supportsRTL": true },
+    "android": {
+      "package": "com.atheerium.vidnest",
+      "supportsRTL": true,
+      "intentFilters": [
+        {
+          "action": "SEND",
+          "category": ["DEFAULT"],
+          "data": { "mimeType": "text/plain" }
+        }
+      ]
+    },
     "web": { "bundler": "metro" }
   }
 }

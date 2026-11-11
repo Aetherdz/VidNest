@@ -43,8 +43,346 @@ function extractYouTubeVideoId(rawUrl) {
   }
 }
 
+function isTikTokUrl(rawUrl) {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase();
+    return host === "tiktok.com" || host.endsWith(".tiktok.com");
+  } catch {
+    return false;
+  }
+}
+
+async function probeTikTokFallback(rawUrl) {
+  if (!isTikTokUrl(rawUrl)) return null;
+  try {
+    const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(rawUrl)}&hd=1`;
+    const r = await fetch(apiUrl, {
+      headers: { Accept: "application/json", "User-Agent": "VidNest/4.0" },
+    });
+    if (!r.ok) return null;
+    const json = await r.json();
+    if (!json || json.code !== 0 || !json.data) return null;
+    const d = json.data;
+    const absUrl = (u) => {
+      if (!u || typeof u !== "string") return "";
+      if (u.startsWith("http://") || u.startsWith("https://")) return u;
+      return `https://www.tikwm.com${u.startsWith("/") ? "" : "/"}${u}`;
+    };
+    const formats = [];
+    const hdUrl = absUrl(d.hdplay || d.play);
+    const sdUrl = absUrl(d.play);
+    const wmUrl = absUrl(d.wmplay);
+    const audioUrl = absUrl(d.music);
+    if (hdUrl) {
+      formats.push({
+        id: "hd",
+        ext: "mp4",
+        quality: "1080p",
+        height: 1080,
+        width: 1080,
+        filesize: typeof d.hd_size === "number" && d.hd_size > 0 ? d.hd_size : typeof d.size === "number" ? d.size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "HD No-Watermark (MP4)",
+        directUrl: hdUrl,
+      });
+    }
+    if (sdUrl && sdUrl !== hdUrl) {
+      formats.push({
+        id: "sd",
+        ext: "mp4",
+        quality: "720p",
+        height: 720,
+        width: 720,
+        filesize: typeof d.size === "number" ? d.size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "Standard No-Watermark (MP4)",
+        directUrl: sdUrl,
+      });
+    }
+    if (wmUrl) {
+      formats.push({
+        id: "wm",
+        ext: "mp4",
+        quality: "540p",
+        height: 540,
+        width: 540,
+        filesize: typeof d.wm_size === "number" ? d.wm_size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "Watermarked (MP4)",
+        directUrl: wmUrl,
+      });
+    }
+    if (audioUrl) {
+      formats.push({
+        id: "audio",
+        ext: "mp3",
+        quality: "Audio",
+        height: null,
+        width: null,
+        filesize: null,
+        hasVideo: false,
+        hasAudio: true,
+        format: "Original Audio (MP3)",
+        directUrl: audioUrl,
+      });
+    }
+    if (formats.length === 0) return null;
+    return {
+      probeId: `tiktok-${d.id || "video"}`,
+      title: String(d.title || "TikTok Video").slice(0, 200),
+      uploader: String(d.author?.nickname || d.author?.unique_id || "TikTok").slice(0, 120),
+      extractor: "TikTok",
+      duration: typeof d.duration === "number" ? d.duration : null,
+      thumbnail: absUrl(d.cover || d.origin_cover) || null,
+      formats,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function extractTwitterStatusId(rawUrl) {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, "");
+    if (host !== "x.com" && host !== "twitter.com" && host !== "fxtwitter.com" && host !== "vxtwitter.com") {
+      return "";
+    }
+    const m = u.pathname.match(/\/status(?:es)?\/(\d{1,25})/);
+    return m ? m[1] : "";
+  } catch {
+    return "";
+  }
+}
+
+async function probeTwitterFallback(rawUrl) {
+  const tweetId = extractTwitterStatusId(rawUrl);
+  if (!tweetId) return null;
+  try {
+    const fxRes = await fetch(`https://api.fxtwitter.com/i/status/${tweetId}`, {
+      headers: { Accept: "application/json", "User-Agent": "VidNest/4.0" },
+    });
+    if (fxRes.ok) {
+      const fxData = await fxRes.json().catch(() => ({}));
+      const tweet = fxData?.tweet;
+      const videos = tweet?.media?.videos || (tweet?.media?.all || []).filter((m) => m.type === "video" || m.type === "gif");
+      if (Array.isArray(videos) && videos.length > 0) {
+        const formats = [];
+        for (const [idx, v] of videos.entries()) {
+          if (Array.isArray(v.variants) && v.variants.length > 0) {
+            for (const [vIdx, vr] of v.variants.entries()) {
+              if (!vr?.url || !String(vr.content_type || "").includes("mp4")) continue;
+              const resMatch = String(vr.url).match(/\/(\d+)x(\d+)\//);
+              const h = resMatch ? Math.min(parseInt(resMatch[1], 10), parseInt(resMatch[2], 10)) : 720;
+              formats.push({
+                id: `x-${idx}-${vIdx}`,
+                ext: "mp4",
+                quality: `${h}p`,
+                height: h,
+                width: v.width || null,
+                filesize: null,
+                hasVideo: true,
+                hasAudio: true,
+                format: `${h}p (MP4)`,
+                directUrl: vr.url,
+              });
+            }
+          }
+          if (v.url && formats.length === 0) {
+            const h = typeof v.height === "number" ? v.height : 720;
+            formats.push({
+              id: `x-${idx}`,
+              ext: "mp4",
+              quality: `${h}p`,
+              height: h,
+              width: typeof v.width === "number" ? v.width : null,
+              filesize: null,
+              hasVideo: true,
+              hasAudio: true,
+              format: `${h}p (MP4)`,
+              directUrl: v.url,
+            });
+          }
+        }
+        if (formats.length > 0) {
+          formats.sort((a, b) => (b.height || 0) - (a.height || 0));
+          return {
+            probeId: `x-${tweetId}`,
+            title: String(tweet.text || "X Video").slice(0, 200),
+            uploader: String(tweet.author?.name || tweet.author?.screen_name || "X").slice(0, 120),
+            extractor: "X",
+            duration: typeof videos[0].duration === "number" ? Math.round(videos[0].duration) : null,
+            thumbnail: videos[0].thumbnail_url || null,
+            formats,
+          };
+        }
+      }
+    }
+  } catch {
+    // fall through to vxtwitter
+  }
+  try {
+    const vxRes = await fetch(`https://api.vxtwitter.com/Twitter/status/${tweetId}`, {
+      headers: { Accept: "application/json", "User-Agent": "VidNest/4.0" },
+    });
+    if (vxRes.ok) {
+      const vxData = await vxRes.json().catch(() => ({}));
+      const media = (vxData?.media_extended || []).filter((m) => (m.type === "video" || m.type === "gif") && m.url);
+      if (media.length > 0) {
+        const formats = media.map((m, idx) => {
+          const h = typeof m.size?.height === "number" ? m.size.height : 720;
+          return {
+            id: `vx-${idx}`,
+            ext: "mp4",
+            quality: `${h}p`,
+            height: h,
+            width: typeof m.size?.width === "number" ? m.size.width : null,
+            filesize: null,
+            hasVideo: true,
+            hasAudio: true,
+            format: `${h}p (MP4)`,
+            directUrl: m.url,
+          };
+        });
+        return {
+          probeId: `x-${tweetId}`,
+          title: String(vxData.text || "X Video").slice(0, 200),
+          uploader: String(vxData.user_name || vxData.user_screen_name || "X").slice(0, 120),
+          extractor: "X",
+          duration: typeof media[0].duration_millis === "number" ? Math.round(media[0].duration_millis / 1000) : null,
+          thumbnail: media[0].thumbnail_url || null,
+          formats,
+        };
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+async function probeDirectPlatformFallback(rawUrl) {
+  const ytId = extractYouTubeVideoId(rawUrl);
+  if (ytId) {
+    const fed = await probeYouTubeFederated(ytId);
+    if (fed) return fed;
+  }
+  if (isTikTokUrl(rawUrl)) {
+    const tk = await probeTikTokFallback(rawUrl);
+    if (tk) return tk;
+  }
+  if (extractTwitterStatusId(rawUrl)) {
+    const tw = await probeTwitterFallback(rawUrl);
+    if (tw) return tw;
+  }
+  return null;
+}
+
+async function probeYouTubeInnertubeIos(videoId) {
+  if (!videoId) return null;
+  try {
+    const gRes = await fetch("https://www.youtube.com/youtubei/v1/guide?prettyPrint=false", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        context: { client: { clientName: "WEB", clientVersion: "2.20250312.04.00" } },
+      }),
+    });
+    const gData = await gRes.json().catch(() => ({}));
+    const visitorData = gData?.responseContext?.visitorData;
+    const client = {
+      clientName: "IOS",
+      clientVersion: "20.10.4",
+      deviceMake: "Apple",
+      deviceModel: "iPhone16,2",
+      osName: "iPhone",
+      osVersion: "18.3.2.22D82",
+      userAgent: "com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
+      ...(visitorData ? { visitorData } : {}),
+    };
+    const pRes = await fetch("https://www.youtube.com/youtubei/v1/player?prettyPrint=false", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": client.userAgent,
+        ...(visitorData ? { "X-Goog-Visitor-Id": visitorData } : {}),
+      },
+      body: JSON.stringify({
+        videoId,
+        context: { client },
+        contentCheckOk: true,
+        racyCheckOk: true,
+      }),
+    });
+    if (!pRes.ok) return null;
+    const data = await pRes.json();
+    const rawFormats = [
+      ...(data?.streamingData?.formats || []),
+      ...(data?.streamingData?.adaptiveFormats || []),
+    ].filter((f) => f && typeof f.url === "string");
+    if (rawFormats.length === 0) return null;
+
+    const seen = new Map();
+    for (const f of rawFormats) {
+      const mime = String(f.mimeType || "").toLowerCase();
+      const isAudio = mime.startsWith("audio/");
+      const hasVideo = !isAudio && (mime.startsWith("video/") || typeof f.height === "number");
+      const hasAudio = isAudio || Boolean(f.audioQuality);
+      const ext = isAudio
+        ? mime.includes("mp4")
+          ? "m4a"
+          : "webm"
+        : mime.includes("webm")
+        ? "webm"
+        : "mp4";
+      const height = typeof f.height === "number" ? f.height : null;
+      const filesize = f.contentLength ? parseInt(String(f.contentLength), 10) : null;
+      const key = `${hasVideo ? height || "v" : "a"}-${ext}-${hasAudio}`;
+      const prev = seen.get(key);
+      if (!prev || (filesize || 0) > (prev.filesize || 0)) {
+        seen.set(key, {
+          id: String(f.itag || key),
+          ext,
+          quality: hasVideo ? `${height || 720}p` : "Audio",
+          height,
+          width: typeof f.width === "number" ? f.width : null,
+          filesize: Number.isFinite(filesize) ? filesize : null,
+          hasVideo,
+          hasAudio,
+          format: hasVideo ? `${f.qualityLabel || `${height}p`} (${ext.toUpperCase()})` : `Audio (${ext.toUpperCase()})`,
+          directUrl: f.url,
+        });
+      }
+    }
+    const formats = Array.from(seen.values()).sort((a, b) => {
+      if (a.hasVideo !== b.hasVideo) return a.hasVideo ? -1 : 1;
+      return (b.height || 0) - (a.height || 0);
+    });
+    const thumbs = data?.videoDetails?.thumbnail?.thumbnails || [];
+    const bestThumb = thumbs.length > 0 ? thumbs[thumbs.length - 1].url : null;
+    return {
+      probeId: `ios-${videoId}`,
+      title: String(data?.videoDetails?.title || "YouTube Video").slice(0, 200),
+      uploader: String(data?.videoDetails?.author || "YouTube").slice(0, 120),
+      extractor: "Youtube",
+      duration: data?.videoDetails?.lengthSeconds ? Number(data.videoDetails.lengthSeconds) : null,
+      thumbnail: bestThumb,
+      formats,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function probeYouTubeFederated(videoId) {
   if (!videoId) return null;
+  const iosResult = await probeYouTubeInnertubeIos(videoId);
+  if (iosResult) return iosResult;
+
   for (const inst of YOUTUBE_FEDERATED_APIS) {
     const endpoint =
       inst.kind === "piped"
@@ -170,7 +508,8 @@ function pickBestFormat(formats, mode) {
     return m4a || pool[0];
   }
   const videos = formats.filter((f) => f.hasVideo !== false);
-  const pool = videos.length > 0 ? videos : formats;
+  const withAudio = videos.filter((f) => f.hasAudio);
+  const pool = withAudio.length > 0 ? withAudio : videos.length > 0 ? videos : formats;
   const maxHeight = typeof mode === "number" ? mode : /^\d+$/.test(String(mode)) ? Number(mode) : null;
   if (maxHeight) {
     const under = pool.filter((f) => typeof f.height === "number" && f.height <= maxHeight);
@@ -238,22 +577,36 @@ module.exports = async function handler(req, res) {
 
     if (rawEndpoint === "api/formats" && req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+      const direct = await probeDirectPlatformFallback(body.url);
+      if (direct) return res.status(200).json(direct);
+
       const upstream = await postRender("/api/formats", body);
-      if (upstream.ok) {
-        const data = await upstream.json().catch(() => ({}));
-        return res.status(200).json(data);
-      }
-      const ytId = extractYouTubeVideoId(body.url);
-      if (ytId) {
-        const fed = await probeYouTubeFederated(ytId);
-        if (fed) return res.status(200).json(fed);
-      }
       const data = await upstream.json().catch(() => ({ error: "Invalid upstream response" }));
       return res.status(upstream.status).json(data);
     }
 
     if (rawEndpoint === "api/download" && req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+      const probePrefix = String(body.probeId || "");
+      if (
+        probePrefix.startsWith("ios-") ||
+        probePrefix.startsWith("fed-") ||
+        probePrefix.startsWith("tiktok-") ||
+        probePrefix.startsWith("x-") ||
+        extractYouTubeVideoId(body.url) ||
+        isTikTokUrl(body.url) ||
+        extractTwitterStatusId(body.url)
+      ) {
+        const direct = await probeDirectPlatformFallback(body.url);
+        const match = direct?.formats?.find((f) => f.id === String(body.formatId)) || direct?.formats?.[0];
+        if (match && match.directUrl) {
+          return res.status(200).json({
+            file: match.directUrl,
+            title: direct.title,
+            formatId: match.id,
+          });
+        }
+      }
       const upstream = await postRender("/api/download", body);
       const data = await upstream.json().catch(() => ({ error: "Invalid upstream response" }));
       return res.status(upstream.status).json(data);
@@ -261,6 +614,17 @@ module.exports = async function handler(req, res) {
 
     if (rawEndpoint === "api/quick-download" && req.method === "POST") {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
+      const directFallback = await probeDirectPlatformFallback(body.url);
+      if (directFallback && Array.isArray(directFallback.formats) && directFallback.formats.length > 0) {
+        const chosen = pickBestFormat(directFallback.formats, body.mode || "video");
+        if (chosen && chosen.directUrl) {
+          return res.status(200).json({
+            file: chosen.directUrl,
+            title: directFallback.title,
+            formatId: chosen.id,
+          });
+        }
+      }
       const direct = await postRender("/api/quick-download", body);
       if (direct.status !== 404) {
         const data = await direct.json().catch(() => ({ error: "Invalid upstream response" }));

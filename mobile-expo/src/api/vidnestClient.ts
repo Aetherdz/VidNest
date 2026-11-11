@@ -35,6 +35,30 @@ export function extractYouTubeVideoId(rawUrl: string): string {
   }
 }
 
+export function isTikTokUrl(rawUrl: string): boolean {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase();
+    return host === "tiktok.com" || host.endsWith(".tiktok.com");
+  } catch {
+    return false;
+  }
+}
+
+export function extractTwitterStatusId(rawUrl: string): string {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, "");
+    if (host !== "x.com" && host !== "twitter.com" && host !== "fxtwitter.com" && host !== "vxtwitter.com") {
+      return "";
+    }
+    const m = u.pathname.match(/\/status(?:es)?\/(\d{1,25})/);
+    return m ? m[1] : "";
+  } catch {
+    return "";
+  }
+}
+
 export class VidNestClient {
   readonly baseUrl: string;
   private csrf = "";
@@ -127,6 +151,178 @@ export class VidNestClient {
     return null;
   }
 
+  private async probeTikTokResidential(rawUrl: string): Promise<ProbeResponse | null> {
+    if (!isTikTokUrl(rawUrl)) return null;
+    try {
+      const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(rawUrl)}&hd=1`;
+      const resp = await this.fetcher(apiUrl, { headers: { Accept: "application/json" } });
+      if (!resp.ok) return null;
+      const json = (await resp.json()) as Record<string, unknown>;
+      if (!json || json.code !== 0 || !json.data) return null;
+      const d = json.data as Record<string, unknown>;
+      const absUrl = (u: unknown) => {
+        if (!u || typeof u !== "string") return "";
+        if (u.startsWith("http://") || u.startsWith("https://")) return u;
+        return `https://www.tikwm.com${u.startsWith("/") ? "" : "/"}${u}`;
+      };
+      const formats: FormatOption[] = [];
+      const title = String(d.title || "TikTok Video").slice(0, 200);
+      const probeId = `tiktok-${String(d.id || "video")}`;
+      const hdUrl = absUrl(d.hdplay || d.play);
+      const sdUrl = absUrl(d.play);
+      const wmUrl = absUrl(d.wmplay);
+      const audioUrl = absUrl(d.music);
+
+      if (hdUrl) {
+        formats.push({
+          id: "hd",
+          ext: "mp4",
+          height: 1080,
+          hasVideo: true,
+          hasAudio: true,
+          filesize: typeof d.hd_size === "number" && d.hd_size > 0 ? d.hd_size : typeof d.size === "number" ? d.size : undefined,
+        });
+        this.cachedDirectStreams.set(`${probeId}:hd`, { title, url: hdUrl, ext: "mp4" });
+      }
+      if (sdUrl && sdUrl !== hdUrl) {
+        formats.push({
+          id: "sd",
+          ext: "mp4",
+          height: 720,
+          hasVideo: true,
+          hasAudio: true,
+          filesize: typeof d.size === "number" ? d.size : undefined,
+        });
+        this.cachedDirectStreams.set(`${probeId}:sd`, { title, url: sdUrl, ext: "mp4" });
+      }
+      if (wmUrl) {
+        formats.push({
+          id: "wm",
+          ext: "mp4",
+          height: 540,
+          hasVideo: true,
+          hasAudio: true,
+          filesize: typeof d.wm_size === "number" ? d.wm_size : undefined,
+        });
+        this.cachedDirectStreams.set(`${probeId}:wm`, { title, url: wmUrl, ext: "mp4" });
+      }
+      if (audioUrl) {
+        formats.push({
+          id: "audio",
+          ext: "mp3",
+          hasVideo: false,
+          hasAudio: true,
+        });
+        this.cachedDirectStreams.set(`${probeId}:audio`, { title, url: audioUrl, ext: "mp3" });
+      }
+
+      if (formats.length === 0) return null;
+      return {
+        probeId,
+        title,
+        formats,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private async probeTwitterResidential(rawUrl: string): Promise<ProbeResponse | null> {
+    const tweetId = extractTwitterStatusId(rawUrl);
+    if (!tweetId) return null;
+    const probeId = `x-${tweetId}`;
+    try {
+      const vxRes = await this.fetcher(`https://api.vxtwitter.com/Twitter/status/${tweetId}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (vxRes.ok) {
+        const vxData = (await vxRes.json()) as Record<string, unknown>;
+        const media = ((Array.isArray(vxData?.media_extended) ? vxData.media_extended : []) as Record<string, unknown>[])
+          .filter((m) => (m.type === "video" || m.type === "gif") && typeof m.url === "string");
+        if (media.length > 0) {
+          const title = String(vxData.text || "X Video").slice(0, 200);
+          const formats: FormatOption[] = media.map((m, idx) => {
+            const sizeObj = m.size as Record<string, unknown> | undefined;
+            const h = typeof sizeObj?.height === "number" ? sizeObj.height : 720;
+            const id = `x-${idx}`;
+            this.cachedDirectStreams.set(`${probeId}:${id}`, { title, url: m.url as string, ext: "mp4" });
+            return {
+              id,
+              ext: "mp4",
+              height: h,
+              hasVideo: true,
+              hasAudio: true,
+            };
+          });
+          return {
+            probeId,
+            title,
+            formats,
+          };
+        }
+      }
+    } catch {
+      // try fxtwitter
+    }
+
+    try {
+      const fxRes = await this.fetcher(`https://api.fxtwitter.com/i/status/${tweetId}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (fxRes.ok) {
+        const fxData = (await fxRes.json()) as Record<string, unknown>;
+        const tweet = fxData?.tweet as Record<string, unknown> | undefined;
+        const mediaObj = tweet?.media as Record<string, unknown> | undefined;
+        const videos = (Array.isArray(mediaObj?.videos) ? mediaObj.videos : (Array.isArray(mediaObj?.all) ? mediaObj.all : [])) as Record<string, unknown>[];
+        const videoItems = videos.filter((m) => m.type === "video" || m.type === "gif");
+        if (videoItems.length > 0) {
+          const title = String(tweet?.text || "X Video").slice(0, 200);
+          const formats: FormatOption[] = [];
+          for (const [idx, v] of videoItems.entries()) {
+            const variants = (Array.isArray(v.variants) ? v.variants : []) as Record<string, unknown>[];
+            for (const [vIdx, vr] of variants.entries()) {
+              if (!vr?.url || typeof vr.url !== "string" || !String(vr.content_type || "").includes("mp4")) continue;
+              const resMatch = String(vr.url).match(/\/(\d+)x(\d+)\//);
+              const h = resMatch ? Math.min(parseInt(resMatch[1], 10), parseInt(resMatch[2], 10)) : 720;
+              const id = `x-${idx}-${vIdx}`;
+              formats.push({
+                id,
+                ext: "mp4",
+                height: h,
+                hasVideo: true,
+                hasAudio: true,
+              });
+              this.cachedDirectStreams.set(`${probeId}:${id}`, { title, url: vr.url, ext: "mp4" });
+            }
+            if (typeof v.url === "string" && formats.length === 0) {
+              const h = typeof v.height === "number" ? v.height : 720;
+              const id = `x-${idx}`;
+              formats.push({
+                id,
+                ext: "mp4",
+                height: h,
+                hasVideo: true,
+                hasAudio: true,
+              });
+              this.cachedDirectStreams.set(`${probeId}:${id}`, { title, url: v.url, ext: "mp4" });
+            }
+          }
+          if (formats.length > 0) {
+            formats.sort((a, b) => (b.height ?? 0) - (a.height ?? 0));
+            return {
+              probeId,
+              title,
+              formats,
+            };
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  }
+
   async getSession(): Promise<string> {
     if (this.csrf) return this.csrf;
     try {
@@ -183,6 +379,14 @@ export class VidNestClient {
       if (!result.probeId || !Array.isArray(result.formats) || result.formats.length === 0) throw new Error("No downloadable formats were found.");
       return result;
     } catch (err) {
+      if (isTikTokUrl(checked.normalized)) {
+        const fallback = await this.probeTikTokResidential(checked.normalized);
+        if (fallback) return fallback;
+      }
+      if (extractTwitterStatusId(checked.normalized)) {
+        const fallback = await this.probeTwitterResidential(checked.normalized);
+        if (fallback) return fallback;
+      }
       const ytId = extractYouTubeVideoId(checked.normalized);
       if (ytId) {
         const fallback = await this.probeYouTubeResidential(ytId);
@@ -201,6 +405,16 @@ export class VidNestClient {
       if (stream) {
         return {
           file: `${ytId}.${stream.ext}`,
+          title: stream.title,
+          url: stream.url,
+        };
+      }
+    }
+    if (probeId.startsWith("tiktok-") || probeId.startsWith("x-")) {
+      const stream = this.cachedDirectStreams.get(`${probeId}:${formatId}`);
+      if (stream) {
+        return {
+          file: `${probeId}.${stream.ext}`,
           title: stream.title,
           url: stream.url,
         };
@@ -237,6 +451,9 @@ export class VidNestClient {
         chosenFormat: direct.formatId ? { id: direct.formatId, ext: direct.file.split(".").pop() ?? "mp4" } : undefined,
       };
     } catch (err) {
+      if ((isTikTokUrl(checked.normalized) || extractTwitterStatusId(checked.normalized)) && this.fetcher === fetch) {
+        return this.probeAndDownload(checked.normalized, mode);
+      }
       const ytId = extractYouTubeVideoId(checked.normalized);
       if (ytId && this.fetcher === fetch) {
         return this.probeAndDownload(checked.normalized, mode);

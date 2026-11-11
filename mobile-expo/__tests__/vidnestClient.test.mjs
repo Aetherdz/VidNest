@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractUrlFromText, validatePublicHttpsUrl, pickBestFormat, formatBytes, formatDuration } from '../src/utils/urlValidator.ts';
-import { VidNestClient } from '../src/api/vidnestClient.ts';
+import { VidNestClient, isTikTokUrl, extractTwitterStatusId } from '../src/api/vidnestClient.ts';
 
 test('extractUrlFromText extracts first HTTPS URL and trims common punctuation', () => {
   assert.equal(extractUrlFromText('Shared: https://youtu.be/abc123. then https://vimeo.com/2'), 'https://youtu.be/abc123');
@@ -84,4 +84,44 @@ test('quickDownload uses /api/quick-download directly when available', async () 
   assert.deepEqual(calls.map((call) => new URL(call.url).pathname), ['/api/session', '/api/quick-download']);
   assert.equal(calls[1].options.headers['X-VidNest-CSRF'], 'csrf-quick');
   assert.deepEqual(JSON.parse(calls[1].options.body), { url: 'https://youtube.com/watch?v=1', mode: 720 });
+});
+
+test('isTikTokUrl and extractTwitterStatusId accurately parse URLs', () => {
+  assert.equal(isTikTokUrl('https://www.tiktok.com/@user/video/7106594312292453675'), true);
+  assert.equal(isTikTokUrl('https://vm.tiktok.com/ZM12345/'), true);
+  assert.equal(isTikTokUrl('https://youtube.com/watch?v=123'), false);
+
+  assert.equal(extractTwitterStatusId('https://x.com/jack/status/20'), '20');
+  assert.equal(extractTwitterStatusId('https://twitter.com/user/status/1785023961500643714?s=20'), '1785023961500643714');
+  assert.equal(extractTwitterStatusId('https://fxtwitter.com/i/status/9876543210'), '9876543210');
+  assert.equal(extractTwitterStatusId('https://instagram.com/reel/123'), '');
+});
+
+test('VidNestClient falls back to TikTok direct stream when backend fails', async () => {
+  const mockFetch = async (url) => {
+    if (url.endsWith('/api/session')) return new Response(JSON.stringify({ csrfToken: 'csrf-tt' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.endsWith('/api/formats')) return new Response(JSON.stringify({ error: 'Extractor unavailable' }), { status: 502, headers: { 'content-type': 'application/json' } });
+    if (url.includes('tikwm.com/api/')) {
+      return new Response(JSON.stringify({
+        code: 0,
+        data: {
+          id: '7106594312292453675',
+          title: 'Fun TikTok Dance',
+          play: 'https://tikwm.com/video/play.mp4',
+          hdplay: 'https://tikwm.com/video/hdplay.mp4',
+          music: 'https://tikwm.com/music/audio.mp3',
+        },
+      }), { status: 200, headers: { 'content-type': 'application/json' } });
+    }
+    throw new Error(`Unexpected URL ${url}`);
+  };
+
+  const client = new VidNestClient('https://api.example.test/', mockFetch);
+  const probe = await client.probeFormats('https://www.tiktok.com/@tiktok/video/7106594312292453675');
+  assert.equal(probe.probeId, 'tiktok-7106594312292453675');
+  assert.equal(probe.title, 'Fun TikTok Dance');
+  assert.equal(probe.formats.length >= 2, true);
+
+  const dl = await client.downloadFormat('https://www.tiktok.com/@tiktok/video/7106594312292453675', probe.probeId, 'hd');
+  assert.equal(dl.url, 'https://tikwm.com/video/hdplay.mp4');
 });

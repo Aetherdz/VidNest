@@ -597,7 +597,7 @@ export function CloseIcon({ size = 20, color = '#525860' }: IconProps) {
 
 export function PlatformIcon({
   id,
-  size = 15,
+  size = 18,
   color = '#111315',
 }: {
   id: string;
@@ -610,109 +610,99 @@ export function PlatformIcon({
         return React.createElement(
           'svg',
           { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
-          React.createElement('rect', {
-            x: '2',
-            y: '4.5',
-            width: '20',
-            height: '15',
-            rx: '4.5',
-            stroke: color,
-            strokeWidth: '2',
-          }),
-          React.createElement('polygon', {
-            points: '10 9 15.5 12 10 15 10 9',
-            fill: color,
-          }),
+          React.createElement('rect', { x: '1.5', y: '4.5', width: '21', height: '15', rx: '4.5', fill: '#FF0000' }),
+          React.createElement('polygon', { points: '10 8.8 16 12 10 15.2', fill: '#FFFFFF' }),
         );
       case 'tiktok':
         return React.createElement(
           'svg',
-          {
-            width: size,
-            height: size,
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: color,
-            strokeWidth: '2.1',
-            strokeLinecap: 'round',
-            strokeLinejoin: 'round',
-            'aria-hidden': 'true',
-          },
+          { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+          React.createElement('rect', { x: '2', y: '2', width: '20', height: '20', rx: '5.5', fill: '#0F172A' }),
           React.createElement('path', {
-            d: 'M14 4v11.2a3.8 3.8 0 1 1-3.2-3.75',
+            d: 'M14.2 6v7.4a2.9 2.9 0 1 1-2.3-2.84',
+            stroke: '#25F4EE',
+            strokeWidth: '2',
+            strokeLinecap: 'round',
           }),
           React.createElement('path', {
-            d: 'M14 4c.9 2.6 2.9 4.3 5.5 4.5',
+            d: 'M13.6 6.4v7.4a2.9 2.9 0 1 1-2.3-2.84',
+            stroke: '#FE2C55',
+            strokeWidth: '2',
+            strokeLinecap: 'round',
+          }),
+          React.createElement('path', {
+            d: 'M13.9 6.2c.7 2 2.2 3.3 4.2 3.5',
+            stroke: '#FFFFFF',
+            strokeWidth: '1.9',
+            strokeLinecap: 'round',
           }),
         );
       case 'instagram':
         return React.createElement(
           'svg',
-          {
-            width: size,
-            height: size,
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: color,
-            strokeWidth: '2',
-            'aria-hidden': 'true',
-          },
-          React.createElement('rect', { x: '3', y: '3', width: '18', height: '18', rx: '5' }),
-          React.createElement('circle', { cx: '12', cy: '12', r: '4' }),
-          React.createElement('circle', { cx: '17.5', cy: '6.5', r: '1.2', fill: color, stroke: 'none' }),
+          { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+          React.createElement('rect', { x: '2', y: '2', width: '20', height: '20', rx: '5.5', fill: '#E1306C' }),
+          React.createElement('rect', {
+            x: '5.5',
+            y: '5.5',
+            width: '13',
+            height: '13',
+            rx: '3.8',
+            stroke: '#FFFFFF',
+            strokeWidth: '1.8',
+          }),
+          React.createElement('circle', { cx: '12', cy: '12', r: '2.8', stroke: '#FFFFFF', strokeWidth: '1.8' }),
+          React.createElement('circle', { cx: '15.8', cy: '8.2', r: '1', fill: '#FFFFFF' }),
         );
       case 'x':
         return React.createElement(
           'svg',
-          {
-            width: size,
-            height: size,
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: color,
-            strokeWidth: '2.1',
+          { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+          React.createElement('rect', { x: '2', y: '2', width: '20', height: '20', rx: '5.5', fill: '#0F172A' }),
+          React.createElement('path', {
+            d: 'M7 7l10 10M17 7L7 17',
+            stroke: '#FFFFFF',
+            strokeWidth: '2',
             strokeLinecap: 'round',
-            'aria-hidden': 'true',
-          },
-          React.createElement('path', { d: 'M4.5 4.5l15 15M19.5 4.5l-15 15' }),
+          }),
         );
       case 'facebook':
         return React.createElement(
           'svg',
-          {
-            width: size,
-            height: size,
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: color,
-            strokeWidth: '2.1',
-            strokeLinecap: 'round',
-            strokeLinejoin: 'round',
-            'aria-hidden': 'true',
-          },
+          { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+          React.createElement('rect', { x: '2', y: '2', width: '20', height: '20', rx: '5.5', fill: '#1877F2' }),
           React.createElement('path', {
-            d: 'M15.5 4H13a3.5 3.5 0 0 0-3.5 3.5V11H7v3.5h2.5V21h3.8v-6.5H16L16.5 11h-3.2V7.8c0-.7.3-1.1 1.1-1.1h1.1V4Z',
+            d: 'M14.8 6.5h-1.8a2.5 2.5 0 0 0-2.5 2.5v2H8.5v2.6h2V19h2.8v-5.4h2l.4-2.6h-2.4V9.3c0-.5.2-.8.8-.8h1.2V6.5Z',
+            fill: '#FFFFFF',
           }),
         );
       case 'soundcloud':
         return React.createElement(
           'svg',
-          {
-            width: size,
-            height: size,
-            viewBox: '0 0 24 24',
-            fill: 'none',
-            stroke: color,
-            strokeWidth: '2',
-            strokeLinecap: 'round',
-            strokeLinejoin: 'round',
-            'aria-hidden': 'true',
-          },
+          { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', 'aria-hidden': 'true' },
+          React.createElement('rect', { x: '2', y: '2', width: '20', height: '20', rx: '5.5', fill: '#FF5500' }),
           React.createElement('path', {
-            d: 'M11 17h7.2a3.3 3.3 0 0 0 .4-6.57A5 5 0 0 0 11 7.5V17Z',
+            d: 'M11.2 15.5h5.3a2.4 2.4 0 0 0 .3-4.78A3.8 3.8 0 0 0 11.2 8.5v7Z',
+            fill: '#FFFFFF',
           }),
-          React.createElement('line', { x1: '4', y1: '12.5', x2: '4', y2: '16.5' }),
-          React.createElement('line', { x1: '7.5', y1: '9.5', x2: '7.5', y2: '17' }),
+          React.createElement('line', {
+            x1: '6.2',
+            y1: '11.5',
+            x2: '6.2',
+            y2: '15.2',
+            stroke: '#FFFFFF',
+            strokeWidth: '1.6',
+            strokeLinecap: 'round',
+          }),
+          React.createElement('line', {
+            x1: '8.7',
+            y1: '9.5',
+            x2: '8.7',
+            y2: '15.5',
+            stroke: '#FFFFFF',
+            strokeWidth: '1.6',
+            strokeLinecap: 'round',
+          }),
         );
       default:
         break;
@@ -722,12 +712,23 @@ export function PlatformIcon({
   return (
     <View
       style={{
-        width: size * 0.65,
-        height: size * 0.65,
-        borderRadius: size * 0.35,
+        width: size,
+        height: size,
+        borderRadius: size * 0.28,
         backgroundColor: color,
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
-    />
+    >
+      <View
+        style={{
+          width: size * 0.36,
+          height: size * 0.36,
+          borderRadius: size * 0.18,
+          backgroundColor: '#FFFFFF',
+        }}
+      />
+    </View>
   );
 }
 

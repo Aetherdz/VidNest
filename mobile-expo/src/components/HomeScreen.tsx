@@ -14,6 +14,7 @@ import {
   SunIcon,
   MoonIcon,
   ClipIcon,
+  CloseIcon,
   DownloadIcon,
   PlayIcon,
   CheckIcon,
@@ -27,6 +28,7 @@ type Props = {
   themeMode: ThemeMode;
   url: string;
   onUrlChange: (text: string) => void;
+  onClear?: () => void;
   onPaste: () => void;
   onAnalyze: () => void;
   isAnalyzing: boolean;
@@ -41,6 +43,7 @@ export default function HomeScreen({
   themeMode,
   url,
   onUrlChange,
+  onClear,
   onPaste,
   onAnalyze,
   isAnalyzing,
@@ -139,15 +142,30 @@ export default function HomeScreen({
             { color: t.ink, writingDirection: url ? 'ltr' : 'rtl' },
           ]}
         />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={onPaste}
-          style={[styles.pasteButton, { backgroundColor: t.accentLight }]}
-          accessibilityRole="button"
-          accessibilityLabel="لصق الرابط"
-        >
-          <ClipIcon size={20} color={t.accentText} />
-        </TouchableOpacity>
+        {url.trim().length > 0 ? (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              if (onClear) onClear();
+              else onUrlChange('');
+            }}
+            style={[styles.pasteButton, { backgroundColor: t.surfaceAlt }]}
+            accessibilityRole="button"
+            accessibilityLabel="مسح الرابط"
+          >
+            <CloseIcon size={18} color={t.muted} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onPaste}
+            style={[styles.pasteButton, { backgroundColor: t.accentLight }]}
+            accessibilityRole="button"
+            accessibilityLabel="لصق الرابط"
+          >
+            <ClipIcon size={20} color={t.accentText} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Download Action Button */}

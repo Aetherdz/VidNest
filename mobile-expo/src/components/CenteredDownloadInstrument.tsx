@@ -307,24 +307,27 @@ export default function CenteredDownloadInstrument({ baseUrl }: Props) {
               ]}
             />
             <View style={styles.inputInnerActions}>
-              {!!d.url && (
+              {d.url.trim().length > 0 ? (
                 <Pressable
                   accessibilityRole="button"
+                  accessibilityLabel="مسح الرابط"
                   onPress={d.clear}
                   hitSlop={8}
                   style={styles.clearBtn}
                 >
                   <Text style={[styles.clearBtnText, { color: t.muted }]}>×</Text>
                 </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="لصق الرابط"
+                  onPress={d.pasteFromClipboard}
+                  hitSlop={8}
+                  style={[styles.pasteBtn, { backgroundColor: t.primaryLight }]}
+                >
+                  <Text style={[styles.pasteBtnText, { color: t.primary }]}>{c.paste as string}</Text>
+                </Pressable>
               )}
-              <Pressable
-                accessibilityRole="button"
-                onPress={d.pasteFromClipboard}
-                hitSlop={8}
-                style={[styles.pasteBtn, { backgroundColor: t.primaryLight }]}
-              >
-                <Text style={[styles.pasteBtnText, { color: t.primary }]}>{c.paste as string}</Text>
-              </Pressable>
             </View>
           </View>
 

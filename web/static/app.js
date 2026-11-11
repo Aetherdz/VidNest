@@ -216,7 +216,7 @@ function t(key) {
 
 function readRecent() {
   try {
-    const raw = localStorage.getItem("vidnest-recent");
+    const raw = localStorage.getItem("vidnest_recent_downloads") || localStorage.getItem("vidnest-recent");
     const parsed = raw ? JSON.parse(raw) : [];
     if (Array.isArray(parsed)) {
       return parsed.filter((item) => item && typeof item.file === "string" && typeof item.title === "string").slice(0, 30);
@@ -231,10 +231,21 @@ let recent = readRecent();
 
 function saveRecent() {
   try {
-    localStorage.setItem("vidnest-recent", JSON.stringify(recent.slice(0, 30)));
+    const serialized = JSON.stringify(recent.slice(0, 30));
+    localStorage.setItem("vidnest_recent_downloads", serialized);
+    localStorage.setItem("vidnest-recent", serialized);
   } catch {
     /* quota error fallback */
   }
+}
+
+function extractUrlFromText(text) {
+  if (typeof text !== "string" || !text.trim()) return null;
+  const match = text.match(/https:\/\/[^\s"'<>]+/i);
+  if (!match) return null;
+  let url = match[0];
+  url = url.replace(/[.,;:!?)]+$/, "");
+  return url;
 }
 
 function resolveApiBase() {
@@ -285,6 +296,219 @@ function extractYouTubeVideoId(rawUrl) {
   } catch {
     return "";
   }
+}
+
+function isTikTokUrl(rawUrl) {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase();
+    return host === "tiktok.com" || host.endsWith(".tiktok.com");
+  } catch {
+    return false;
+  }
+}
+
+async function probeTikTokFromClient(url) {
+  if (!isTikTokUrl(url)) return null;
+  try {
+    const apiUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(url)}&hd=1`;
+    const resp = await fetch(apiUrl, { headers: { Accept: "application/json" } });
+    if (!resp.ok) return null;
+    const json = await resp.json();
+    if (!json || json.code !== 0 || !json.data) return null;
+    const d = json.data;
+    const absUrl = (u) => {
+      if (!u || typeof u !== "string") return "";
+      if (u.startsWith("http://") || u.startsWith("https://")) return u;
+      return `https://www.tikwm.com${u.startsWith("/") ? "" : "/"}${u}`;
+    };
+    const formats = [];
+    const hdUrl = absUrl(d.hdplay || d.play);
+    const sdUrl = absUrl(d.play);
+    const wmUrl = absUrl(d.wmplay);
+    const audioUrl = absUrl(d.music);
+    if (hdUrl) {
+      formats.push({
+        id: "tiktok-hd",
+        ext: "mp4",
+        quality: "1080p",
+        height: 1080,
+        filesize: typeof d.hd_size === "number" && d.hd_size > 0 ? d.hd_size : typeof d.size === "number" ? d.size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "HD No-Watermark (MP4)",
+        directUrl: hdUrl,
+      });
+    }
+    if (sdUrl && sdUrl !== hdUrl) {
+      formats.push({
+        id: "tiktok-sd",
+        ext: "mp4",
+        quality: "720p",
+        height: 720,
+        filesize: typeof d.size === "number" ? d.size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "Standard No-Watermark (MP4)",
+        directUrl: sdUrl,
+      });
+    }
+    if (wmUrl) {
+      formats.push({
+        id: "tiktok-wm",
+        ext: "mp4",
+        quality: "540p",
+        height: 540,
+        filesize: typeof d.wm_size === "number" ? d.wm_size : null,
+        hasVideo: true,
+        hasAudio: true,
+        format: "Watermarked (MP4)",
+        directUrl: wmUrl,
+      });
+    }
+    if (audioUrl) {
+      formats.push({
+        id: "tiktok-audio",
+        ext: "mp3",
+        quality: "Audio",
+        height: null,
+        filesize: null,
+        hasVideo: false,
+        hasAudio: true,
+        format: "Original Audio (MP3)",
+        directUrl: audioUrl,
+      });
+    }
+    if (formats.length === 0) return null;
+    return {
+      probeId: `tiktok-${d.id || "video"}`,
+      title: String(d.title || "TikTok Video").slice(0, 200),
+      uploader: String(d.author?.nickname || d.author?.unique_id || "TikTok").slice(0, 120),
+      extractor: "TikTokClientFallback",
+      duration: typeof d.duration === "number" ? d.duration : null,
+      thumbnail: absUrl(d.cover || d.origin_cover) || null,
+      formats,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function extractTwitterStatusId(rawUrl) {
+  try {
+    const u = new URL(String(rawUrl || ""));
+    const host = u.hostname.toLowerCase().replace(/^(www\.|m\.|mobile\.)/, "");
+    if (host !== "x.com" && host !== "twitter.com" && host !== "fxtwitter.com" && host !== "vxtwitter.com") {
+      return "";
+    }
+    const m = u.pathname.match(/\/status(?:es)?\/(\d{1,25})/);
+    return m ? m[1] : "";
+  } catch {
+    return "";
+  }
+}
+
+async function probeTwitterFromClient(rawUrl) {
+  const tweetId = extractTwitterStatusId(rawUrl);
+  if (!tweetId) return null;
+  try {
+    const vxRes = await fetch(`https://api.vxtwitter.com/Twitter/status/${tweetId}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (vxRes.ok) {
+      const vxData = await vxRes.json();
+      const media = (vxData?.media_extended || []).filter((m) => (m.type === "video" || m.type === "gif") && m.url);
+      if (media.length > 0) {
+        const formats = media.map((m, idx) => {
+          const h = typeof m.size?.height === "number" ? m.size.height : 720;
+          return {
+            id: `x-${idx}`,
+            ext: "mp4",
+            quality: `${h}p`,
+            height: h,
+            filesize: null,
+            hasVideo: true,
+            hasAudio: true,
+            format: `${h}p (MP4)`,
+            directUrl: m.url,
+          };
+        });
+        return {
+          probeId: `x-${tweetId}`,
+          title: String(vxData.text || "X Video").slice(0, 200),
+          uploader: String(vxData.user_name || vxData.user_screen_name || "X").slice(0, 120),
+          extractor: "XClientFallback",
+          duration: null,
+          thumbnail: media[0].thumbnail_url || null,
+          formats,
+        };
+      }
+    }
+  } catch {
+    /* fallback to fxtwitter */
+  }
+  try {
+    const fxRes = await fetch(`https://api.fxtwitter.com/i/status/${tweetId}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (fxRes.ok) {
+      const fxData = await fxRes.json();
+      const tweet = fxData?.tweet;
+      const videos = tweet?.media?.videos || (tweet?.media?.all || []).filter((m) => m.type === "video" || m.type === "gif");
+      if (Array.isArray(videos) && videos.length > 0) {
+        const formats = [];
+        for (const [idx, v] of videos.entries()) {
+          if (Array.isArray(v.variants) && v.variants.length > 0) {
+            for (const [vIdx, vr] of v.variants.entries()) {
+              if (!vr?.url || !String(vr.content_type || "").includes("mp4")) continue;
+              const resMatch = String(vr.url).match(/\/(\d+)x(\d+)\//);
+              const h = resMatch ? Math.min(parseInt(resMatch[1], 10), parseInt(resMatch[2], 10)) : 720;
+              formats.push({
+                id: `x-${idx}-${vIdx}`,
+                ext: "mp4",
+                quality: `${h}p`,
+                height: h,
+                filesize: null,
+                hasVideo: true,
+                hasAudio: true,
+                format: `${h}p (MP4)`,
+                directUrl: vr.url,
+              });
+            }
+          }
+          if (v.url && formats.length === 0) {
+            const h = typeof v.height === "number" ? v.height : 720;
+            formats.push({
+              id: `x-${idx}`,
+              ext: "mp4",
+              quality: `${h}p`,
+              height: h,
+              filesize: null,
+              hasVideo: true,
+              hasAudio: true,
+              format: `${h}p (MP4)`,
+              directUrl: v.url,
+            });
+          }
+        }
+        if (formats.length > 0) {
+          formats.sort((a, b) => (b.height || 0) - (a.height || 0));
+          return {
+            probeId: `x-${tweetId}`,
+            title: String(tweet.text || "X Video").slice(0, 200),
+            uploader: String(tweet.author?.name || tweet.author?.screen_name || "X").slice(0, 120),
+            extractor: "XClientFallback",
+            duration: typeof videos[0].duration === "number" ? Math.round(videos[0].duration) : null,
+            thumbnail: videos[0].thumbnail_url || null,
+            formats,
+          };
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
 }
 
 async function probeYouTubeFromClient(videoId) {
@@ -488,6 +712,7 @@ function updateInspect() {
   const val = input ? input.value.trim() : "";
   const hasText = val.length > 0;
   if (clearUrlButton) clearUrlButton.hidden = !hasText;
+  if (pasteButton) pasteButton.hidden = hasText;
   const isReady = val.length >= 8 && val.startsWith("https://");
   if (inspectButton) inspectButton.disabled = requestInProgress || !isReady;
   if (quickButton) quickButton.disabled = requestInProgress || !isReady;
@@ -499,6 +724,20 @@ function resetFormats() {
   selectedFormat = null;
   const panel = $("formats-panel");
   if (panel) panel.hidden = true;
+  const playerContainer = $("preview-player-container");
+  if (playerContainer) {
+    playerContainer.replaceChildren();
+    playerContainer.hidden = true;
+  }
+  const previewThumbnail = $("preview-thumbnail");
+  if (previewThumbnail) previewThumbnail.hidden = false;
+  const thumbImg = $("preview-thumb-img");
+  if (thumbImg) {
+    thumbImg.hidden = true;
+    thumbImg.removeAttribute("src");
+  }
+  const playBtn = $("preview-play-btn");
+  if (playBtn) playBtn.hidden = true;
 }
 
 function createSvgIcon(iconId) {
@@ -548,6 +787,27 @@ function setView(viewName) {
   }
 }
 
+function pickBestFormatOption(formats, platform) {
+  if (!Array.isArray(formats) || formats.length === 0) return null;
+  if (platform === "soundcloud") {
+    const audio = formats.find((f) => !f.hasVideo && /^(mp3|m4a|aac|wav)$/i.test(f.ext || "")) ||
+                  formats.find((f) => !f.hasVideo) || formats[0];
+    return audio ? audio.id : formats[0].id;
+  }
+  // Video platforms: prioritize highest HD mp4 with audio
+  const hdWithAudio = formats
+    .filter((f) => f.hasVideo && f.hasAudio && f.ext === "mp4")
+    .sort((a, b) => (b.height || 0) - (a.height || 0));
+  if (hdWithAudio.length > 0) return hdWithAudio[0].id;
+
+  const anyHdVideo = formats
+    .filter((f) => f.hasVideo)
+    .sort((a, b) => (b.height || 0) - (a.height || 0));
+  if (anyHdVideo.length > 0) return anyHdVideo[0].id;
+
+  return formats[0].id;
+}
+
 // Render Formats Radiogroup
 function renderFormats(result) {
   const list = $("format-list");
@@ -573,6 +833,17 @@ function renderFormats(result) {
     thumbEl.style.setProperty("background", getGradient(result.title));
   }
 
+  const thumbImg = $("preview-thumb-img");
+  if (thumbImg) {
+    if (result.thumbnail) {
+      thumbImg.src = result.thumbnail;
+      thumbImg.hidden = false;
+    } else {
+      thumbImg.hidden = true;
+      thumbImg.removeAttribute("src");
+    }
+  }
+
   const filtered = result.formats.filter((format) => {
     if (activeFilter === "video") return format.hasVideo;
     if (activeFilter === "audio") return !format.hasVideo;
@@ -596,8 +867,9 @@ function renderFormats(result) {
     return;
   }
 
-  if (!filtered.some((f) => f.id === selectedFormat)) {
-    selectedFormat = filtered[0].id;
+  const platform = detectPlatform(result.url || (input ? input.value : ""));
+  if (!selectedFormat || !filtered.some((f) => f.id === selectedFormat)) {
+    selectedFormat = pickBestFormatOption(filtered, platform) || filtered[0].id;
   }
 
   filtered.forEach((format) => {
@@ -636,13 +908,75 @@ function renderFormats(result) {
 
     radio.addEventListener("change", () => {
       selectedFormat = format.id;
-      if (downloadButton) downloadButton.disabled = requestInProgress || !selectedFormat;
+      if (downloadButton) downloadButton.disabled = !selectedFormat;
     });
 
     list.append(wrapper);
   });
 
-  if (downloadButton) downloadButton.disabled = requestInProgress || !selectedFormat;
+  // Setup inline player
+  const playerContainer = $("preview-player-container");
+  const playBtn = $("preview-play-btn");
+
+  if (playerContainer) {
+    playerContainer.hidden = true;
+    playerContainer.replaceChildren();
+  }
+
+  function getActiveDirectStream() {
+    const chosen = result.formats.find((f) => f.id === selectedFormat);
+    if (chosen && chosen.directUrl) return { url: chosen.directUrl, isAudio: !chosen.hasVideo };
+    const anyDirect = result.formats.find((f) => f.directUrl);
+    if (anyDirect) return { url: anyDirect.directUrl, isAudio: !anyDirect.hasVideo };
+    return null;
+  }
+
+  function renderInlinePlayer(streamInfo) {
+    if (!playerContainer || !streamInfo) return;
+    playerContainer.replaceChildren();
+    if (streamInfo.isAudio) {
+      const audioEl = document.createElement("audio");
+      audioEl.controls = true;
+      audioEl.playsInline = true;
+      audioEl.preload = "metadata";
+      audioEl.src = streamInfo.url;
+      audioEl.autoplay = true;
+      playerContainer.append(audioEl);
+    } else {
+      const videoEl = document.createElement("video");
+      videoEl.controls = true;
+      videoEl.playsInline = true;
+      videoEl.preload = "metadata";
+      videoEl.src = streamInfo.url;
+      videoEl.autoplay = true;
+      playerContainer.append(videoEl);
+    }
+    if (thumbEl) thumbEl.hidden = true;
+    playerContainer.hidden = false;
+  }
+
+  const directInfo = getActiveDirectStream();
+  if (playBtn) {
+    if (directInfo) {
+      playBtn.hidden = false;
+      playBtn.onclick = (e) => {
+        e.stopPropagation();
+        renderInlinePlayer(getActiveDirectStream());
+      };
+    } else {
+      playBtn.hidden = true;
+    }
+  }
+
+  if (thumbEl) {
+    thumbEl.hidden = false;
+    thumbEl.onclick = () => {
+      const info = getActiveDirectStream();
+      if (info) renderInlinePlayer(info);
+    };
+  }
+
+  if (downloadButton) downloadButton.disabled = !selectedFormat;
   const panel = $("formats-panel");
   if (panel) {
     panel.hidden = false;
@@ -667,10 +1001,26 @@ function setFilter(filterType) {
 function createMediaRow(item, isActiveDownloading = false, stageText = "") {
   const row = document.createElement("div");
   row.className = "media-row";
+  row.style.flexDirection = "column";
+  row.style.alignItems = "stretch";
+
+  const topWrap = document.createElement("div");
+  topWrap.style.display = "flex";
+  topWrap.style.alignItems = "center";
+  topWrap.style.gap = "12px";
+  topWrap.style.width = "100%";
 
   const thumb = document.createElement("div");
   thumb.className = "media-thumb";
   thumb.style.setProperty("background", getGradient(item.title));
+  if (item.thumbnail) {
+    const tImg = document.createElement("img");
+    tImg.className = "media-thumb-img";
+    tImg.referrerPolicy = "no-referrer";
+    tImg.src = item.thumbnail;
+    tImg.alt = "";
+    thumb.append(tImg);
+  }
   thumb.append(createSvgIcon(item.kind === "audio" ? "play" : "play"));
 
   const content = document.createElement("div");
@@ -687,6 +1037,7 @@ function createMediaRow(item, isActiveDownloading = false, stageText = "") {
   meta.textContent = metaParts.join(" · ");
 
   content.append(title, meta);
+  topWrap.append(thumb, content);
 
   if (isActiveDownloading) {
     const progWrap = document.createElement("div");
@@ -711,15 +1062,68 @@ function createMediaRow(item, isActiveDownloading = false, stageText = "") {
     const spinner = document.createElement("span");
     spinner.className = "btn-spinner";
     badge.append(spinner);
-    row.append(thumb, content, badge);
+    topWrap.append(badge);
+    row.append(topWrap);
   } else {
+    const actions = document.createElement("div");
+    actions.style.display = "flex";
+    actions.style.alignItems = "center";
+    actions.style.gap = "8px";
+
+    const previewBtn = document.createElement("button");
+    previewBtn.className = "media-preview-btn";
+    previewBtn.type = "button";
+    previewBtn.setAttribute("aria-label", "معاينة");
+    previewBtn.append(createSvgIcon("play"));
+
     const badge = document.createElement("a");
     badge.className = "media-row-badge badge-mint badge-link";
     badge.href = buildFileUrl(item.file);
     badge.download = "";
     badge.setAttribute("aria-label", t("saveFile"));
     badge.append(createSvgIcon("check"));
-    row.append(thumb, content, badge);
+
+    actions.append(previewBtn, badge);
+    topWrap.append(actions);
+    row.append(topWrap);
+
+    const inlinePreviewWrap = document.createElement("div");
+    inlinePreviewWrap.className = "media-row-preview";
+    inlinePreviewWrap.hidden = true;
+    row.append(inlinePreviewWrap);
+
+    let isPlaying = false;
+    function togglePreview() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        inlinePreviewWrap.replaceChildren();
+        const fileUrl = buildFileUrl(item.file);
+        if (item.kind === "audio") {
+          const audioEl = document.createElement("audio");
+          audioEl.controls = true;
+          audioEl.playsInline = true;
+          audioEl.preload = "metadata";
+          audioEl.src = fileUrl;
+          audioEl.autoplay = true;
+          inlinePreviewWrap.append(audioEl);
+        } else {
+          const videoEl = document.createElement("video");
+          videoEl.controls = true;
+          videoEl.playsInline = true;
+          videoEl.preload = "metadata";
+          videoEl.src = fileUrl;
+          videoEl.autoplay = true;
+          inlinePreviewWrap.append(videoEl);
+        }
+        inlinePreviewWrap.hidden = false;
+      } else {
+        inlinePreviewWrap.replaceChildren();
+        inlinePreviewWrap.hidden = true;
+      }
+    }
+
+    previewBtn.addEventListener("click", togglePreview);
+    thumb.addEventListener("click", togglePreview);
   }
 
   return row;
@@ -818,7 +1222,7 @@ async function postJson(path, body) {
   if (path === "/api/download" && probe && Array.isArray(probe.formats)) {
     const matched = probe.formats.find((f) => f.id === body.formatId);
     if (matched && typeof matched.directUrl === "string" && matched.directUrl) {
-      return { file: matched.directUrl, title: probe.title || "YouTube Video" };
+      return { file: matched.directUrl, title: probe.title || "Media" };
     }
   }
 
@@ -855,22 +1259,32 @@ async function postJson(path, body) {
     }
   }
 
-  // Tier-3 Client-Side Residential-IP YouTube Fallback
-  const ytId = body && body.url ? extractYouTubeVideoId(body.url) : "";
-  if (ytId) {
-    const clientProbe = await probeYouTubeFromClient(ytId);
-    if (clientProbe && Array.isArray(clientProbe.formats) && clientProbe.formats.length > 0) {
-      if (path === "/api/formats") {
-        return clientProbe;
-      }
-      if (path === "/api/quick-download" || path === "/api/download") {
-        const chosen =
-          body.mode === "audio"
-            ? clientProbe.formats.find((f) => !f.hasVideo) || clientProbe.formats[0]
-            : clientProbe.formats.find((f) => f.hasVideo) || clientProbe.formats[0];
-        if (chosen && chosen.directUrl) {
-          return { file: chosen.directUrl, title: clientProbe.title, formatId: chosen.id };
-        }
+  // Tier-3 Client-Side Multi-Provider Fallbacks (TikTok, X/Twitter, YouTube)
+  const targetUrl = body && body.url ? body.url : "";
+  const ytId = targetUrl ? extractYouTubeVideoId(targetUrl) : "";
+  const isTikTok = targetUrl && isTikTokUrl(targetUrl);
+  const isX = targetUrl && Boolean(extractTwitterStatusId(targetUrl));
+
+  let clientProbe = null;
+  if (isTikTok) {
+    clientProbe = await probeTikTokFromClient(targetUrl);
+  } else if (isX) {
+    clientProbe = await probeTwitterFromClient(targetUrl);
+  } else if (ytId) {
+    clientProbe = await probeYouTubeFromClient(ytId);
+  }
+
+  if (clientProbe && Array.isArray(clientProbe.formats) && clientProbe.formats.length > 0) {
+    if (path === "/api/formats") {
+      return clientProbe;
+    }
+    if (path === "/api/quick-download" || path === "/api/download") {
+      const chosen =
+        body.mode === "audio"
+          ? clientProbe.formats.find((f) => !f.hasVideo) || clientProbe.formats[0]
+          : clientProbe.formats.find((f) => f.hasVideo) || clientProbe.formats[0];
+      if (chosen && chosen.directUrl) {
+        return { file: chosen.directUrl, title: clientProbe.title, formatId: chosen.id };
       }
     }
   }
@@ -968,6 +1382,18 @@ if (input) {
     setMessage("");
     updateInspect();
   });
+  input.addEventListener("paste", (e) => {
+    const pasted = (e.clipboardData || window.clipboardData)?.getData("text");
+    if (pasted) {
+      const extracted = extractUrlFromText(pasted);
+      if (extracted) {
+        e.preventDefault();
+        input.value = extracted;
+        updateInspect();
+        inspectFormats(extracted);
+      }
+    }
+  });
 }
 
 if (clearUrlButton) {
@@ -986,20 +1412,26 @@ if (pasteButton) {
     try {
       if (!input) return;
       const textFromClipboard = await navigator.clipboard.readText();
-      if (textFromClipboard && textFromClipboard.trim()) {
-        input.value = textFromClipboard.trim();
-        input.dispatchEvent(new Event("input", { bubbles: true }));
+      const extracted = extractUrlFromText(textFromClipboard) || (textFromClipboard ? textFromClipboard.trim() : "");
+      if (extracted) {
+        input.value = extracted;
+        updateInspect();
         input.focus();
+        if (extracted.startsWith("https://")) {
+          inspectFormats(extracted);
+        }
       } else {
         input.value = "https://www.youtube.com/watch?v=aqz-KE-bpKQ";
-        input.dispatchEvent(new Event("input", { bubbles: true }));
+        updateInspect();
         input.focus();
+        inspectFormats(input.value);
       }
     } catch {
       if (input && !input.value.trim()) {
         input.value = "https://www.youtube.com/watch?v=aqz-KE-bpKQ";
-        input.dispatchEvent(new Event("input", { bubbles: true }));
+        updateInspect();
         input.focus();
+        inspectFormats(input.value);
       } else {
         setMessage(t("pasteDenied"), true);
       }
@@ -1013,8 +1445,9 @@ document.querySelectorAll(".chip").forEach((chip) => {
     const url = chip.dataset.url;
     if (url) {
       input.value = url;
-      input.dispatchEvent(new Event("input", { bubbles: true }));
+      updateInspect();
       input.focus();
+      inspectFormats(url);
     }
   });
 });
@@ -1093,51 +1526,84 @@ if (clearDownloadsBtn) {
   });
 }
 
-// Form Submit: Format Probe
-if (form) {
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (requestInProgress) return;
+// Format Inspection
+async function inspectFormats(targetUrl) {
+  if (requestInProgress) return;
 
-    const url = input ? input.value.trim() : "";
-    if (!url) {
-      setMessage(t("empty"), true);
-      return;
+  const url = typeof targetUrl === "string" && targetUrl.trim()
+    ? targetUrl.trim()
+    : (input ? input.value.trim() : "");
+  if (!url) {
+    setMessage(t("empty"), true);
+    return;
+  }
+
+  requestInProgress = true;
+  if (inspectButton) {
+    inspectButton.setAttribute("aria-busy", "true");
+    const sp = inspectButton.querySelector(".btn-spinner");
+    if (sp) sp.hidden = false;
+    const tx = inspectButton.querySelector(".btn-text");
+    if (tx) tx.textContent = t("inspecting");
+  }
+  updateInspect();
+  resetFormats();
+  setMessage("");
+
+  try {
+    const result = await postJson("/api/formats", { url });
+    if (!Array.isArray(result.formats) || result.formats.length === 0 || typeof result.probeId !== "string") {
+      throw new Error(t("noFormats"));
     }
-
-    requestInProgress = true;
+    probe = { ...result, url };
+    requestInProgress = false;
+    renderFormats(probe);
+  } catch (error) {
+    setMessage(error instanceof Error ? error.message : t("genericError"), true);
+  } finally {
+    requestInProgress = false;
+    if (downloadButton && selectedFormat) {
+      downloadButton.disabled = false;
+    }
     if (inspectButton) {
-      inspectButton.setAttribute("aria-busy", "true");
+      inspectButton.removeAttribute("aria-busy");
       const sp = inspectButton.querySelector(".btn-spinner");
-      if (sp) sp.hidden = false;
+      if (sp) sp.hidden = true;
       const tx = inspectButton.querySelector(".btn-text");
-      if (tx) tx.textContent = t("inspecting");
+      if (tx) tx.textContent = t("inspect");
     }
     updateInspect();
-    resetFormats();
-    setMessage("");
+  }
+}
 
-    try {
-      const result = await postJson("/api/formats", { url });
-      if (!Array.isArray(result.formats) || result.formats.length === 0 || typeof result.probeId !== "string") {
-        throw new Error(t("noFormats"));
-      }
-      probe = { ...result, url };
-      renderFormats(probe);
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("genericError"), true);
-    } finally {
-      requestInProgress = false;
-      if (inspectButton) {
-        inspectButton.removeAttribute("aria-busy");
-        const sp = inspectButton.querySelector(".btn-spinner");
-        if (sp) sp.hidden = true;
-        const tx = inspectButton.querySelector(".btn-text");
-        if (tx) tx.textContent = t("inspect");
-      }
-      updateInspect();
-    }
+// Form Submit: Format Probe
+if (form) {
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    inspectFormats();
   });
+}
+
+// Share Target Query Parameter Handling
+function handleInitialShareTarget() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get("url") || params.get("text") || params.get("title") || "";
+    if (raw) {
+      const extracted = extractUrlFromText(raw) || (raw.startsWith("https://") ? raw.trim() : null);
+      if (extracted && input) {
+        input.value = extracted;
+        updateInspect();
+        input.focus();
+        inspectFormats(extracted);
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    }
+  } catch {
+    /* ignore search params */
+  }
 }
 
 // Direct / Quick Download Button
@@ -1199,3 +1665,4 @@ document.documentElement.setAttribute("data-theme", theme);
 applyLanguage();
 updateInspect();
 setView("home");
+handleInitialShareTarget();

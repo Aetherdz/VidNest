@@ -1,0 +1,87 @@
+name: Build & Release Android APK
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build VidNest Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'mobile-expo/package.json'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        working-directory: mobile-expo
+        run: npm install --legacy-peer-deps
+
+      - name: Prebuild native Android project
+        working-directory: mobile-expo
+        run: npx expo prebuild --platform android --clean
+
+      - name: Build Android Release APK
+        working-directory: mobile-expo/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease -x lint --no-daemon
+
+      - name: Stage APK artifact
+        run: |
+          cp mobile-expo/android/app/build/outputs/apk/release/app-release.apk VidNest.apk
+          sha256sum VidNest.apk > VidNest.apk.sha256
+          ls -lh VidNest.apk
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VidNest-apk
+          path: VidNest.apk
+          retention-days: 14
+
+      - name: Publish GitHub Release (v4.0.0)
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        with:
+          tag_name: v4.0.0
+          name: VidNest v4.0.0
+          body: |
+            ### VidNest v4.0.0 — Official Android Release
+            
+            - **Platform:** Android (API 26+)
+            - **Framework:** React Native + Expo SDK 54, StyleX, TypeScript
+            - **Design System:** Violet Instrument v4 by **Atheerium** (`zaikabdou`)
+            - **Features:** 1,800+ media platforms, 4K UHD video, lossless audio (MP3/M4A), zero ads, zero trackers.
+            
+            Download `VidNest.apk` directly to install.
+          files: |
+            VidNest.apk
+            VidNest.apk.sha256
+          make_latest: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

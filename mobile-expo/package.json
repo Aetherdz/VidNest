@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "main": "node_modules/expo/AppEntry.js",
+  "main": "index.js",
   "scripts": { "start": "expo start", "android": "expo start --android", "ios": "expo start --ios", "web": "expo start --web", "test": "node --test __tests__/*.test.mjs" },
   "dependencies": {
     "expo": "~54.0.0",

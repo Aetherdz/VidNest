@@ -37,7 +37,7 @@ import LibraryScreen from './src/components/LibraryScreen.tsx';
 import SettingsModal from './src/components/SettingsModal.tsx';
 
 const DEFAULT_BASE_URL =
-  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://6c55b2a011d7d5.lhr.life';
+  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://e4dc2225efba3e.lhr.life';
 
 export default function App() {
   const systemColorScheme = useColorScheme();

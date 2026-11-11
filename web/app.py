@@ -16,7 +16,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 import yt_dlp
-from flask import Flask, abort, jsonify, request, send_from_directory
+from flask import Flask, abort, jsonify, redirect, request, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 try:  # The tests import ``app`` directly from the web/ directory.
@@ -369,9 +369,10 @@ def sitemap_xml():
 
 @app.get("/download/apk")
 def download_apk():
-    """Serves the signed release Android APK package."""
+    """Serves the release Android APK package, or redirects to the latest GitHub Release."""
     candidates = [
         Path(__file__).resolve().parent.parent / "dist" / "VidNest-release.apk",
+        Path(__file__).resolve().parent.parent / "VidNest.apk",
     ]
     for target in candidates:
         if target.is_file():
@@ -379,11 +380,11 @@ def download_apk():
                 target.parent,
                 target.name,
                 as_attachment=True,
-                download_name="VidNest-release.apk",
+                download_name="VidNest.apk",
                 mimetype="application/vnd.android.package-archive",
                 conditional=True,
             )
-    abort(404, description="Release APK is currently being compiled.")
+    return redirect("https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk", code=302)
 
 
 

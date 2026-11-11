@@ -155,7 +155,18 @@ VidNest adheres to a strict zero-trust egress model:
 
 ## Quick Start
 
-### 1. Mobile App (`mobile-expo/`)
+### 1. One-Command Ecosystem Launch (`tools/start_all.sh`)
+Start the Flask backend API, the Expo web client, and generate public HTTPS preview tunnels with one command:
+```bash
+./tools/start_all.sh
+```
+
+### 2. Download Official Android APK
+The Android APK is compiled and published automatically via GitHub Actions:
+- **Direct APK Download:** [**VidNest.apk (Latest Release)**](https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk)
+- **GitHub Releases:** [https://github.com/Aetherdz/VidNest/releases/latest](https://github.com/Aetherdz/VidNest/releases/latest)
+
+### 3. Mobile App Development (`mobile-expo/`)
 
 ```bash
 # Navigate to the mobile package
@@ -170,7 +181,7 @@ npx expo start --android   # Launch on Android device / emulator
 npx expo start --ios       # Launch on iOS simulator
 ```
 
-### 2. Web Server & Backend API (`web/`)
+### 4. Web Server & Backend API (`web/`)
 
 ```bash
 # Setup Python virtual environment
@@ -184,14 +195,14 @@ pip install -r web/requirements.txt
 python3 -m flask --app web/app.py run --port 5000
 ```
 
-### 3. Docker Compose (Production Ready)
+### 5. Docker Compose (Production Ready)
 
 ```bash
 # Spin up the Flask backend, FFmpeg multiplexer, and Caddy reverse proxy
 docker compose up -d
 ```
 
-### 4. Telegram Bot Companion
+### 6. Telegram Bot Companion
 
 ```bash
 export TELEGRAM_BOT_TOKEN="your_bot_token"

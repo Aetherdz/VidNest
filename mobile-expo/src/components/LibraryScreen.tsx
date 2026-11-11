@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { PlayIcon } from './Icons.tsx';
-import { tokens, radii, gradients, type ThemeMode } from '../theme/tokens.ts';
+import { tokens, radii, gradients, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
 import type { LibraryItem } from '../hooks/useDownloader.ts';
 
@@ -40,8 +40,8 @@ export default function LibraryScreen({
       <View style={styles.grid}>
         {items.map((item, index) => {
           const gradPair = gradients[(item.gradientIndex ?? index) % gradients.length];
-          const bgPrimary = gradPair[0];
           const bgSecondary = gradPair[1];
+          const badgeLabel = index % 2 === 0 ? '4K' : 'HD';
 
           return (
             <TouchableOpacity
@@ -52,30 +52,34 @@ export default function LibraryScreen({
               accessibilityRole="button"
               accessibilityLabel={`${item.title} - ${item.duration}`}
             >
-              {/* Media Card Thumbnail */}
+              {/* Crafted Dark Carbon Media Card Thumbnail */}
               <View
                 style={[
                   styles.thumbnail,
                   {
-                    backgroundColor: bgPrimary,
+                    backgroundColor: '#14171C',
                     borderColor: t.line,
                   },
                 ]}
               >
-                {/* Secondary gradient tone overlay */}
                 <View
                   style={[
                     styles.gradientOverlay,
                     {
                       backgroundColor: bgSecondary,
-                      opacity: 0.5,
+                      opacity: 0.22,
                     },
                   ]}
                 />
 
-                {/* Play triangle */}
+                {/* Top Quality Tag */}
+                <View style={styles.qualityBadge}>
+                  <Text style={styles.qualityBadgeText}>{badgeLabel}</Text>
+                </View>
+
+                {/* Play button */}
                 <View style={styles.playButtonWrapper}>
-                  <PlayIcon size={26} color="#FFFFFF" />
+                  <PlayIcon size={22} color="#FFFFFF" />
                 </View>
 
                 {/* Duration Badge */}
@@ -120,10 +124,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
+    fontFamily: fonts.bold,
     fontSize: 26,
     fontWeight: '700',
     textAlign: 'right',
-    letterSpacing: -0.3,
+    letterSpacing: 0,
   },
   grid: {
     flexDirection: 'row',
@@ -148,11 +153,30 @@ const styles = StyleSheet.create({
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
   },
+  qualityBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(251, 146, 60, 0.24)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 146, 60, 0.5)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  qualityBadgeText: {
+    fontFamily: fonts.bold,
+    color: '#FDBA74',
+    fontSize: 10,
+    fontWeight: '700',
+  },
   playButtonWrapper: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.24)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -160,22 +184,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 8,
     bottom: 8,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
   },
   durationText: {
+    fontFamily: fonts.semibold,
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
   },
   tileTitle: {
+    fontFamily: fonts.semibold,
     fontSize: 14,
     fontWeight: '600',
     marginTop: 8,
     textAlign: 'right',
-    lineHeight: 18,
+    lineHeight: 21,
   },
   emptyBox: {
     width: '100%',
@@ -187,6 +213,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   emptyText: {
+    fontFamily: fonts.medium,
     fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',

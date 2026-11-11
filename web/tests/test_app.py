@@ -755,6 +755,54 @@ class VidNestWebTests(unittest.TestCase):
         self.assertEqual(video_calls[0]["caption"], "720p")
         self.assertFalse(Path(video_calls[0]["video"]).exists())
 
+    def test_cors_allowlist_permits_configured_origins_and_blocks_others(self):
+        allowed_origin = "https://aetherdz.github.io"
+        preflight = self.client.options(
+            "/api/formats",
+            base_url=self.base_url,
+            headers={
+                "Origin": allowed_origin,
+                "Sec-Fetch-Site": "cross-site",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "Content-Type, X-VidNest-CSRF",
+            },
+        )
+        self.assertEqual(preflight.status_code, 200)
+        self.assertEqual(preflight.headers.get("Access-Control-Allow-Origin"), allowed_origin)
+        self.assertEqual(preflight.headers.get("Vary"), "Origin")
+        self.assertIn("X-VidNest-CSRF", preflight.headers.get("Access-Control-Allow-Headers", ""))
+
+        session_resp = self.client.get(
+            "/api/session",
+            base_url=self.base_url,
+            headers={"Origin": allowed_origin, "Sec-Fetch-Site": "cross-site"},
+        )
+        self.assertEqual(session_resp.status_code, 200)
+        self.assertEqual(session_resp.headers.get("Access-Control-Allow-Origin"), allowed_origin)
+
+        with patch.object(webapp, "validate_media_url", return_value="https://youtube.com/watch?v=x"), \
+             patch.object(webapp.yt_dlp, "YoutubeDL", FakeYoutubeDL):
+            probe_resp = self.client.post(
+                "/api/formats",
+                base_url=self.base_url,
+                headers={
+                    "Origin": allowed_origin,
+                    "Sec-Fetch-Site": "cross-site",
+                    "X-VidNest-CSRF": webapp.csrf_token,
+                },
+                json={"url": "https://youtube.com/watch?v=x"},
+            )
+        self.assertEqual(probe_resp.status_code, 200)
+        self.assertEqual(probe_resp.headers.get("Access-Control-Allow-Origin"), allowed_origin)
+
+        blocked_preflight = self.client.options(
+            "/api/formats",
+            base_url=self.base_url,
+            headers={"Origin": "https://evil.example", "Sec-Fetch-Site": "cross-site"},
+        )
+        self.assertEqual(blocked_preflight.status_code, 403)
+        self.assertIsNone(blocked_preflight.headers.get("Access-Control-Allow-Origin"))
+
 
 if __name__ == "__main__":
     unittest.main()

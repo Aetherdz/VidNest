@@ -11,14 +11,15 @@ import {
 } from 'react-native';
 import {
   VidNestLogo,
-  MenuIcon,
+  SunIcon,
+  MoonIcon,
   ClipIcon,
   DownloadIcon,
   PlayIcon,
   CheckIcon,
-  PlatformDot,
+  PlatformIcon,
 } from './Icons.tsx';
-import { tokens, radii, gradients, type ThemeMode } from '../theme/tokens.ts';
+import { tokens, radii, gradients, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
 import type { ActiveDownloadItem, PreviewData } from '../hooks/useDownloader.ts';
 
@@ -33,7 +34,7 @@ type Props = {
   onSelectOption: (id: string) => void;
   onStartDownload: () => void;
   recentDownloads: ActiveDownloadItem[];
-  onOpenSettings: () => void;
+  onToggleTheme: () => void;
 };
 
 export default function HomeScreen({
@@ -47,7 +48,7 @@ export default function HomeScreen({
   onSelectOption,
   onStartDownload,
   recentDownloads,
-  onOpenSettings,
+  onToggleTheme,
 }: Props) {
   const t = tokens[themeMode];
   const c = copy.ar;
@@ -55,7 +56,6 @@ export default function HomeScreen({
 
   const canAnalyze = url.trim().length >= 8 && !isAnalyzing;
 
-  // Detect which chip matches current URL
   const matchingPlatformId = c.platforms.find((p) =>
     p.match.some((keyword) => url.toLowerCase().includes(keyword)),
   )?.id;
@@ -84,7 +84,7 @@ export default function HomeScreen({
 
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={onOpenSettings}
+          onPress={onToggleTheme}
           style={[
             styles.menuButton,
             {
@@ -92,9 +92,16 @@ export default function HomeScreen({
               borderColor: t.line,
             },
           ]}
-          accessibilityLabel="القائمة والإعدادات"
+          accessibilityRole="button"
+          accessibilityLabel={
+            themeMode === 'dark' ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'
+          }
         >
-          <MenuIcon size={20} color={t.ink} />
+          {themeMode === 'dark' ? (
+            <SunIcon size={20} color={t.ink} />
+          ) : (
+            <MoonIcon size={20} color={t.ink} />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -136,9 +143,10 @@ export default function HomeScreen({
           activeOpacity={0.8}
           onPress={onPaste}
           style={[styles.pasteButton, { backgroundColor: t.accentLight }]}
+          accessibilityRole="button"
           accessibilityLabel="لصق الرابط"
         >
-          <ClipIcon size={22} color={t.accent} />
+          <ClipIcon size={20} color={t.accentText} />
         </TouchableOpacity>
       </View>
 
@@ -190,18 +198,22 @@ export default function HomeScreen({
               style={[
                 styles.chip,
                 {
-                  backgroundColor: isSelected ? t.accent : t.surface,
-                  borderColor: isSelected ? t.accent : t.line,
+                  backgroundColor: isSelected ? t.primary : t.surface,
+                  borderColor: isSelected ? t.primary : t.line,
                 },
               ]}
             >
-              <PlatformDot color={platform.color} size={8} />
+              <PlatformIcon
+                id={platform.id}
+                size={15}
+                color={isSelected ? t.onPrimary : platform.color}
+              />
               <Text
                 style={[
                   styles.chipText,
                   {
-                    color: isSelected ? '#FFFFFF' : t.ink,
-                    fontWeight: isSelected ? '700' : '500',
+                    color: isSelected ? t.onPrimary : t.ink,
+                    fontWeight: isSelected ? '700' : '600',
                   },
                 ]}
               >
@@ -237,12 +249,12 @@ export default function HomeScreen({
                 styles.playOverlay,
                 {
                   backgroundColor: gradients[preview.gradientIndex % gradients.length][1],
-                  opacity: 0.6,
+                  opacity: 0.45,
                 },
               ]}
             />
             <View style={styles.playIconWrapper}>
-              <PlayIcon size={38} color="#FFFFFF" />
+              <PlayIcon size={28} color="#FFFFFF" />
             </View>
             <View style={styles.durationBadge}>
               <Text style={styles.durationText}>{preview.duration}</Text>
@@ -321,9 +333,9 @@ export default function HomeScreen({
       {/* Recent Downloads Section */}
       <Text style={[styles.sectionTitle, { color: t.ink }]}>{c.recentTitle}</Text>
       <View style={styles.recentList}>
-        {recentDownloads.slice(0, 2).map((item) => {
+        {recentDownloads.slice(0, 2).map((item, idx) => {
           const isComplete = item.progress >= 100;
-          const bgGrad = gradients[item.gradientIndex % gradients.length][0];
+          const badgeText = idx === 0 ? '4K' : 'HD';
 
           return (
             <View
@@ -336,7 +348,14 @@ export default function HomeScreen({
                 },
               ]}
             >
-              <View style={[styles.recentThumb, { backgroundColor: bgGrad }]} />
+              <View style={styles.recentThumb}>
+                <View style={styles.thumbPlayCircle}>
+                  <PlayIcon size={13} color="#FFFFFF" />
+                </View>
+                <View style={styles.thumbTagBadge}>
+                  <Text style={styles.thumbTagText}>{badgeText}</Text>
+                </View>
+              </View>
               <View style={styles.recentMid}>
                 <Text style={[styles.recentItemTitle, { color: t.ink }]} numberOfLines={1}>
                   {item.title}
@@ -368,7 +387,7 @@ export default function HomeScreen({
                 ]}
               >
                 {isComplete ? (
-                  <CheckIcon size={18} color={t.mint} />
+                  <CheckIcon size={18} color={t.accentText} />
                 ) : (
                   <Text style={[styles.progressBadgeText, { color: t.accentText }]}>
                     {item.progress}%
@@ -404,10 +423,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingTop: 18,
     paddingHorizontal: 20,
-    paddingBottom: 110, // Space for floating bottom nav
+    paddingBottom: 110,
   },
   topRow: {
-    flexDirection: 'row', // RTL: Brand on right, Menu on left
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 28,
@@ -418,9 +437,10 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   brandTitle: {
+    fontFamily: fonts.bold,
     fontSize: 22,
     fontWeight: '700',
-    letterSpacing: -0.5,
+    letterSpacing: 0,
   },
   menuButton: {
     width: 48,
@@ -431,12 +451,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headline: {
+    fontFamily: fonts.bold,
     fontSize: 30,
     fontWeight: '700',
-    lineHeight: 40,
+    lineHeight: 44,
     textAlign: 'right',
     marginBottom: 20,
-    letterSpacing: -0.3,
+    letterSpacing: 0,
   },
   inputBox: {
     borderRadius: radii.box,
@@ -448,6 +469,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   textInput: {
+    fontFamily: fonts.medium,
     flex: 1,
     minHeight: 48,
     fontSize: 16,
@@ -479,6 +501,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   downloadButtonText: {
+    fontFamily: fonts.bold,
     fontSize: 17,
     fontWeight: '700',
   },
@@ -491,15 +514,16 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: 48,
     minWidth: 48,
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
     borderRadius: 24,
     justifyContent: 'center',
     borderWidth: 1.5,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
   },
   chipText: {
+    fontFamily: fonts.semibold,
     fontSize: 14,
   },
   previewCard: {
@@ -523,7 +547,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -531,25 +555,30 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     bottom: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(15, 23, 42, 0.78)',
     paddingHorizontal: 9,
     paddingVertical: 3,
     borderRadius: 10,
   },
   durationText: {
+    fontFamily: fonts.semibold,
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
   },
   previewTitle: {
+    fontFamily: fonts.bold,
     fontSize: 16,
     fontWeight: '700',
+    lineHeight: 24,
     paddingTop: 12,
     paddingHorizontal: 6,
     textAlign: 'right',
   },
   previewSource: {
+    fontFamily: fonts.regular,
     fontSize: 13,
+    lineHeight: 20,
     paddingHorizontal: 6,
     marginBottom: 12,
     textAlign: 'right',
@@ -570,10 +599,12 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   qualityLabel: {
+    fontFamily: fonts.bold,
     fontSize: 15,
     fontWeight: '700',
   },
   qualitySize: {
+    fontFamily: fonts.medium,
     fontSize: 12,
     fontWeight: '500',
   },
@@ -586,10 +617,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   startDownloadText: {
+    fontFamily: fonts.bold,
     fontSize: 16,
     fontWeight: '700',
   },
   sectionTitle: {
+    fontFamily: fonts.bold,
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'right',
@@ -611,6 +644,38 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: radii.thumb,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  thumbPlayCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(251, 146, 60, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 146, 60, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbTagBadge: {
+    position: 'absolute',
+    bottom: 3,
+    right: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  thumbTagText: {
+    fontFamily: fonts.bold,
+    color: '#FDBA74',
+    fontSize: 9,
+    fontWeight: '700',
   },
   recentMid: {
     flex: 1,
@@ -618,12 +683,16 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   recentItemTitle: {
+    fontFamily: fonts.bold,
     fontSize: 15,
     fontWeight: '700',
+    lineHeight: 22,
     textAlign: 'right',
   },
   recentSubtitle: {
-    fontSize: 12.5,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
     textAlign: 'right',
   },
   progressBarBg: {
@@ -646,6 +715,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   progressBadgeText: {
+    fontFamily: fonts.bold,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -659,6 +729,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   creditText: {
+    fontFamily: fonts.medium,
     fontSize: 13,
     fontWeight: '500',
   },

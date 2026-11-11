@@ -51,6 +51,22 @@ PUBLIC_ALLOWED_HOSTS = frozenset(
     for host in os.environ.get("VIDNEST_ALLOWED_HOSTS", "").split(",")
     if host.strip()
 )
+DEFAULT_CORS_ORIGINS = (
+    "https://aetherdz.github.io",
+    "https://vidnest-six.vercel.app",
+    "https://vidnest.vercel.app",
+    "https://vidnest-web.vercel.app",
+    "https://vidnest-atheerium-dz.vercel.app",
+    "https://vidnest-aether-dz.vercel.app",
+)
+CORS_ORIGINS = frozenset(
+    origin.strip().lower().rstrip("/")
+    for origin in os.environ.get(
+        "VIDNEST_CORS_ORIGINS",
+        ",".join(DEFAULT_CORS_ORIGINS),
+    ).split(",")
+    if origin.strip()
+)
 MAX_URL_LENGTH = 4_096
 MAX_DOWNLOAD_BYTES = _env_int("VIDNEST_MAX_FILE_MB", 1_000) * 1_000_000
 MAX_STORAGE_BYTES = _env_int("VIDNEST_STORAGE_MB", 2_000) * 1_000_000
@@ -176,13 +192,20 @@ if TRUST_PROXY:
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 
+def _is_cors_allowed_origin(origin: str | None) -> bool:
+    if not origin:
+        return False
+    normalized = origin.strip().lower().rstrip("/")
+    return normalized in CORS_ORIGINS
+
+
 @app.before_request
 def guard_request_origin():
     # Local builds stay loopback-only: foreign Host headers are rejected so a
     # hostile page cannot DNS-rebind localhost into its own origin. The public
     # deployment (VIDNEST_PUBLIC=1) serves its own hostname instead and keeps
     # the Origin, Sec-Fetch-Site and CSRF gates, so cross-site pages still
-    # cannot drive this API.
+    # cannot drive this API unless explicitly listed in CORS_ORIGINS.
     if request.path == "/healthz":
         return None
 
@@ -193,11 +216,13 @@ def guard_request_origin():
     elif authority not in LOCAL_AUTHORITIES:
         abort(400)
 
-    if request.headers.get("Sec-Fetch-Site", "").lower() == "cross-site":
+    origin = request.headers.get("Origin")
+    is_allowed_cors = _is_cors_allowed_origin(origin)
+
+    if request.headers.get("Sec-Fetch-Site", "").lower() == "cross-site" and not is_allowed_cors:
         abort(403)
 
-    origin = request.headers.get("Origin")
-    if origin:
+    if origin and not is_allowed_cors:
         try:
             parsed = urlsplit(origin)
             origin_host = (parsed.hostname or "").lower()
@@ -226,6 +251,11 @@ def guard_request_origin():
                 or origin_authority != authority
             ):
                 abort(403)
+
+    if request.method == "OPTIONS":
+        if is_allowed_cors:
+            return app.make_default_options_response()
+        abort(403)
 
     if request.method == "POST" and request.path in {
         "/api/formats", "/api/download", "/api/quick-download", "/api/telegram/webhook",
@@ -305,12 +335,21 @@ def security_headers(response):
     response.headers.setdefault(
         "Content-Security-Policy",
         "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; "
-        "connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+        "connect-src 'self' https://vidnest-web.onrender.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
     )
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "no-referrer")
-    response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
+    origin = request.headers.get("Origin")
+    if _is_cors_allowed_origin(origin) and origin:
+        response.headers["Access-Control-Allow-Origin"] = origin.strip().rstrip("/")
+        response.headers["Vary"] = "Origin"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-VidNest-CSRF"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "cross-origin")
+    else:
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
     if request.path == "/" or request.path.startswith("/api/") or request.path.startswith("/files/"):
         response.headers["Cache-Control"] = "no-store"
     return response

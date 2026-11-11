@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { CheckIcon } from './Icons.tsx';
-import { tokens, radii, gradients, type ThemeMode } from '../theme/tokens.ts';
+import { CheckIcon, PlayIcon } from './Icons.tsx';
+import { tokens, radii, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
 import type { ActiveDownloadItem } from '../hooks/useDownloader.ts';
 
@@ -41,9 +41,9 @@ export default function DownloadsScreen({
 
       {/* Downloads List */}
       <View style={styles.list}>
-        {downloads.map((item) => {
+        {downloads.map((item, idx) => {
           const isComplete = item.progress >= 100;
-          const bgGrad = gradients[item.gradientIndex % gradients.length][0];
+          const badgeText = idx % 2 === 0 ? '4K' : 'HD';
 
           return (
             <TouchableOpacity
@@ -58,8 +58,15 @@ export default function DownloadsScreen({
                 },
               ]}
             >
-              {/* Thumbnail */}
-              <View style={[styles.thumb, { backgroundColor: bgGrad }]} />
+              {/* Crafted Dark Carbon Media Thumbnail */}
+              <View style={styles.thumb}>
+                <View style={styles.thumbPlayCircle}>
+                  <PlayIcon size={13} color="#FFFFFF" />
+                </View>
+                <View style={styles.thumbTagBadge}>
+                  <Text style={styles.thumbTagText}>{badgeText}</Text>
+                </View>
+              </View>
 
               {/* Middle Information */}
               <View style={styles.mid}>
@@ -94,7 +101,7 @@ export default function DownloadsScreen({
                 ]}
               >
                 {isComplete ? (
-                  <CheckIcon size={18} color={t.mint} />
+                  <CheckIcon size={18} color={t.accentText} />
                 ) : (
                   <Text style={[styles.badgeText, { color: t.accentText }]}>
                     {item.progress}%
@@ -133,16 +140,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   title: {
+    fontFamily: fonts.bold,
     fontSize: 26,
     fontWeight: '700',
     textAlign: 'right',
-    letterSpacing: -0.3,
+    letterSpacing: 0,
   },
   hint: {
+    fontFamily: fonts.regular,
     fontSize: 14,
     textAlign: 'right',
     marginBottom: 22,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   list: {
     gap: 10,
@@ -160,6 +169,38 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: radii.thumb,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  thumbPlayCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(251, 146, 60, 0.22)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 146, 60, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbTagBadge: {
+    position: 'absolute',
+    bottom: 3,
+    right: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+  thumbTagText: {
+    fontFamily: fonts.bold,
+    color: '#FDBA74',
+    fontSize: 9,
+    fontWeight: '700',
   },
   mid: {
     flex: 1,
@@ -167,12 +208,16 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   itemTitle: {
+    fontFamily: fonts.bold,
     fontSize: 15,
     fontWeight: '700',
+    lineHeight: 22,
     textAlign: 'right',
   },
   subtitle: {
-    fontSize: 12.5,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 19,
     textAlign: 'right',
   },
   barBg: {
@@ -195,6 +240,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   badgeText: {
+    fontFamily: fonts.bold,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -207,6 +253,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   emptyText: {
+    fontFamily: fonts.medium,
     fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',

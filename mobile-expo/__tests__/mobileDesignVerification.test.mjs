@@ -6,23 +6,23 @@ import { extractUrlFromText, validatePublicHttpsUrl, formatBytes, formatDuration
 import { VidNestClient } from '../src/api/vidnestClient.ts';
 
 test('theme tokens match mobile design requirements', () => {
-  // Forest Green, Mint, Violet tokens
-  assert.equal(tokens.light.primary, '#0F2A24');
-  assert.equal(tokens.light.onPrimary, '#CFF5E3');
-  assert.equal(tokens.light.mintBg, '#CFF5E3');
-  assert.equal(tokens.light.accent, '#6A4CFF');
-  assert.equal(tokens.light.bg, '#F6F4FF');
+  // Sand & Terracotta Studio (ui-ux-pro-max) light tokens
+  assert.equal(tokens.light.primary, '#0F172A');
+  assert.equal(tokens.light.onPrimary, '#FFFFFF');
+  assert.equal(tokens.light.mintBg, '#FFF1E6');
+  assert.equal(tokens.light.accent, '#C2410C');
+  assert.equal(tokens.light.bg, '#FAF7F2');
   assert.equal(tokens.light.surface, '#FFFFFF');
-  assert.equal(tokens.light.line, '#DCD7EE');
+  assert.equal(tokens.light.line, '#E2DDD5');
 
   // Dark mode tokens
-  assert.equal(tokens.dark.bg, '#0E0C18');
-  assert.equal(tokens.dark.surface, '#181527');
-  assert.equal(tokens.dark.primary, '#CFF5E3');
-  assert.equal(tokens.dark.onPrimary, '#0F2A24');
-  assert.equal(tokens.dark.mintBg, '#173A30');
-  assert.equal(tokens.dark.accent, '#9A85FF');
-  assert.equal(tokens.dark.line, '#2E2947');
+  assert.equal(tokens.dark.bg, '#0B0F19');
+  assert.equal(tokens.dark.surface, '#131B2E');
+  assert.equal(tokens.dark.primary, '#FB923C');
+  assert.equal(tokens.dark.onPrimary, '#0B0F19');
+  assert.equal(tokens.dark.mintBg, '#2A1C17');
+  assert.equal(tokens.dark.accent, '#FB923C');
+  assert.equal(tokens.dark.line, '#26334D');
 
   // Large radii (20-30px)
   assert.equal(radii.card, 28);
@@ -34,7 +34,7 @@ test('theme tokens match mobile design requirements', () => {
 
   // Gradient pairs
   assert.equal(gradients.length >= 6, true);
-  assert.equal(gradients[0][0], '#6A4CFF');
+  assert.equal(gradients[0][0], '#C2410C');
 });
 
 test('Arabic copy contains all mobile UI strings and RTL setting', () => {

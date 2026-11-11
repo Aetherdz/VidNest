@@ -1,0 +1,47 @@
+name: Deploy Web App to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Publish Static Frontend to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare static site bundle
+        run: |
+          mkdir -p _site/static
+          cp -r web/static/. _site/
+          cp -r web/static/. _site/static/
+          sed -i 's|href="/static/|href="./static/|g; s|src="/static/|src="./static/|g; s|href="/manifest.webmanifest"|href="./manifest.webmanifest"|g; s|href="/llms.txt"|href="./llms.txt"|g; s|href="/"|href="./"|g' _site/index.html
+          touch _site/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

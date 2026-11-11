@@ -7,6 +7,13 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
+import {
+  useFonts,
+  ReadexPro_400Regular,
+  ReadexPro_500Medium,
+  ReadexPro_600SemiBold,
+  ReadexPro_700Bold,
+} from '@expo-google-fonts/readex-pro';
 
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
@@ -19,7 +26,7 @@ if (typeof document !== 'undefined') {
     style.id = 'vidnest-web-a11y';
     style.textContent = `
       html, body, #root, [dir="rtl"], [dir="rtl"] * { direction: rtl !important; }
-      :focus-visible { outline: 3px solid #6A4CFF !important; outline-offset: 2px !important; }
+      :focus-visible { outline: 3px solid #C2410C !important; outline-offset: 2px !important; }
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
       }
@@ -28,24 +35,29 @@ if (typeof document !== 'undefined') {
   }
 }
 import { StatusBar } from 'expo-status-bar';
-import { tokens, type ThemeMode } from './src/theme/tokens.ts';
+import { tokens, fonts, type ThemeMode } from './src/theme/tokens.ts';
 import { useDownloader } from './src/hooks/useDownloader.ts';
 import BottomNav, { type TabKey } from './src/components/BottomNav.tsx';
 import HomeScreen from './src/components/HomeScreen.tsx';
 import DownloadsScreen from './src/components/DownloadsScreen.tsx';
 import LibraryScreen from './src/components/LibraryScreen.tsx';
-import SettingsModal from './src/components/SettingsModal.tsx';
 
 const DEFAULT_BASE_URL =
-  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://e4dc2225efba3e.lhr.life';
+  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://vidnest-web.onrender.com';
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    ReadexPro_400Regular,
+    ReadexPro_500Medium,
+    ReadexPro_600SemiBold,
+    ReadexPro_700Bold,
+  });
+
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeMode] = useState<ThemeMode>(
     systemColorScheme === 'dark' ? 'dark' : 'light',
   );
   const [activeTab, setActiveTab] = useState<TabKey>('home');
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (systemColorScheme === 'dark' || systemColorScheme === 'light') {
@@ -58,7 +70,7 @@ export default function App() {
       document.documentElement.dir = 'rtl';
       document.documentElement.lang = 'ar';
       document.documentElement.style.colorScheme = themeMode;
-      const focusColor = themeMode === 'dark' ? '#9A85FF' : '#6A4CFF';
+      const focusColor = themeMode === 'dark' ? '#FB923C' : '#C2410C';
       let style = document.getElementById('vidnest-web-a11y') as HTMLStyleElement | null;
       if (!style) {
         style = document.createElement('style');
@@ -85,16 +97,16 @@ export default function App() {
     downloads,
     library,
     toastMessage,
-    connStatus,
-    serverUrl,
-    setServerUrl,
     pasteFromClipboard,
     analyzeUrl,
     selectQualityOption,
     startDownload,
     shareItem,
-    testConnection,
   } = useDownloader(DEFAULT_BASE_URL);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   const handleStartDownloadFromHome = async () => {
     const res = await startDownload();
@@ -121,7 +133,7 @@ export default function App() {
             onSelectOption={selectQualityOption}
             onStartDownload={handleStartDownloadFromHome}
             recentDownloads={downloads}
-            onOpenSettings={() => setSettingsOpen(true)}
+            onToggleTheme={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
           />
         )}
 
@@ -167,18 +179,6 @@ export default function App() {
         onTabChange={setActiveTab}
         themeMode={themeMode}
       />
-
-      {/* Settings / Server Configuration Modal */}
-      <SettingsModal
-        visible={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        themeMode={themeMode}
-        onToggleTheme={setThemeMode}
-        serverUrl={serverUrl}
-        onServerUrlChange={setServerUrl}
-        onTestConnection={testConnection}
-        connStatus={connStatus}
-      />
     </SafeAreaView>
   );
 }
@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   toastText: {
+    fontFamily: fonts.bold,
     fontSize: 15,
     fontWeight: '700',
     textAlign: 'center',

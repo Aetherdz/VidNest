@@ -3,19 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0F2A24">
+  <meta name="theme-color" content="#0F172A">
   <meta name="vidnest-csrf" content="__VIDNEST_CSRF_TOKEN__">
-  <meta name="description" content="أداة تنزيل وسائط سريعة وهادئة وخاصة تدعم أكثر من 1,800 موقع عالمي، بتصميم Violet Instrument وبدون إعلانات.">
+  <meta name="vidnest-api" content="https://vidnest-web.onrender.com">
+  <meta name="description" content="أداة تنزيل وسائط سريعة وهادئة وخاصة تدعم أكثر من 1,800 موقع عالمي، بتصميم Sand & Terracotta Studio وبدون إعلانات.">
   <meta name="keywords" content="تنزيل فيديو, يوتيوب, تيك توك, انستغرام, فيسبوك, Atheerium, VidNest">
   <meta name="author" content="Atheerium">
   <link rel="canonical" href="/">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preload" href="/static/fonts/readex-pro-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="VidNest — Violet Instrument v4 | Atheerium">
+  <meta property="og:title" content="VidNest — Sand & Terracotta Studio v4 | Atheerium">
   <meta property="og:description" content="تنزيل فوري لأكثر من 1,800 موقع عالمي بأعلى جودة وبدون إعلانات. تصميم Atheerium.">
 
-  <title>VidNest — Violet Instrument v4 | Atheerium</title>
+  <title>VidNest — Sand & Terracotta Studio v4 | Atheerium</title>
 
   <script type="application/ld+json">
   {
@@ -91,11 +93,11 @@
     <header class="topbar">
       <a class="brand" href="/" aria-label="VidNest">
         <span class="brand-logo-wrap">
-          <svg class="brand-logo" viewBox="0 0 136 136" width="30" height="30" aria-hidden="true">
-            <rect width="136" height="136" rx="36" fill="#0F2A24"/>
-            <path d="M29 49c5 28 19 49 39 52 20-3 34-24 39-52" fill="none" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M41 65c6 17 16 27 27 28 11-1 21-11 27-28" fill="none" stroke="#FFFFFF" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <polygon points="57 45 83 60 57 75" fill="#C8F36A"/>
+          <svg class="brand-logo" viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+            <rect width="40" height="40" rx="11" fill="#0F172A"/>
+            <rect x="1" y="1" width="38" height="38" rx="10" fill="none" stroke="#FB923C" stroke-opacity="0.45" stroke-width="1.2"/>
+            <path d="M11.5 14.5L20 29L28.5 14.5" fill="none" stroke="#FAF7F2" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z" fill="#FB923C"/>
           </svg>
         </span>
         <span class="brand-text">VidNest</span>
@@ -139,28 +141,28 @@
             <!-- Platform Detect Chips -->
             <div class="chips-group" role="group" aria-label="المنصات المدعومة">
               <button type="button" class="chip" data-platform="youtube" data-url="https://www.youtube.com/watch?v=aqz-KE-bpKQ">
-                <span class="chip-dot dot-yt" aria-hidden="true"></span>YouTube
+                <svg class="chip-icon dot-yt" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4.5" width="20" height="15" rx="4.5"/><polygon points="10 9 15.5 12 10 15 10 9" fill="currentColor" stroke="none"/></svg>YouTube
               </button>
               <button type="button" class="chip" data-platform="tiktok" data-url="https://www.tiktok.com/@tiktok/video/7106594312292453678">
-                <span class="chip-dot dot-tt" aria-hidden="true"></span>TikTok
+                <svg class="chip-icon dot-tt" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4v11.2a3.8 3.8 0 1 1-3.2-3.75"/><path d="M14 4c.9 2.6 2.9 4.3 5.5 4.5"/></svg>TikTok
               </button>
               <button type="button" class="chip" data-platform="instagram" data-url="https://www.instagram.com/reel/C8r_Bv3M-Q0/">
-                <span class="chip-dot dot-ig" aria-hidden="true"></span>Instagram
+                <svg class="chip-icon dot-ig" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>Instagram
               </button>
               <button type="button" class="chip" data-platform="x" data-url="https://x.com/Twitter/status/1234567890">
-                <span class="chip-dot dot-x" aria-hidden="true"></span>X
+                <svg class="chip-icon dot-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/></svg>X
               </button>
               <button type="button" class="chip" data-platform="facebook" data-url="https://www.facebook.com/watch/?v=10153231379946729">
-                <span class="chip-dot dot-fb" aria-hidden="true"></span>Facebook
+                <svg class="chip-icon dot-fb" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 4H13a3.5 3.5 0 0 0-3.5 3.5V11H7v3.5h2.5V21h3.8v-6.5H16L16.5 11h-3.2V7.8c0-.7.3-1.1 1.1-1.1h1.1V4Z"/></svg>Facebook
               </button>
               <button type="button" class="chip" data-platform="vimeo" data-url="https://vimeo.com/76979871">
-                <span class="chip-dot dot-vm" aria-hidden="true"></span>Vimeo
+                <svg class="chip-icon dot-vm" viewBox="0 0 24 24" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Vimeo
               </button>
               <button type="button" class="chip" data-platform="soundcloud" data-url="https://soundcloud.com/forss/flickermood">
-                <span class="chip-dot dot-sc" aria-hidden="true"></span>SoundCloud
+                <svg class="chip-icon dot-sc" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 17h7.2a3.3 3.3 0 0 0 .4-6.57A5 5 0 0 0 11 7.5V17Z"/><line x1="4" y1="12.5" x2="4" y2="16.5"/><line x1="7.5" y1="9.5" x2="7.5" y2="17"/></svg>SoundCloud
               </button>
               <button type="button" class="chip" data-platform="universal">
-                <span class="chip-dot dot-all" aria-hidden="true"></span>+1,800
+                <svg class="chip-icon dot-all" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a14 14 0 0 1 3.6 9 14 14 0 0 1-3.6 9 14 14 0 0 1-3.6-9A14 14 0 0 1 12 3z"/></svg>+1,800
               </button>
             </div>
 
@@ -290,7 +292,7 @@
             <div class="apk-content">
               <h2 id="apk-heading" data-copy="apkTitle">حمّل تطبيق VidNest للأندرويد</h2>
               <p data-copy="apkDesc">تجربة أصيلة ومتكاملة على جهازك المحمول، مع مشغل وسائط مدمج وتشغيل في الخلفية ومكتبة منظمة.</p>
-              <a id="apk-download" class="apk-cta-btn" href="/download/apk">
+              <a id="apk-download" class="apk-cta-btn" href="https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk">
                 <svg class="icon"><use href="#i-apk"/></svg>
                 <span data-copy="apkCta">تنزيل حزمة APK الرسمية</span>
               </a>
@@ -383,8 +385,8 @@
           <a class="designer-link" href="https://atheerium.com" target="_blank" rel="noopener">Atheerium</a>
         </div>
         <div>
-          <span>Violet Instrument v4 · </span>
-          <a class="footer-link" href="/static/fonts/OFL.txt" target="_blank">IBM Plex Sans Arabic (OFL)</a>
+          <span>Sand &amp; Terracotta Studio v4 · </span>
+          <a class="footer-link" href="/static/fonts/OFL-ReadexPro.txt" target="_blank">Readex Pro (OFL)</a>
           <span> · </span>
           <a class="footer-link" href="/llms.txt">llms.txt</a>
         </div>

@@ -165,12 +165,12 @@ const copy = {
 };
 
 const GRADIENTS = [
-  ["#6A4CFF", "#2FD4A0"],
-  ["#FF7A59", "#6A4CFF"],
-  ["#0F2A24", "#2FD4A0"],
-  ["#FFB347", "#E1306C"],
-  ["#3A86FF", "#8338EC"],
-  ["#06D6A0", "#0F2A24"],
+  ["#C2410C", "#EA580C"],
+  ["#0F172A", "#1E3A8A"],
+  ["#9A3412", "#D97706"],
+  ["#1E293B", "#0369A1"],
+  ["#0F172A", "#059669"],
+  ["#7C2D12", "#B45309"],
 ];
 
 function getGradient(seedText) {
@@ -237,9 +237,54 @@ function saveRecent() {
   }
 }
 
+function resolveApiBase() {
+  const csrfMeta = document.querySelector('meta[name="vidnest-csrf"]');
+  const csrfVal = csrfMeta ? (csrfMeta.getAttribute("content") || "").trim() : "";
+  // When served directly by the Flask backend, __VIDNEST_CSRF_TOKEN__ is replaced in-page.
+  if (csrfVal && csrfVal !== "__VIDNEST_CSRF_TOKEN__") {
+    return "";
+  }
+  const apiMeta = document.querySelector('meta[name="vidnest-api"]');
+  const configured = apiMeta ? (apiMeta.getAttribute("content") || "").trim().replace(/\/+$/, "") : "";
+  return configured || "https://vidnest-web.onrender.com";
+}
+
+const API_BASE = resolveApiBase();
+let cachedCsrfToken = "";
+
 function getCsrfToken() {
+  if (cachedCsrfToken) return cachedCsrfToken;
   const meta = document.querySelector('meta[name="vidnest-csrf"]');
-  return meta ? meta.getAttribute("content") || "" : "";
+  const content = meta ? (meta.getAttribute("content") || "").trim() : "";
+  if (content && content !== "__VIDNEST_CSRF_TOKEN__") {
+    cachedCsrfToken = content;
+    return content;
+  }
+  return "";
+}
+
+async function ensureCsrfToken() {
+  const existing = getCsrfToken();
+  if (existing) return existing;
+  const response = await fetch(`${API_BASE}/api/session`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(t("genericError"));
+  }
+  const data = await response.json();
+  if (data && typeof data.csrfToken === "string" && data.csrfToken) {
+    cachedCsrfToken = data.csrfToken;
+    const meta = document.querySelector('meta[name="vidnest-csrf"]');
+    if (meta) meta.setAttribute("content", data.csrfToken);
+    return data.csrfToken;
+  }
+  throw new Error(t("genericError"));
+}
+
+function buildFileUrl(fileName) {
+  return `${API_BASE}/files/${encodeURIComponent(fileName)}`;
 }
 
 function setMessage(textMsg, isError = false) {
@@ -546,7 +591,7 @@ function createMediaRow(item, isActiveDownloading = false, stageText = "") {
   } else {
     const badge = document.createElement("a");
     badge.className = "media-row-badge badge-mint badge-link";
-    badge.href = `/files/${encodeURIComponent(item.file)}`;
+    badge.href = buildFileUrl(item.file);
     badge.download = "";
     badge.setAttribute("aria-label", t("saveFile"));
     badge.append(createSvgIcon("check"));
@@ -619,7 +664,7 @@ function renderLibrary() {
   recent.forEach((item) => {
     const tile = document.createElement("a");
     tile.className = "library-tile";
-    tile.href = `/files/${encodeURIComponent(item.file)}`;
+    tile.href = buildFileUrl(item.file);
     tile.download = "";
 
     const thumb = document.createElement("div");
@@ -646,8 +691,8 @@ function renderLibrary() {
 let activeJob = null;
 
 async function postJson(path, body) {
-  const csrfValue = getCsrfToken();
-  const response = await fetch(path, {
+  const csrfValue = await ensureCsrfToken();
+  const response = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -727,7 +772,7 @@ async function triggerDownloadExecution(payload, downloadTitle, downloadSource, 
 
     // Trigger direct browser save
     const anchor = document.createElement("a");
-    anchor.href = `/files/${encodeURIComponent(result.file)}`;
+    anchor.href = buildFileUrl(result.file);
     anchor.download = "";
     document.body.append(anchor);
     anchor.click();

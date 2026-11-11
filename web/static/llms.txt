@@ -4,25 +4,25 @@
 
 ## Overview & Philosophy
 - **Creator / Organization**: Atheerium (https://atheerium.com)
-- **Design Philosophy**: Violet Instrument v4 aesthetic, calm typography, distraction-free utility.
+- **Design Philosophy**: Sand & Terracotta Studio v4 aesthetic, calm typography, distraction-free utility.
 - **Zero-Ad Policy**: No advertisements, no trackers, no surveillance cookies, no third-party telemetry scripts.
 - **Zero-Emoji UI**: Purpose-built minimal geometric SVG iconography.
-- **Bilingual Core**: Native Arabic-first (RTL) and English (LTR) interface and typography with self-hosted IBM Plex Sans Arabic.
+- **Bilingual Core**: Native Arabic-first (RTL) and English (LTR) interface and typography with self-hosted Readex Pro.
 
 ## Architecture & Ecosystem
 VidNest operates across three complementary form factors:
 
 ### 1. Web Application (`web/`)
-- Universal media inspection and on-demand stream extraction ("Violet Instrument v4").
+- Universal media inspection and on-demand stream extraction ("Sand & Terracotta Studio v4").
 - Single-page interface built with vanilla semantic HTML5, pure CSS3 (custom properties, responsive grid/flexbox), and vanilla ES2022 JavaScript.
 - Backend powered by Flask, NetGuard SSRF filter, and yt-dlp + FFmpeg.
 - Secure CSRF protection (`X-VidNest-CSRF`), rate-limiting, and ephemeral storage cleanup.
-- Self-hosted fonts (`IBM Plex Sans Arabic`, OFL license).
+- Self-hosted fonts (`Readex Pro`, OFL license).
 - Zero external CDNs, strict Content Security Policy (`font-src 'self'`).
 
 ### 2. Cross-Platform Mobile & Web App (`mobile-expo/`)
 - Universal application built with React Native + Expo SDK 54 and TypeScript.
-- Violet Instrument v4 dark/light theme designed with Astryx Design and StyleX design tokens (`src/theme/tokens.ts`).
+- Sand & Terracotta Studio v4 dark/light theme designed with Astryx Design and StyleX design tokens (`src/theme/tokens.ts`).
 - Centered Download Instrument (`App.tsx`, `CenteredDownloadInstrument.tsx`) supporting video/audio downloads, format inspection, and platform auto-detection.
 - Native device integration: local caching, share sheet invocation, and offline recent downloads management.
 - Full RTL Arabic interface, WCAG AA compliance, and accessible touch targets (>= 48dp).

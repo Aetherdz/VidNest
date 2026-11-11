@@ -2,34 +2,29 @@
   <defs>
     <!-- Background Gradients -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#08070D"/>
-      <stop offset="50%" stop-color="#0E0C18"/>
-      <stop offset="100%" stop-color="#141126"/>
+      <stop offset="0%" stop-color="#070A12"/>
+      <stop offset="50%" stop-color="#0B0F19"/>
+      <stop offset="100%" stop-color="#131B2E"/>
     </linearGradient>
 
-    <linearGradient id="glowViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6A4CFF" stop-opacity="0.35"/>
-      <stop offset="100%" stop-color="#6A4CFF" stop-opacity="0"/>
+    <linearGradient id="glowAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C2410C" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#FB923C" stop-opacity="0"/>
     </linearGradient>
 
-    <linearGradient id="glowForest" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#143326" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#D8F3E5" stop-opacity="0"/>
+    <linearGradient id="glowNavy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FDBA74" stop-opacity="0"/>
     </linearGradient>
 
     <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7B5EFF"/>
-      <stop offset="100%" stop-color="#5538EE"/>
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
     </linearGradient>
 
-    <linearGradient id="mintGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#D8F3E5"/>
-      <stop offset="100%" stop-color="#A7F3D0"/>
-    </linearGradient>
-
-    <linearGradient id="ctaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#143326"/>
-      <stop offset="100%" stop-color="#0A1D15"/>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#FDBA74"/>
     </linearGradient>
 
     <!-- Filters -->
@@ -44,8 +39,8 @@
   </defs>
 
   <style>
-    .font-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; font-weight: 800; }
-    .font-sub { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; font-weight: 500; }
+    .font-title { font-family: "Readex Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 800; }
+    .font-sub { font-family: "Readex Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 500; }
     .font-mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
   </style>
 
@@ -53,12 +48,12 @@
   <rect width="1200" height="420" rx="20" fill="url(#bgGrad)"/>
 
   <!-- Ambient Light Orbs -->
-  <circle cx="200" cy="80" r="260" fill="url(#glowViolet)" filter="url(#softGlow)"/>
-  <circle cx="1020" cy="340" r="220" fill="url(#glowForest)" filter="url(#softGlow)"/>
-  <circle cx="1050" cy="80" r="180" fill="url(#glowViolet)" filter="url(#softGlow)"/>
+  <circle cx="200" cy="80" r="260" fill="url(#glowAmber)" filter="url(#softGlow)"/>
+  <circle cx="1020" cy="340" r="220" fill="url(#glowNavy)" filter="url(#softGlow)"/>
+  <circle cx="1050" cy="80" r="180" fill="url(#glowAmber)" filter="url(#softGlow)"/>
 
   <!-- Subtle Precision Grid Pattern -->
-  <g opacity="0.08" stroke="#FFFFFF" stroke-width="1">
+  <g opacity="0.06" stroke="#FFFFFF" stroke-width="1">
     <line x1="80" y1="0" x2="80" y2="420"/>
     <line x1="200" y1="0" x2="200" y2="420"/>
     <line x1="320" y1="0" x2="320" y2="420"/>
@@ -77,90 +72,75 @@
   </g>
 
   <!-- Border Frame -->
-  <rect x="1" y="1" width="1198" height="418" rx="19" fill="none" stroke="#6A4CFF" stroke-opacity="0.25" stroke-width="1.5"/>
+  <rect x="1" y="1" width="1198" height="418" rx="19" fill="none" stroke="#FB923C" stroke-opacity="0.28" stroke-width="1.5"/>
 
   <!-- Left: VidNest Emblem -->
   <g transform="translate(90, 85)" filter="url(#dropShadow)">
-    <!-- Outer Violet Shield -->
     <rect width="130" height="130" rx="32" fill="url(#brandGrad)"/>
-    <!-- Subtle Inner Border -->
-    <rect x="2" y="2" width="126" height="126" rx="30" fill="none" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="1.5"/>
-
-    <!-- Nest Curve / Geometric 'V' Pattern -->
-    <path d="M 38 42 L 65 92 L 92 42" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Mint Center Accent Play Triangle -->
-    <polygon points="61,54 75,64 61,74" fill="url(#mintGrad)"/>
-    <!-- Pulse Ring Indicator -->
-    <circle cx="65" cy="108" r="4" fill="#D8F3E5"/>
+    <rect x="2" y="2" width="126" height="126" rx="30" fill="none" stroke="#FB923C" stroke-opacity="0.45" stroke-width="1.5"/>
+    <path d="M 38 44 L 65 94 L 92 44" fill="none" stroke="#FAF7F2" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="57,36 80,50 57,64" fill="url(#amberGrad)"/>
+    <circle cx="65" cy="110" r="4" fill="#FB923C"/>
   </g>
 
   <!-- Central Typography & Identity -->
   <g transform="translate(255, 115)">
-    <!-- Version & Instrument Pill -->
     <g transform="translate(0, 0)">
-      <rect width="248" height="30" rx="15" fill="#18152A" stroke="#6A4CFF" stroke-opacity="0.4" stroke-width="1"/>
-      <circle cx="14" cy="15" r="4" fill="#D8F3E5"/>
-      <text x="26" y="20" fill="#DCD7EE" font-size="12" class="font-mono" letter-spacing="0.5">VIOLET INSTRUMENT v4.0</text>
+      <rect width="280" height="30" rx="15" fill="#131B2E" stroke="#FB923C" stroke-opacity="0.45" stroke-width="1"/>
+      <circle cx="14" cy="15" r="4" fill="#FB923C"/>
+      <text x="26" y="20" fill="#FDBA74" font-size="12" class="font-mono" letter-spacing="0.5">SAND &amp; TERRACOTTA STUDIO v4</text>
     </g>
 
-    <!-- Main Title -->
-    <text x="0" y="80" fill="#FFFFFF" font-size="56" class="font-title" letter-spacing="-1.5">VidNest</text>
+    <text x="0" y="80" fill="#F8FAFC" font-size="56" class="font-title" letter-spacing="-1">VidNest</text>
 
-    <!-- Subtitle -->
-    <text x="0" y="116" fill="#A59EC2" font-size="20" class="font-sub">
+    <text x="0" y="116" fill="#94A3B8" font-size="20" class="font-sub">
       The quiet, privacy-first media downloader &amp; player ecosystem.
     </text>
 
     <!-- Capability Highlights / Spec Strip -->
     <g transform="translate(0, 145)">
-      <!-- Pill 1: 1800+ Platforms -->
       <g transform="translate(0, 0)">
-        <rect width="168" height="34" rx="8" fill="#161326" stroke="#2C2746" stroke-width="1"/>
-        <text x="14" y="22" fill="#D8F3E5" font-size="13" class="font-sub" font-weight="600">✦ 1,800+ Platforms</text>
+        <rect width="168" height="34" rx="8" fill="#131B2E" stroke="#26334D" stroke-width="1"/>
+        <text x="14" y="22" fill="#FDBA74" font-size="13" class="font-sub" font-weight="600">✦ 1,800+ Platforms</text>
       </g>
-      <!-- Pill 2: 4K & Audio Mux -->
       <g transform="translate(178, 0)">
-        <rect width="186" height="34" rx="8" fill="#161326" stroke="#2C2746" stroke-width="1"/>
-        <text x="14" y="22" fill="#E2DEFA" font-size="13" class="font-sub">4K Video + MP3 / M4A</text>
+        <rect width="186" height="34" rx="8" fill="#131B2E" stroke="#26334D" stroke-width="1"/>
+        <text x="14" y="22" fill="#F8FAFC" font-size="13" class="font-sub">4K Video + MP3 / M4A</text>
       </g>
-      <!-- Pill 3: NetGuard SSRF Shield -->
       <g transform="translate(374, 0)">
-        <rect width="176" height="34" rx="8" fill="#161326" stroke="#2C2746" stroke-width="1"/>
-        <text x="14" y="22" fill="#E2DEFA" font-size="13" class="font-sub">NetGuard SSRF Shield</text>
+        <rect width="176" height="34" rx="8" fill="#131B2E" stroke="#26334D" stroke-width="1"/>
+        <text x="14" y="22" fill="#F8FAFC" font-size="13" class="font-sub">NetGuard SSRF Shield</text>
       </g>
-      <!-- Pill 4: Arabic RTL-First -->
       <g transform="translate(560, 0)">
-        <rect width="160" height="34" rx="8" fill="#161326" stroke="#2C2746" stroke-width="1"/>
-        <text x="14" y="22" fill="#E2DEFA" font-size="13" class="font-sub">RTL-Native &amp; WCAG AA</text>
+        <rect width="160" height="34" rx="8" fill="#131B2E" stroke="#26334D" stroke-width="1"/>
+        <text x="14" y="22" fill="#F8FAFC" font-size="13" class="font-sub">Readex Pro · RTL AA</text>
       </g>
     </g>
   </g>
 
   <!-- Right Geometric Accents -->
-  <g transform="translate(1010, 85)" opacity="0.85">
-    <!-- Visual Soundwave / Frequency Bars -->
-    <rect x="0" y="55" width="6" height="50" rx="3" fill="#6A4CFF"/>
-    <rect x="14" y="35" width="6" height="90" rx="3" fill="#7B5EFF"/>
-    <rect x="28" y="15" width="6" height="130" rx="3" fill="#D8F3E5"/>
-    <rect x="42" y="45" width="6" height="70" rx="3" fill="#7B5EFF"/>
-    <rect x="56" y="65" width="6" height="30" rx="3" fill="#6A4CFF"/>
-    <rect x="70" y="30" width="6" height="100" rx="3" fill="#D8F3E5"/>
-    <rect x="84" y="50" width="6" height="60" rx="3" fill="#7B5EFF"/>
+  <g transform="translate(1010, 85)" opacity="0.88">
+    <rect x="0" y="55" width="6" height="50" rx="3" fill="#C2410C"/>
+    <rect x="14" y="35" width="6" height="90" rx="3" fill="#FB923C"/>
+    <rect x="28" y="15" width="6" height="130" rx="3" fill="#FDBA74"/>
+    <rect x="42" y="45" width="6" height="70" rx="3" fill="#FB923C"/>
+    <rect x="56" y="65" width="6" height="30" rx="3" fill="#C2410C"/>
+    <rect x="70" y="30" width="6" height="100" rx="3" fill="#FDBA74"/>
+    <rect x="84" y="50" width="6" height="60" rx="3" fill="#FB923C"/>
   </g>
 
   <!-- Footer Baseline Info Strip -->
   <g transform="translate(90, 365)">
-    <line x1="0" y1="0" x2="1020" y2="0" stroke="#6A4CFF" stroke-opacity="0.18" stroke-width="1"/>
-    
-    <text x="0" y="25" fill="#7D749B" font-size="13" class="font-sub">
-      Ad-Free • Zero Trackers • Zero Emojis in UI • 100% Open Source (MIT)
+    <line x1="0" y1="0" x2="1020" y2="0" stroke="#26334D" stroke-width="1"/>
+
+    <text x="0" y="25" fill="#94A3B8" font-size="13" class="font-sub">
+      Ad-Free • Zero Trackers • Readex Pro (OFL) • 100% Open Source (MIT)
     </text>
 
-    <!-- Designer Attribution Badge -->
     <g transform="translate(740, 7)">
-      <rect width="280" height="26" rx="6" fill="#120F20" stroke="#2B2446" stroke-width="1"/>
-      <text x="14" y="17" fill="#A59EC2" font-size="12" class="font-sub">
-        Design &amp; Architecture: <tspan fill="#D8F3E5" font-weight="700">Atheerium</tspan> (<tspan fill="#E2DEFA">zaikabdou</tspan>)
+      <rect width="280" height="26" rx="6" fill="#131B2E" stroke="#26334D" stroke-width="1"/>
+      <text x="14" y="17" fill="#94A3B8" font-size="12" class="font-sub">
+        Design &amp; Architecture: <tspan fill="#FB923C" font-weight="700">Atheerium</tspan> (<tspan fill="#F8FAFC">zaikabdou</tspan>)
       </text>
     </g>
   </g>

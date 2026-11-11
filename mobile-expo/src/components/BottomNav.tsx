@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { HomeIcon, DownloadIcon, LibraryIcon } from './Icons.tsx';
-import { tokens, type ThemeMode } from '../theme/tokens.ts';
+import { tokens, fonts, type ThemeMode } from '../theme/tokens.ts';
 
 export type TabKey = 'home' | 'downloads' | 'library';
 
@@ -73,6 +73,7 @@ export default function BottomNav({ activeTab, onTabChange, themeMode }: Props) 
                 style={[
                   styles.tabLabel,
                   {
+                    fontFamily: isActive ? fonts.bold : fonts.medium,
                     color: isActive ? t.ink : t.muted,
                     fontWeight: isActive ? '700' : '500',
                   },
@@ -109,10 +110,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 8,
-    // Soft calm purple shadow
-    shadowColor: '#3C288C',
+    // Soft studio carbon shadow
+    shadowColor: '#111315',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.14,
+    shadowOpacity: 0.12,
     shadowRadius: 20,
     elevation: 8,
   },

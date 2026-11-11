@@ -374,6 +374,47 @@ export class VidNestClient {
   async probeFormats(url: string): Promise<ProbeResponse> {
     const checked = validatePublicHttpsUrl(url);
     if (!checked.valid || !checked.normalized) throw new Error(checked.error ?? "Invalid URL.");
+
+    if (this.fetcher === (globalThis as any).fetch) {
+      const candidates: Promise<ProbeResponse>[] = [];
+      if (isTikTokUrl(checked.normalized)) {
+        candidates.push(
+          this.probeTikTokResidential(checked.normalized).then((r) => {
+            if (!r || !Array.isArray(r.formats) || r.formats.length === 0) throw new Error("empty");
+            return r;
+          })
+        );
+      }
+      if (extractTwitterStatusId(checked.normalized)) {
+        candidates.push(
+          this.probeTwitterResidential(checked.normalized).then((r) => {
+            if (!r || !Array.isArray(r.formats) || r.formats.length === 0) throw new Error("empty");
+            return r;
+          })
+        );
+      }
+      const ytId = extractYouTubeVideoId(checked.normalized);
+      if (ytId) {
+        candidates.push(
+          this.probeYouTubeResidential(ytId).then((r) => {
+            if (!r || !Array.isArray(r.formats) || r.formats.length === 0) throw new Error("empty");
+            return r;
+          })
+        );
+      }
+      candidates.push(
+        this.post<ProbeResponse>("/api/formats", { url: checked.normalized }).then((r) => {
+          if (!r.probeId || !Array.isArray(r.formats) || r.formats.length === 0) throw new Error("empty");
+          return r;
+        })
+      );
+      try {
+        return await Promise.any(candidates);
+      } catch {
+        throw new Error("No downloadable formats were found.");
+      }
+    }
+
     try {
       const result = await this.post<ProbeResponse>("/api/formats", { url: checked.normalized });
       if (!result.probeId || !Array.isArray(result.formats) || result.formats.length === 0) throw new Error("No downloadable formats were found.");

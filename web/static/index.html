@@ -11,6 +11,9 @@
   <meta name="author" content="Atheerium">
   <link rel="canonical" href="/">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/static/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
   <link rel="preload" href="/static/fonts/readex-pro-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 
   <meta property="og:type" content="website">
@@ -94,10 +97,17 @@
       <a class="brand" href="/" aria-label="VidNest">
         <span class="brand-logo-wrap">
           <svg class="brand-logo" viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
-            <rect width="40" height="40" rx="11" fill="#0F172A"/>
+            <defs>
+              <linearGradient id="bl-terra" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FB923C" />
+                <stop offset="100%" stop-color="#C2410C" />
+              </linearGradient>
+            </defs>
+            <rect width="40" height="40" rx="11" fill="#0B0F19"/>
             <rect x="1" y="1" width="38" height="38" rx="10" fill="none" stroke="#FB923C" stroke-opacity="0.45" stroke-width="1.2"/>
-            <path d="M11.5 14.5L20 29L28.5 14.5" fill="none" stroke="#FAF7F2" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z" fill="#FB923C"/>
+            <path d="M11.5 14.5L20 28.5L28.5 14.5" fill="none" stroke="#FAF7F2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z" fill="url(#bl-terra)"/>
+            <path d="M17 23L20 26L23 23" fill="none" stroke="url(#bl-terra)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
         <span class="brand-text">VidNest</span>

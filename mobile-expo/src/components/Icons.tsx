@@ -23,11 +23,21 @@ export function LogoMarkIcon({ size = 38 }: { size?: number }) {
         style: { flexShrink: 0, display: 'block' },
         'aria-hidden': 'true',
       },
+      React.createElement(
+        'defs',
+        null,
+        React.createElement(
+          'linearGradient',
+          { id: 'logo-mark-terra', x1: '0%', y1: '0%', x2: '100%', y2: '100%' },
+          React.createElement('stop', { offset: '0%', stopColor: '#FB923C' }),
+          React.createElement('stop', { offset: '100%', stopColor: '#C2410C' }),
+        ),
+      ),
       React.createElement('rect', {
         width: '40',
         height: '40',
         rx: '11',
-        fill: '#0F172A',
+        fill: '#0B0F19',
       }),
       React.createElement('rect', {
         x: '1',
@@ -36,19 +46,26 @@ export function LogoMarkIcon({ size = 38 }: { size?: number }) {
         height: '38',
         rx: '10',
         stroke: '#FB923C',
-        strokeOpacity: '0.42',
+        strokeOpacity: '0.45',
         strokeWidth: '1.2',
       }),
       React.createElement('path', {
-        d: 'M11.5 14.5L20 29L28.5 14.5',
+        d: 'M11.5 14.5L20 28.5L28.5 14.5',
         stroke: '#FAF7F2',
-        strokeWidth: '3.2',
+        strokeWidth: '2.8',
         strokeLinecap: 'round',
         strokeLinejoin: 'round',
       }),
       React.createElement('path', {
         d: 'M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z',
-        fill: '#FB923C',
+        fill: 'url(#logo-mark-terra)',
+      }),
+      React.createElement('path', {
+        d: 'M17 23L20 26L23 23',
+        stroke: '#FB923C',
+        strokeWidth: '1.6',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
       }),
     );
   }

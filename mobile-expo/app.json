@@ -5,13 +5,26 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F19"
+    },
     "newArchEnabled": true,
     "supportsRTL": true,
     "designer": "Atheerium",
-    "ios": { "bundleIdentifier": "com.atheerium.vidnest", "supportsTablet": true },
+    "ios": {
+      "bundleIdentifier": "com.atheerium.vidnest",
+      "supportsTablet": true
+    },
     "android": {
       "package": "com.atheerium.vidnest",
       "supportsRTL": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F19"
+      },
       "intentFilters": [
         {
           "action": "SEND",
@@ -20,6 +33,9 @@
         }
       ]
     },
-    "web": { "bundler": "metro" }
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    }
   }
 }

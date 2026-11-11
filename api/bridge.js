@@ -266,11 +266,6 @@ async function probeTwitterFallback(rawUrl) {
 }
 
 async function probeDirectPlatformFallback(rawUrl) {
-  const ytId = extractYouTubeVideoId(rawUrl);
-  if (ytId) {
-    const fed = await probeYouTubeFederated(ytId);
-    if (fed) return fed;
-  }
   if (isTikTokUrl(rawUrl)) {
     const tk = await probeTikTokFallback(rawUrl);
     if (tk) return tk;
@@ -278,6 +273,11 @@ async function probeDirectPlatformFallback(rawUrl) {
   if (extractTwitterStatusId(rawUrl)) {
     const tw = await probeTwitterFallback(rawUrl);
     if (tw) return tw;
+  }
+  const ytId = extractYouTubeVideoId(rawUrl);
+  if (ytId) {
+    const fed = await probeYouTubeFederated(ytId);
+    if (fed) return fed;
   }
   return null;
 }
@@ -378,92 +378,116 @@ async function probeYouTubeInnertubeIos(videoId) {
   }
 }
 
-async function probeYouTubeFederated(videoId) {
-  if (!videoId) return null;
-  const iosResult = await probeYouTubeInnertubeIos(videoId);
-  if (iosResult) return iosResult;
+function fetchWithTimeout(url, opts = {}, timeoutMs = 3500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...opts, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
 
-  for (const inst of YOUTUBE_FEDERATED_APIS) {
-    const endpoint =
-      inst.kind === "piped"
-        ? `${inst.base}/streams/${videoId}`
-        : `${inst.base}/api/v1/videos/${videoId}`;
-    try {
-      const r = await fetch(endpoint, { headers: { Accept: "application/json", "User-Agent": "VidNest/4.0" } });
-      if (!r.ok) continue;
-      const data = await r.json();
-      const formats = [];
-      if (inst.kind === "piped") {
-        for (const [idx, vs] of (data.videoStreams || []).entries()) {
-          if (!vs || typeof vs.url !== "string") continue;
-          const height = typeof vs.height === "number" ? vs.height : 720;
-          const ext = String(vs.mimeType || "").includes("webm") ? "webm" : "mp4";
-          formats.push({
-            id: String(vs.itag || `pipedv${idx}`),
-            ext,
-            quality: `${height}p`,
-            height,
-            width: typeof vs.width === "number" ? vs.width : null,
-            filesize: typeof vs.contentLength === "number" ? vs.contentLength : null,
-            hasVideo: true,
-            hasAudio: !vs.videoOnly,
-            format: `${height}p (${ext})`,
-            directUrl: vs.url,
-          });
-        }
-        for (const [idx, aus] of (data.audioStreams || []).entries()) {
-          if (!aus || typeof aus.url !== "string") continue;
-          const ext = String(aus.mimeType || "").includes("mp4") ? "m4a" : "webm";
-          formats.push({
-            id: String(aus.itag || `pipeda${idx}`),
-            ext,
-            quality: "Audio",
-            height: null,
-            width: null,
-            filesize: typeof aus.contentLength === "number" ? aus.contentLength : null,
-            hasVideo: false,
-            hasAudio: true,
-            format: `Audio (${ext})`,
-            directUrl: aus.url,
-          });
-        }
-      } else {
-        for (const [idx, fs] of [...(data.formatStreams || []), ...(data.adaptiveFormats || [])].entries()) {
-          if (!fs || typeof fs.url !== "string") continue;
-          const mime = String(fs.type || "").toLowerCase();
-          const isAudio = mime.startsWith("audio/");
-          const ext = isAudio && mime.includes("mp4") ? "m4a" : mime.includes("webm") ? "webm" : "mp4";
-          const h = parseInt(String(fs.resolution || "").replace("p", ""), 10);
-          const height = Number.isFinite(h) ? h : isAudio ? null : 720;
-          formats.push({
-            id: String(fs.itag || `inv${idx}`),
-            ext,
-            quality: isAudio ? "Audio" : `${height}p`,
-            height,
-            width: null,
-            filesize: null,
-            hasVideo: !isAudio,
-            hasAudio: true,
-            format: isAudio ? `Audio (${ext})` : `${height}p (${ext})`,
-            directUrl: fs.url,
-          });
-        }
+async function probeSingleFederatedInstance(inst, videoId) {
+  const endpoint =
+    inst.kind === "piped"
+      ? `${inst.base}/streams/${videoId}`
+      : `${inst.base}/api/v1/videos/${videoId}`;
+  try {
+    const r = await fetchWithTimeout(endpoint, {
+      headers: { Accept: "application/json", "User-Agent": "VidNest/4.0" },
+    }, 3500);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const formats = [];
+    if (inst.kind === "piped") {
+      for (const [idx, vs] of (data.videoStreams || []).entries()) {
+        if (!vs || typeof vs.url !== "string") continue;
+        const height = typeof vs.height === "number" ? vs.height : 720;
+        const ext = String(vs.mimeType || "").includes("webm") ? "webm" : "mp4";
+        formats.push({
+          id: String(vs.itag || `pipedv${idx}`),
+          ext,
+          quality: `${height}p`,
+          height,
+          width: typeof vs.width === "number" ? vs.width : null,
+          filesize: typeof vs.contentLength === "number" ? vs.contentLength : null,
+          hasVideo: true,
+          hasAudio: !vs.videoOnly,
+          format: `${height}p (${ext})`,
+          directUrl: vs.url,
+        });
       }
-      if (formats.length > 0) {
-        return {
-          probeId: `fed-${videoId}`,
-          title: String(data.title || "YouTube Video").slice(0, 200),
-          uploader: String(data.uploader || data.author || "").slice(0, 120),
-          extractor: "YoutubeFederated",
-          duration: typeof data.duration === "number" ? data.duration : null,
-          formats,
-        };
+      for (const [idx, aus] of (data.audioStreams || []).entries()) {
+        if (!aus || typeof aus.url !== "string") continue;
+        const ext = String(aus.mimeType || "").includes("mp4") ? "m4a" : "webm";
+        formats.push({
+          id: String(aus.itag || `pipeda${idx}`),
+          ext,
+          quality: "Audio",
+          height: null,
+          width: null,
+          filesize: typeof aus.contentLength === "number" ? aus.contentLength : null,
+          hasVideo: false,
+          hasAudio: true,
+          format: `Audio (${ext})`,
+          directUrl: aus.url,
+        });
       }
-    } catch {
-      // try next instance
+    } else {
+      for (const [idx, fs] of [...(data.formatStreams || []), ...(data.adaptiveFormats || [])].entries()) {
+        if (!fs || typeof fs.url !== "string") continue;
+        const mime = String(fs.type || "").toLowerCase();
+        const isAudio = mime.startsWith("audio/");
+        const ext = isAudio && mime.includes("mp4") ? "m4a" : mime.includes("webm") ? "webm" : "mp4";
+        const h = parseInt(String(fs.resolution || "").replace("p", ""), 10);
+        const height = Number.isFinite(h) ? h : isAudio ? null : 720;
+        formats.push({
+          id: String(fs.itag || `inv${idx}`),
+          ext,
+          quality: isAudio ? "Audio" : `${height}p`,
+          height,
+          width: null,
+          filesize: null,
+          hasVideo: !isAudio,
+          hasAudio: true,
+          format: isAudio ? `Audio (${ext})` : `${height}p (${ext})`,
+          directUrl: fs.url,
+        });
+      }
     }
+    if (formats.length > 0) {
+      return {
+        probeId: `fed-${videoId}`,
+        title: String(data.title || "YouTube Video").slice(0, 200),
+        uploader: String(data.uploader || data.author || "").slice(0, 120),
+        extractor: "YoutubeFederated",
+        duration: typeof data.duration === "number" ? data.duration : null,
+        formats,
+      };
+    }
+  } catch {
+    // ignore failed instance
   }
   return null;
+}
+
+async function probeYouTubeFederated(videoId) {
+  if (!videoId) return null;
+  const candidates = [
+    probeYouTubeInnertubeIos(videoId),
+    ...YOUTUBE_FEDERATED_APIS.map((inst) => probeSingleFederatedInstance(inst, videoId)),
+  ];
+  try {
+    return await Promise.any(
+      candidates.map((p) =>
+        p.then((res) => {
+          if (!res || !Array.isArray(res.formats) || res.formats.length === 0) {
+            throw new Error("No formats");
+          }
+          return res;
+        })
+      )
+    );
+  } catch {
+    return null;
+  }
 }
 
 let cachedCsrf = "";
@@ -474,9 +498,9 @@ async function getRenderCsrf(forceRefresh = false) {
     return cachedCsrf;
   }
   try {
-    const sess = await fetch(`${RENDER_BASE}/api/session`, {
+    const sess = await fetchWithTimeout(`${RENDER_BASE}/api/session`, {
       headers: { Accept: "application/json", Origin: RENDER_BASE },
-    });
+    }, 2500);
     if (sess.ok) {
       const data = await sess.json().catch(() => ({}));
       const tok = data.csrfToken || data.csrf || sess.headers.get("x-vidnest-csrf") || "";
@@ -489,14 +513,18 @@ async function getRenderCsrf(forceRefresh = false) {
   } catch {
     // Fall back to HTML meta extraction below
   }
-  const page = await fetch(`${RENDER_BASE}/`, { headers: { Accept: "text/html" } });
-  const html = await page.text();
-  const match =
-    html.match(/<meta\s+[^>]*name=["']vidnest-csrf["'][^>]*content=["']([^"']*)["']/i) ||
-    html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*name=["']vidnest-csrf["']/i);
-  cachedCsrf = match ? match[1] : "";
-  cachedAt = Date.now();
-  return cachedCsrf;
+  try {
+    const page = await fetchWithTimeout(`${RENDER_BASE}/`, { headers: { Accept: "text/html" } }, 2500);
+    const html = await page.text();
+    const match =
+      html.match(/<meta\s+[^>]*name=["']vidnest-csrf["'][^>]*content=["']([^"']*)["']/i) ||
+      html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*name=["']vidnest-csrf["']/i);
+    cachedCsrf = match ? match[1] : "";
+    cachedAt = Date.now();
+    return cachedCsrf;
+  } catch {
+    return "";
+  }
 }
 
 function pickBestFormat(formats, mode) {
@@ -524,7 +552,7 @@ function pickBestFormat(formats, mode) {
 
 async function postRender(path, payload) {
   let csrf = await getRenderCsrf(false);
-  let res = await fetch(`${RENDER_BASE}${path}`, {
+  let res = await fetchWithTimeout(`${RENDER_BASE}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -533,10 +561,10 @@ async function postRender(path, payload) {
       "X-VidNest-CSRF": csrf,
     },
     body: JSON.stringify(payload),
-  });
+  }, 4500);
   if (res.status === 403) {
     csrf = await getRenderCsrf(true);
-    res = await fetch(`${RENDER_BASE}${path}`, {
+    res = await fetchWithTimeout(`${RENDER_BASE}${path}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -545,7 +573,7 @@ async function postRender(path, payload) {
         "X-VidNest-CSRF": csrf,
       },
       body: JSON.stringify(payload),
-    });
+    }, 4500);
   }
   return res;
 }

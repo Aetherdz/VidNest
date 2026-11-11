@@ -715,7 +715,7 @@ function updateInspect() {
   if (pasteButton) pasteButton.hidden = hasText;
   const isReady = val.length >= 8 && val.startsWith("https://");
   if (inspectButton) inspectButton.disabled = requestInProgress || !isReady;
-  if (quickButton) quickButton.disabled = requestInProgress || !isReady;
+  if (quickButton) quickButton.disabled = !isReady;
   updatePlatformChips();
 }
 
@@ -1323,8 +1323,17 @@ async function triggerDownloadExecution(payload, downloadTitle, downloadSource, 
   }, 2200);
 
   try {
-    const endpoint = payload.mode ? "/api/quick-download" : "/api/download";
-    const result = await postJson(endpoint, payload);
+    let result = null;
+    if (selectedFormat && selectedFormat.directUrl && !payload.mode) {
+      result = {
+        file: selectedFormat.directUrl,
+        title: downloadTitle || probe?.title || "Media",
+        formatId: selectedFormat.id,
+      };
+    } else {
+      const endpoint = payload.mode ? "/api/quick-download" : "/api/download";
+      result = await postJson(endpoint, payload);
+    }
 
     clearTimeout(stageTimer1);
     clearTimeout(stageTimer2);
@@ -1551,10 +1560,28 @@ async function inspectFormats(targetUrl) {
   setMessage("");
 
   try {
-    const result = await postJson("/api/formats", { url });
-    if (!Array.isArray(result.formats) || result.formats.length === 0 || typeof result.probeId !== "string") {
-      throw new Error(t("noFormats"));
+    const candidates = [];
+    if (isTikTokUrl(url)) {
+      candidates.push(probeTikTokFromClient(url));
     }
+    if (extractTwitterStatusId(url)) {
+      candidates.push(probeTwitterFromClient(url));
+    }
+    if (extractYouTubeVideoId(url)) {
+      candidates.push(probeYouTubeFromClient(url));
+    }
+    candidates.push(postJson("/api/formats", { url }));
+
+    const validCandidates = candidates.map((p) =>
+      Promise.resolve(p).then((res) => {
+        if (!res || !Array.isArray(res.formats) || res.formats.length === 0 || typeof res.probeId !== "string") {
+          throw new Error(t("noFormats"));
+        }
+        return res;
+      })
+    );
+
+    const result = await Promise.any(validCandidates);
     probe = { ...result, url };
     requestInProgress = false;
     renderFormats(probe);

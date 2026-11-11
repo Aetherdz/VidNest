@@ -214,6 +214,24 @@ export function useDownloader(initialServerUrl: string) {
     const platform = detectPlatform(checked.normalized);
     const gradientIdx = Math.abs(checked.normalized.length) % 6;
 
+    // Instant optimistic preview options at 0ms
+    const isAudioPlatform = platform === 'SoundCloud' || checked.normalized.toLowerCase().includes('soundcloud');
+    const defaultOptions: QualityOption[] = [
+      { id: '1080p', label: '1080p', size: '72 MB', mode: 1080, height: 1080 },
+      { id: '720p', label: '720p', size: '38 MB', mode: 720, height: 720 },
+      { id: 'mp3', label: 'MP3', size: '5 MB', mode: 'audio' },
+    ];
+    const initialDefaultId = isAudioPlatform ? 'mp3' : '1080p';
+    setPreview({
+      url: checked.normalized,
+      title: `${platform} Media`,
+      source: platform,
+      duration: '03:32',
+      gradientIndex: gradientIdx,
+      options: defaultOptions,
+      selectedOptionId: initialDefaultId,
+    });
+
     try {
       let probeResult: ProbeResponse | null = null;
       try {
@@ -263,7 +281,6 @@ export function useDownloader(initialServerUrl: string) {
         }
       }
 
-      const isAudioPlatform = platform === 'SoundCloud' || checked.normalized.toLowerCase().includes('soundcloud');
       const bestDefaultId = isAudioPlatform
         ? (options.find((o) => o.mode === 'audio')?.id ?? options[0].id)
         : (options.find((o) => o.height === 1080)?.id ?? options[0].id);
@@ -277,9 +294,6 @@ export function useDownloader(initialServerUrl: string) {
         options,
         selectedOptionId: bestDefaultId,
       };
-
-      // Slight natural pause matching design (~800ms)
-      await new Promise((resolve) => setTimeout(resolve, 800));
 
       setPreview(previewData);
       setIsAnalyzing(false);

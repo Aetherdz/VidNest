@@ -250,7 +250,124 @@ function resolveApiBase() {
 }
 
 const API_BASE = resolveApiBase();
+const BRIDGE_API_BASE =
+  typeof window !== "undefined" && window.location && window.location.hostname.endsWith(".vercel.app")
+    ? ""
+    : "https://vidnest-six.vercel.app";
+let activeApiBase = API_BASE;
 let cachedCsrfToken = "";
+
+const CLIENT_YOUTUBE_APIS = [
+  { kind: "piped", base: "https://pipedapi.kavin.rocks" },
+  { kind: "piped", base: "https://pipedapi.adminforge.de" },
+  { kind: "invidious", base: "https://inv.nadeko.net" },
+  { kind: "invidious", base: "https://invidious.nerdvpn.de" },
+];
+
+function extractYouTubeVideoId(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || ""));
+    const host = parsed.hostname.toLowerCase().replace(/^(www\.|m\.)/, "");
+    let id = "";
+    if (host === "youtu.be") {
+      id = parsed.pathname.split("/").filter(Boolean)[0] || "";
+    } else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+      if (parsed.pathname === "/watch") {
+        id = parsed.searchParams.get("v") || "";
+      } else {
+        const parts = parsed.pathname.split("/").filter(Boolean);
+        if (parts.length >= 2 && ["shorts", "embed", "live", "v"].includes(parts[0])) {
+          id = parts[1];
+        }
+      }
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+  } catch {
+    return "";
+  }
+}
+
+async function probeYouTubeFromClient(videoId) {
+  if (!videoId) return null;
+  for (const inst of CLIENT_YOUTUBE_APIS) {
+    const endpoint =
+      inst.kind === "piped"
+        ? `${inst.base}/streams/${videoId}`
+        : `${inst.base}/api/v1/videos/${videoId}`;
+    try {
+      const resp = await fetch(endpoint, { headers: { Accept: "application/json" } });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const formats = [];
+      if (inst.kind === "piped") {
+        (data.videoStreams || []).forEach((vs, idx) => {
+          if (!vs || typeof vs.url !== "string") return;
+          const height = typeof vs.height === "number" ? vs.height : 720;
+          const ext = String(vs.mimeType || "").includes("webm") ? "webm" : "mp4";
+          formats.push({
+            id: String(vs.itag || `v${idx}`),
+            ext,
+            quality: `${height}p`,
+            height,
+            filesize: typeof vs.contentLength === "number" ? vs.contentLength : null,
+            hasVideo: true,
+            hasAudio: !vs.videoOnly,
+            format: `${height}p (${ext})`,
+            directUrl: vs.url,
+          });
+        });
+        (data.audioStreams || []).forEach((aus, idx) => {
+          if (!aus || typeof aus.url !== "string") return;
+          const ext = String(aus.mimeType || "").includes("mp4") ? "m4a" : "webm";
+          formats.push({
+            id: String(aus.itag || `a${idx}`),
+            ext,
+            quality: "Audio",
+            height: null,
+            filesize: typeof aus.contentLength === "number" ? aus.contentLength : null,
+            hasVideo: false,
+            hasAudio: true,
+            format: `Audio (${ext})`,
+            directUrl: aus.url,
+          });
+        });
+      } else {
+        [...(data.formatStreams || []), ...(data.adaptiveFormats || [])].forEach((fs, idx) => {
+          if (!fs || typeof fs.url !== "string") return;
+          const mime = String(fs.type || "").toLowerCase();
+          const isAudio = mime.startsWith("audio/");
+          const ext = isAudio && mime.includes("mp4") ? "m4a" : mime.includes("webm") ? "webm" : "mp4";
+          const h = parseInt(String(fs.resolution || "").replace("p", ""), 10);
+          const height = Number.isFinite(h) ? h : isAudio ? null : 720;
+          formats.push({
+            id: String(fs.itag || `inv${idx}`),
+            ext,
+            quality: isAudio ? "Audio" : `${height}p`,
+            height,
+            filesize: null,
+            hasVideo: !isAudio,
+            hasAudio: true,
+            format: isAudio ? `Audio (${ext})` : `${height}p (${ext})`,
+            directUrl: fs.url,
+          });
+        });
+      }
+      if (formats.length > 0) {
+        return {
+          probeId: `client-${videoId}`,
+          title: String(data.title || "YouTube Video").slice(0, 200),
+          uploader: String(data.uploader || data.author || "YouTube").slice(0, 120),
+          extractor: "YoutubeClientFallback",
+          duration: typeof data.duration === "number" ? data.duration : null,
+          formats,
+        };
+      }
+    } catch {
+      /* continue to next residential-reachable instance */
+    }
+  }
+  return null;
+}
 
 function getCsrfToken() {
   if (cachedCsrfToken) return cachedCsrfToken;
@@ -266,25 +383,32 @@ function getCsrfToken() {
 async function ensureCsrfToken() {
   const existing = getCsrfToken();
   if (existing) return existing;
-  const response = await fetch(`${API_BASE}/api/session`, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-  });
-  if (!response.ok) {
-    throw new Error(t("genericError"));
-  }
-  const data = await response.json();
-  if (data && typeof data.csrfToken === "string" && data.csrfToken) {
-    cachedCsrfToken = data.csrfToken;
-    const meta = document.querySelector('meta[name="vidnest-csrf"]');
-    if (meta) meta.setAttribute("content", data.csrfToken);
-    return data.csrfToken;
+  const bases = activeApiBase === BRIDGE_API_BASE ? [activeApiBase] : [activeApiBase, BRIDGE_API_BASE];
+  for (const base of bases) {
+    try {
+      const response = await fetch(`${base}/api/session`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) continue;
+      const data = await response.json();
+      if (data && typeof data.csrfToken === "string" && data.csrfToken) {
+        activeApiBase = base;
+        cachedCsrfToken = data.csrfToken;
+        const meta = document.querySelector('meta[name="vidnest-csrf"]');
+        if (meta) meta.setAttribute("content", data.csrfToken);
+        return data.csrfToken;
+      }
+    } catch {
+      /* try bridge base next */
+    }
   }
   throw new Error(t("genericError"));
 }
 
 function buildFileUrl(fileName) {
-  return `${API_BASE}/files/${encodeURIComponent(fileName)}`;
+  if (/^https?:\/\//i.test(fileName)) return fileName;
+  return `${activeApiBase}/files/${encodeURIComponent(fileName)}`;
 }
 
 function setMessage(textMsg, isError = false) {
@@ -691,28 +815,67 @@ function renderLibrary() {
 let activeJob = null;
 
 async function postJson(path, body) {
-  const csrfValue = await ensureCsrfToken();
-  const response = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      "X-VidNest-CSRF": csrfValue,
-    },
-    body: JSON.stringify(body),
-  });
+  if (path === "/api/download" && probe && Array.isArray(probe.formats)) {
+    const matched = probe.formats.find((f) => f.id === body.formatId);
+    if (matched && typeof matched.directUrl === "string" && matched.directUrl) {
+      return { file: matched.directUrl, title: probe.title || "YouTube Video" };
+    }
+  }
 
-  let result;
+  let csrfValue = "";
   try {
-    result = await response.json();
+    csrfValue = await ensureCsrfToken();
   } catch {
-    throw new Error(t("genericError"));
+    csrfValue = "";
   }
 
-  if (!response.ok) {
-    throw new Error(typeof result.error === "string" ? result.error : t("genericError"));
+  const bases = activeApiBase === BRIDGE_API_BASE ? [activeApiBase] : [activeApiBase, BRIDGE_API_BASE];
+  let lastError = null;
+
+  for (const base of bases) {
+    try {
+      const response = await fetch(`${base}${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "X-VidNest-CSRF": csrfValue,
+        },
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (response.ok) {
+        activeApiBase = base;
+        return result;
+      }
+      lastError = new Error(typeof result.error === "string" ? result.error : t("genericError"));
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(t("genericError"));
+    }
   }
-  return result;
+
+  // Tier-3 Client-Side Residential-IP YouTube Fallback
+  const ytId = body && body.url ? extractYouTubeVideoId(body.url) : "";
+  if (ytId) {
+    const clientProbe = await probeYouTubeFromClient(ytId);
+    if (clientProbe && Array.isArray(clientProbe.formats) && clientProbe.formats.length > 0) {
+      if (path === "/api/formats") {
+        return clientProbe;
+      }
+      if (path === "/api/quick-download" || path === "/api/download") {
+        const chosen =
+          body.mode === "audio"
+            ? clientProbe.formats.find((f) => !f.hasVideo) || clientProbe.formats[0]
+            : clientProbe.formats.find((f) => f.hasVideo) || clientProbe.formats[0];
+        if (chosen && chosen.directUrl) {
+          return { file: chosen.directUrl, title: clientProbe.title, formatId: chosen.id };
+        }
+      }
+    }
+  }
+
+  throw lastError || new Error(t("genericError"));
 }
 
 // Download Lifecycle with Staged Progress States

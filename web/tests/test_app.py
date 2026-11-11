@@ -803,6 +803,55 @@ class VidNestWebTests(unittest.TestCase):
         self.assertEqual(blocked_preflight.status_code, 403)
         self.assertIsNone(blocked_preflight.headers.get("Access-Control-Allow-Origin"))
 
+    def test_youtube_resilience_tiers_and_federated_fallback(self):
+        opts = webapp.yt_dlp_options()
+        yt_args = opts.get("extractor_args", {}).get("youtube", {})
+        self.assertIn("android_vr", yt_args.get("player_client", []))
+        self.assertIn("tv_embedded", yt_args.get("player_client", []))
+        self.assertEqual(
+            webapp._extract_youtube_video_id("https://www.youtube.com/watch?v=aqz-KE-bpKQ"),
+            "aqz-KE-bpKQ",
+        )
+        self.assertEqual(
+            webapp._extract_youtube_video_id("https://youtu.be/jNQXAC9IVRw"),
+            "jNQXAC9IVRw",
+        )
+        self.assertIsNone(webapp._extract_youtube_video_id("https://youtube.com/watch?v=x"))
+
+        class BlockedYoutubeDL:
+            def __init__(self, _opts):
+                pass
+            def __enter__(self):
+                return self
+            def __exit__(self, *_args):
+                return False
+            def extract_info(self, _url, download=False):
+                raise RuntimeError("Sign in to confirm you're not a bot")
+
+        fake_federated = {
+            "title": "Federated Fallback Clip",
+            "uploader": "Blender Foundation",
+            "extractor_key": "YoutubeFederated",
+            "duration": 60,
+            "formats": [
+                {"format_id": "22", "ext": "mp4", "height": 720, "vcodec": "avc1", "acodec": "mp4a"},
+            ],
+        }
+        with patch.object(webapp, "validate_media_url", return_value="https://www.youtube.com/watch?v=aqz-KE-bpKQ"), \
+             patch.object(webapp.yt_dlp, "YoutubeDL", BlockedYoutubeDL), \
+             patch.object(webapp, "_probe_or_fetch_youtube_federated", return_value=fake_federated):
+            resp = self.client.post(
+                "/api/formats",
+                base_url=self.base_url,
+                headers={"Origin": self.base_url, "X-VidNest-CSRF": webapp.csrf_token},
+                json={"url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ"},
+            )
+        self.assertEqual(resp.status_code, 200)
+        body = resp.get_json()
+        self.assertEqual(body["title"], "Federated Fallback Clip")
+        self.assertEqual(body["extractor"], "YoutubeFederated")
+        self.assertEqual(body["formats"][0]["id"], "22")
+
 
 if __name__ == "__main__":
     unittest.main()

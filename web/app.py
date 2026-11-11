@@ -335,7 +335,7 @@ def security_headers(response):
     response.headers.setdefault(
         "Content-Security-Policy",
         "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; "
-        "connect-src 'self' https://vidnest-web.onrender.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
+        "connect-src 'self' https://vidnest-web.onrender.com https://vidnest-six.vercel.app https://pipedapi.kavin.rocks https://pipedapi.adminforge.de https://inv.nadeko.net https://invidious.nerdvpn.de; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'",
     )
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
@@ -507,6 +507,164 @@ def has_ffmpeg() -> bool:
     return HAS_FFMPEG or app.config.get("TESTING", False)
 
 
+YOUTUBE_VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
+YOUTUBE_FEDERATED_INSTANCES = (
+    ("piped", "https://pipedapi.kavin.rocks"),
+    ("piped", "https://pipedapi.adminforge.de"),
+    ("invidious", "https://inv.nadeko.net"),
+    ("invidious", "https://invidious.nerdvpn.de"),
+)
+
+
+def _extract_youtube_video_id(link: str) -> str | None:
+    try:
+        parsed = urlsplit(link)
+    except Exception:
+        return None
+    host = (parsed.hostname or "").lower()
+    if host.startswith("www.") or host.startswith("m."):
+        host = host.split(".", 1)[1]
+    candidate = None
+    if host == "youtu.be":
+        parts = [p for p in parsed.path.split("/") if p]
+        candidate = parts[0] if parts else None
+    elif host in {"youtube.com", "youtube-nocookie.com"}:
+        parts = [p for p in parsed.path.split("/") if p]
+        if parsed.path == "/watch":
+            for kv in parsed.query.split("&"):
+                if kv.startswith("v="):
+                    candidate = kv[2:]
+                    break
+        elif len(parts) >= 2 and parts[0] in {"shorts", "embed", "live", "v"}:
+            candidate = parts[1]
+    if candidate and YOUTUBE_VIDEO_ID_RE.fullmatch(candidate):
+        return candidate
+    return None
+
+
+def _probe_or_fetch_youtube_federated(
+    video_id: str,
+    download_dir: Path | None = None,
+    target_format_id: str | None = None,
+    max_bytes: int | None = None,
+) -> dict | None:
+    """Tier-2 server-side Piped/Invidious federation fallback when YouTube blocks datacenter IPs."""
+    import json as _json
+    import urllib.request as _urlreq
+
+    if not YOUTUBE_VIDEO_ID_RE.fullmatch(video_id or ""):
+        return None
+
+    for kind, base_url in YOUTUBE_FEDERATED_INSTANCES:
+        api_url = (
+            f"{base_url}/streams/{video_id}"
+            if kind == "piped"
+            else f"{base_url}/api/v1/videos/{video_id}"
+        )
+        try:
+            validate_media_url(api_url)
+            req = _urlreq.Request(
+                api_url,
+                headers={"User-Agent": "VidNest/4.0", "Accept": "application/json"},
+            )
+            with _urlreq.urlopen(req, timeout=8) as resp:
+                raw = resp.read(2_000_000)
+            data = _json.loads(raw.decode("utf-8", "replace"))
+            if not isinstance(data, dict):
+                continue
+        except Exception:
+            continue
+
+        formats_out: list[dict] = []
+        stream_urls: dict[str, tuple[str, str]] = {}
+        if kind == "piped":
+            for idx, vs in enumerate(data.get("videoStreams") or []):
+                if not isinstance(vs, dict) or not isinstance(vs.get("url"), str):
+                    continue
+                fid = str(vs.get("itag") or f"pipedv{idx}")
+                ext = "webm" if "webm" in str(vs.get("mimeType") or "").lower() else "mp4"
+                height = vs.get("height") if isinstance(vs.get("height"), int) else 720
+                video_only = bool(vs.get("videoOnly"))
+                formats_out.append({
+                    "format_id": fid,
+                    "ext": ext,
+                    "height": height,
+                    "width": vs.get("width") if isinstance(vs.get("width"), int) else None,
+                    "filesize": vs.get("contentLength") if isinstance(vs.get("contentLength"), int) else None,
+                    "vcodec": "avc1",
+                    "acodec": "none" if video_only else "mp4a",
+                    "format": f"{fid} - {height}p",
+                })
+                stream_urls[fid] = (vs["url"], ext)
+            for idx, aus in enumerate(data.get("audioStreams") or []):
+                if not isinstance(aus, dict) or not isinstance(aus.get("url"), str):
+                    continue
+                fid = str(aus.get("itag") or f"pipeda{idx}")
+                ext = "m4a" if "mp4" in str(aus.get("mimeType") or "").lower() else "webm"
+                formats_out.append({
+                    "format_id": fid,
+                    "ext": ext,
+                    "vcodec": "none",
+                    "acodec": "mp4a",
+                    "abr": aus.get("bitrate") or 128,
+                    "filesize": aus.get("contentLength") if isinstance(aus.get("contentLength"), int) else None,
+                    "format": f"{fid} - audio",
+                })
+                stream_urls[fid] = (aus["url"], ext)
+        else:
+            for idx, fs in enumerate((data.get("formatStreams") or []) + (data.get("adaptiveFormats") or [])):
+                if not isinstance(fs, dict) or not isinstance(fs.get("url"), str):
+                    continue
+                fid = str(fs.get("itag") or f"inv{idx}")
+                mime = str(fs.get("type") or "").lower()
+                is_audio = mime.startswith("audio/")
+                ext = "m4a" if (is_audio and "mp4" in mime) else "webm" if "webm" in mime else "mp4"
+                res_str = str(fs.get("resolution") or "").rstrip("p")
+                height = int(res_str) if res_str.isdigit() else (None if is_audio else 720)
+                formats_out.append({
+                    "format_id": fid,
+                    "ext": ext,
+                    "height": height,
+                    "vcodec": "none" if is_audio else "avc1",
+                    "acodec": "mp4a",
+                    "abr": 128 if is_audio else None,
+                    "format": f"{fid} - {height or 'audio'}",
+                })
+                stream_urls[fid] = (fs["url"], ext)
+
+        if not formats_out:
+            continue
+
+        if download_dir is not None:
+            chosen_key = (target_format_id or "").split("+")[0]
+            if chosen_key not in stream_urls:
+                chosen_key = next(iter(stream_urls.keys()))
+            stream_url, ext = stream_urls[chosen_key]
+            validate_media_url(stream_url)
+            out_file = download_dir / f"media.{ext}"
+            req = _urlreq.Request(stream_url, headers={"User-Agent": "VidNest/4.0"})
+            total = 0
+            limit = max_bytes or MAX_DOWNLOAD_BYTES
+            with _urlreq.urlopen(req, timeout=25) as resp, open(out_file, "wb") as fh:
+                while True:
+                    chunk = resp.read(65536)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > limit:
+                        raise RuntimeError("The file exceeds the download size limit.")
+                    fh.write(chunk)
+
+        return {
+            "title": str(data.get("title") or "YouTube Video")[:200],
+            "uploader": str(data.get("uploader") or data.get("author") or "")[:120],
+            "extractor_key": "YoutubeFederated",
+            "duration": data.get("duration") if isinstance(data.get("duration"), (int, float)) else None,
+            "formats": formats_out,
+        }
+    return None
+
+
 def yt_dlp_options(**overrides):
     options = {
         "noplaylist": True,
@@ -516,11 +674,23 @@ def yt_dlp_options(**overrides):
         "quiet": True,
         "no_warnings": True,
         "cachedir": False,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android_vr", "tv_embedded", "mweb", "ios", "web"],
+                "skip": ["translated_subs"],
+            }
+        },
     }
     if NODE_PATH:
         options["js_runtimes"] = {"node": {"path": NODE_PATH}}
     if FFMPEG_PATH:
         options["ffmpeg_location"] = FFMPEG_PATH
+    proxy_url = os.environ.get("VIDNEST_PROXY_URL", "").strip()
+    if proxy_url:
+        options["proxy"] = proxy_url
+    cookies_file = os.environ.get("VIDNEST_COOKIES_FILE", "").strip()
+    if cookies_file:
+        options["cookiefile"] = cookies_file
     options.update(overrides)
     return options
 
@@ -583,8 +753,14 @@ def formats():
         # addresses at connect() time, so a DNS rebind or an HTTP redirect
         # after validate_media_url() still cannot reach an internal service.
         with netguard.public_egress_only():
-            with yt_dlp.YoutubeDL(yt_dlp_options(skip_download=True, extract_flat=False)) as ydl:
-                info = ydl.extract_info(link, download=False)
+            try:
+                with yt_dlp.YoutubeDL(yt_dlp_options(skip_download=True, extract_flat=False)) as ydl:
+                    info = ydl.extract_info(link, download=False)
+            except Exception:
+                yt_vid = _extract_youtube_video_id(link)
+                info = _probe_or_fetch_youtube_federated(yt_vid) if yt_vid else None
+                if info is None:
+                    raise
         if not isinstance(info, dict):
             raise RuntimeError("No media information was returned.")
         available = [
@@ -710,10 +886,25 @@ def download():
         if has_ffmpeg() and "+" in selector:
             options["merge_output_format"] = "mkv"
         with netguard.public_egress_only():
-            with yt_dlp.YoutubeDL(options) as ydl:
-                info = ydl.extract_info(link, download=True)
+            try:
+                with yt_dlp.YoutubeDL(options) as ydl:
+                    info = ydl.extract_info(link, download=True)
+                    if not isinstance(info, dict):
+                        raise RuntimeError("No media information was returned.")
+            except Exception:
+                yt_vid = _extract_youtube_video_id(link)
+                info = (
+                    _probe_or_fetch_youtube_federated(
+                        yt_vid,
+                        download_dir=job_dir,
+                        target_format_id=selector,
+                        max_bytes=download_limit,
+                    )
+                    if yt_vid
+                    else None
+                )
                 if not isinstance(info, dict):
-                    raise RuntimeError("No media information was returned.")
+                    raise
         # Select the finished output in the private per-job directory rather
         # than prepare_filename(), which may name a pre-merge video-only file.
         outputs = [
@@ -776,8 +967,14 @@ def quick_download():
     job_dir = None
     try:
         with netguard.public_egress_only():
-            with yt_dlp.YoutubeDL(yt_dlp_options(skip_download=True, extract_flat=False)) as ydl:
-                info = ydl.extract_info(link, download=False)
+            try:
+                with yt_dlp.YoutubeDL(yt_dlp_options(skip_download=True, extract_flat=False)) as ydl:
+                    info = ydl.extract_info(link, download=False)
+            except Exception:
+                yt_vid = _extract_youtube_video_id(link)
+                info = _probe_or_fetch_youtube_federated(yt_vid) if yt_vid else None
+                if info is None:
+                    raise
             if not isinstance(info, dict):
                 raise RuntimeError("No media information was returned.")
             formats = [item for item in (public_format(entry) for entry in info.get("formats", [])) if item]
@@ -814,8 +1011,23 @@ def quick_download():
             )
             if has_ffmpeg() and "+" in selector:
                 options["merge_output_format"] = "mkv"
-            with yt_dlp.YoutubeDL(options) as ydl:
-                downloaded = ydl.extract_info(link, download=True)
+            try:
+                with yt_dlp.YoutubeDL(options) as ydl:
+                    downloaded = ydl.extract_info(link, download=True)
+            except Exception:
+                yt_vid = _extract_youtube_video_id(link)
+                downloaded = (
+                    _probe_or_fetch_youtube_federated(
+                        yt_vid,
+                        download_dir=job_dir,
+                        target_format_id=selector,
+                        max_bytes=limit,
+                    )
+                    if yt_vid
+                    else None
+                )
+                if downloaded is None:
+                    raise
         outputs = [p for p in job_dir.iterdir() if p.is_file() and not p.is_symlink() and not p.name.endswith((".part", ".ytdl"))]
         merged = [p for p in outputs if p.suffix.lower() == ".mkv"]
         output = merged[0] if merged else outputs[0] if len(outputs) == 1 else None

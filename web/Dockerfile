@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     VIDNEST_DOWNLOAD_DIR=/tmp/vidnest-downloads
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg \
+    && apt-get install -y --no-install-recommends ffmpeg nodejs \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --system --uid 1001 --create-home vidnest
 

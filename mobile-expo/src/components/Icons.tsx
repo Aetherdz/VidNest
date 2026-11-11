@@ -951,8 +951,6 @@ export function PlatformIcon({
   }
 }
 
-}
-
 export function PlatformDot({ color, size = 9 }: { color: string; size?: number }) {
   return (
     <View

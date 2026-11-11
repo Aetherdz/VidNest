@@ -13,7 +13,7 @@ Designed &amp; Architected by [**Atheerium**](https://atheerium.com) (`zaikabdou
 
 [![Live on Vercel](https://img.shields.io/badge/Vercel-Live_Web_App-000000.svg?style=flat-square&logo=vercel&logoColor=white)](https://vidnest-six.vercel.app)
 [![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Live_Web_App-181717.svg?style=flat-square&logo=github&logoColor=white)](https://aetherdz.github.io/VidNest/)
-[![Download Android APK](https://img.shields.io/badge/Android_APK-v4.0.0_Download-C2410C.svg?style=flat-square&logo=android&logoColor=white)](https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk)
+[![Download Android APK](https://img.shields.io/badge/Android_APK-v4.0.1_Download-C2410C.svg?style=flat-square&logo=android&logoColor=white)](https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk)
 [![Render Cloud API](https://img.shields.io/badge/Render_API-Online-0F766E.svg?style=flat-square)](https://vidnest-web.onrender.com/healthz)
 [![Expo SDK 54](https://img.shields.io/badge/Expo-SDK_54-000020.svg?style=flat-square&logo=expo&logoColor=white)](https://expo.dev/)
 [![React Native](https://img.shields.io/badge/React_Native-0.81+-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://reactnative.dev/)
@@ -37,7 +37,7 @@ Designed &amp; Architected by [**Atheerium**](https://atheerium.com) (`zaikabdou
 | **Vercel Web App** | [**https://vidnest-six.vercel.app**](https://vidnest-six.vercel.app) | Production static frontend powered by Render API |
 | **GitHub Pages Web App** | [**https://aetherdz.github.io/VidNest/**](https://aetherdz.github.io/VidNest/) | Official GitHub Pages mirror connected to Render API |
 | **Render Cloud Backend** | [**https://vidnest-web.onrender.com**](https://vidnest-web.onrender.com) | Full Flask + `yt-dlp` + `FFmpeg` + `NetGuard` API &amp; Web UI |
-| **Android APK (v4.0.0)** | [**VidNest.apk (Direct Download)**](https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk) | Installable Android package connected to `https://vidnest-web.onrender.com` |
+| **Android APK (v4.0.1)** | [**VidNest.apk (Direct Download)**](https://github.com/Aetherdz/VidNest/releases/latest/download/VidNest.apk) | Installable Android package connected to `https://vidnest-web.onrender.com` |
 
 ---
 

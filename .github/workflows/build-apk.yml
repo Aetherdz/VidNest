@@ -20,6 +20,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Validate app version and protect existing releases
+        id: app-version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const app = JSON.parse(fs.readFileSync('mobile-expo/app.json', 'utf8')).expo;
+            const version = app.version;
+            const versionCode = app.android?.versionCode;
+            if (!/^\d+\.\d+\.\d+$/.test(version)) {
+              throw new Error(`Expected a stable semantic app version, got: ${version}`);
+            }
+            if (!Number.isInteger(versionCode) || versionCode < 1) {
+              throw new Error('Set a positive android.versionCode before publishing.');
+            }
+            const tag = `v${version}`;
+            const checks = [
+              ['release', () => github.rest.repos.getReleaseByTag({ ...context.repo, tag })],
+              ['git tag', () => github.rest.git.getRef({ ...context.repo, ref: `tags/${tag}` })],
+            ];
+            for (const [label, check] of checks) {
+              try {
+                await check();
+                throw new Error(`Refusing to replace existing ${label} ${tag}.`);
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+            core.setOutput('version', version);
+            core.setOutput('tag', tag);
+
       - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -64,14 +95,14 @@ jobs:
           path: VidNest.apk
           retention-days: 14
 
-      - name: Publish GitHub Release (v4.0.0)
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
-          tag_name: v4.0.0
-          name: VidNest v4.0.0
+          tag_name: ${{ steps.app-version.outputs.tag }}
+          name: VidNest ${{ steps.app-version.outputs.tag }}
           body: |
-            ### VidNest v4.0.0 — Official Android Release
+            ### VidNest ${{ steps.app-version.outputs.tag }} — Official Android Release
             
             - **Platform:** Android (API 26+)
             - **Framework:** React Native + Expo SDK 54, StyleX, TypeScript

@@ -43,7 +43,8 @@ void main() {
     const mobileSize = Size(360, 720);
     const tabletSize = Size(768, 1024);
 
-    testWidgets('HomeScreen renders in Arabic RTL with zero overflow', (tester) async {
+    testWidgets('HomeScreen renders in Arabic RTL with zero overflow',
+        (tester) async {
       await tester.binding.setSurfaceSize(mobileSize);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -60,7 +61,8 @@ void main() {
       expect(find.text('ماذا تريد أن تحمّل اليوم؟'), findsOneWidget);
     });
 
-    testWidgets('HomeScreen renders in English LTR with zero overflow', (tester) async {
+    testWidgets('HomeScreen renders in English LTR with zero overflow',
+        (tester) async {
       await tester.binding.setSurfaceSize(mobileSize);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -76,7 +78,8 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('DownloadsScreen renders on Tablet with zero overflow', (tester) async {
+    testWidgets('DownloadsScreen renders on Tablet with zero overflow',
+        (tester) async {
       await tester.binding.setSurfaceSize(tabletSize);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -93,7 +96,8 @@ void main() {
       expect(find.text('التنزيلات'), findsOneWidget);
     });
 
-    testWidgets('LibraryScreen renders on Mobile with zero overflow', (tester) async {
+    testWidgets('LibraryScreen renders on Mobile with zero overflow',
+        (tester) async {
       await tester.binding.setSurfaceSize(mobileSize);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -107,10 +111,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(find.text('مكتبة الوسائط'), findsOneWidget);
+      expect(find.text('المكتبة'), findsOneWidget);
     });
 
-    testWidgets('SettingsScreen renders on Mobile with zero overflow', (tester) async {
+    testWidgets('SettingsScreen renders on Mobile with zero overflow',
+        (tester) async {
       await tester.binding.setSurfaceSize(mobileSize);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 

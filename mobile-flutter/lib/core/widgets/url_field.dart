@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
-import '../theme/app_motion.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
@@ -10,6 +10,7 @@ class UrlField extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onAnalyze,
+    this.onChanged,
     this.onCleared,
     this.placeholder = 'https://...',
     this.isLoading = false,
@@ -17,6 +18,7 @@ class UrlField extends StatefulWidget {
 
   final TextEditingController controller;
   final ValueChanged<String> onAnalyze;
+  final ValueChanged<String>? onChanged;
   final VoidCallback? onCleared;
   final String placeholder;
   final bool isLoading;
@@ -46,11 +48,13 @@ class _UrlFieldState extends State<UrlField> {
     if (hasNow != _hasText) {
       setState(() => _hasText = hasNow);
     }
+    widget.onChanged?.call(widget.controller.text);
   }
 
   String? _extractUrl(String text) {
     if (text.trim().isEmpty) return null;
-    final match = RegExp(r'https?://[^\s"<>]+', caseSensitive: false).firstMatch(text);
+    final match =
+        RegExp(r'https?://[^\s"<>]+', caseSensitive: false).firstMatch(text);
     if (match != null) {
       String url = match.group(0)!;
       url = url.replaceAll(RegExp(r"[.,;:!?')]+$"), "");
@@ -86,7 +90,8 @@ class _UrlFieldState extends State<UrlField> {
         borderRadius: AppRadius.radiusSm,
         border: Border.all(color: colors.border, width: 1),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
+      padding:
+          const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 4),
       child: Row(
         children: [
           Expanded(
@@ -102,40 +107,41 @@ class _UrlFieldState extends State<UrlField> {
               },
               style: TextStyle(
                 color: colors.text,
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),
               decoration: InputDecoration(
                 hintText: widget.placeholder,
-                hintStyle: TextStyle(color: colors.textSecondary, fontSize: 14),
+                hintStyle: TextStyle(color: colors.textSecondary, fontSize: 13),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: AppSpacing.sm),
                 isDense: true,
               ),
             ),
           ),
           AppSpacing.gapSm,
-          AnimatedSwitcher(
-            duration: AppMotion.durationFast,
-            switchInCurve: AppMotion.curveSpring,
-            switchOutCurve: AppMotion.curveExit,
-            child: _hasText
-                ? IconButton(
-                    key: const ValueKey('clear_btn'),
-                    icon: Icon(Icons.close_rounded, size: 20, color: colors.textSecondary),
-                    onPressed: widget.isLoading ? null : _handleClear,
-                    tooltip: 'مسح',
-                    splashRadius: 20,
-                  )
-                : IconButton(
-                    key: const ValueKey('paste_btn'),
-                    icon: Icon(Icons.content_paste_rounded, size: 20, color: colors.primary),
-                    onPressed: widget.isLoading ? null : _handlePaste,
-                    tooltip: 'لصق',
-                    splashRadius: 20,
-                  ),
+          if (_hasText)
+            IconButton(
+              key: const ValueKey('clear_btn'),
+              icon: Icon(AppIcons.clear, size: 20, color: colors.textSecondary),
+              onPressed: widget.isLoading ? null : _handleClear,
+              tooltip: 'مسح',
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            ),
+          TextButton.icon(
+            key: const ValueKey('paste_btn'),
+            onPressed: widget.isLoading ? null : _handlePaste,
+            icon: Icon(AppIcons.paste, size: 18, color: colors.primary),
+            label:
+                Text('لصق', style: TextStyle(color: colors.text, fontSize: 13)),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, 48),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
         ],
       ),

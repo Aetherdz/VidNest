@@ -57,11 +57,14 @@ class _AppButtonState extends State<AppButton> {
 
     switch (widget.variant) {
       case AppButtonVariant.primary:
-        bg = isEnabled ? colors.primary : colors.primary.withValues(alpha: 0.45);
-        fg = Colors.white;
+        bg =
+            isEnabled ? colors.primary : colors.primary.withValues(alpha: 0.45);
+        fg = colors.text;
         border = null;
       case AppButtonVariant.secondary:
-        bg = isEnabled ? colors.surfaceSubtle : colors.surfaceSubtle.withValues(alpha: 0.5);
+        bg = isEnabled
+            ? colors.surfaceSubtle
+            : colors.surfaceSubtle.withValues(alpha: 0.5);
         fg = colors.text;
         border = Border.all(color: colors.border, width: 1);
       case AppButtonVariant.outlined:
@@ -96,7 +99,7 @@ class _AppButtonState extends State<AppButton> {
             style: TextStyle(
               color: fg,
               fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontSize: 16,
             ),
           ),
         ),
@@ -114,11 +117,11 @@ class _AppButtonState extends State<AppButton> {
         onTap: isEnabled ? widget.onPressed : null,
         behavior: HitTestBehavior.opaque,
         child: Container(
-          height: 48,
+          height: 56,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: AppRadius.radiusSm,
+            borderRadius: AppRadius.radiusLg,
             border: border,
           ),
           alignment: Alignment.center,

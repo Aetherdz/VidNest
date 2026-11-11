@@ -25,27 +25,27 @@ class VidNestColors extends ThemeExtension<VidNestColors> {
   final Color primaryDark;
 
   static const light = VidNestColors(
-    bg: Color(0xFFFAF7F2),
+    bg: Color(0xFFFFFFFF),
     surface: Color(0xFFFFFFFF),
-    surfaceSubtle: Color(0xFFF5F0E6),
-    text: Color(0xFF141B2D),
-    textSecondary: Color(0xFF5B6475),
-    border: Color(0xFFE8E2D8),
-    primary: Color(0xFFF26A21),
-    primaryTint: Color(0xFFFDEBDD),
-    primaryDark: Color(0xFFC2410C),
+    surfaceSubtle: Color(0xFFF6F7F9),
+    text: Color(0xFF101828),
+    textSecondary: Color(0xFF667085),
+    border: Color(0xFFE4E7EC),
+    primary: Color(0xFFF26B1D),
+    primaryTint: Color(0xFFFFF1E6),
+    primaryDark: Color(0xFF101828),
   );
 
   static const dark = VidNestColors(
-    bg: Color(0xFF0F1424),
-    surface: Color(0xFF181F33),
-    surfaceSubtle: Color(0xFF222B42),
-    text: Color(0xFFF3F4F8),
-    textSecondary: Color(0xFF94A3B8),
-    border: Color(0xFF2D3748),
-    primary: Color(0xFFF26A21),
-    primaryTint: Color(0xFF3D2418),
-    primaryDark: Color(0xFFEA580C),
+    bg: Color(0xFF101828),
+    surface: Color(0xFF1D2939),
+    surfaceSubtle: Color(0xFF344054),
+    text: Color(0xFFF9FAFB),
+    textSecondary: Color(0xFFD0D5DD),
+    border: Color(0xFF475467),
+    primary: Color(0xFFF26B1D),
+    primaryTint: Color(0xFF3A2B23),
+    primaryDark: Color(0xFFF9FAFB),
   );
 
   @override
@@ -91,5 +91,6 @@ class VidNestColors extends ThemeExtension<VidNestColors> {
 }
 
 extension BuildContextVidNestColors on BuildContext {
-  VidNestColors get colors => Theme.of(this).extension<VidNestColors>() ?? VidNestColors.light;
+  VidNestColors get colors =>
+      Theme.of(this).extension<VidNestColors>() ?? VidNestColors.light;
 }

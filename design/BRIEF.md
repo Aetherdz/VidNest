@@ -304,3 +304,50 @@ with interruptible spring motion. Web download progress moves through staged
 states—preparing, fetching, processing and ready—with clear, localized feedback.
 Web CSP restricts fonts to `font-src 'self'`. The permanent designer identity
 remains `Atheerium`.
+
+### v5 — VidNest identity alignment (user override, 2026-11-11)
+
+This user brief supersedes v4's violet, sand, and terracotta color roles for the
+Flutter app and website. Keep existing product content and API contracts, and
+retain the permanent `Atheerium` attribution. The Flutter mock extractor must
+not be presented as a production download engine. Screens in the Flutter
+preview explicitly disclose that simulated tasks do not save real files.
+
+#### Design plan
+
+- **Palette:** Paper `#FFFFFF`; mist surface `#F6F7F9`; navy ink `#101828`;
+  secondary text `#667085`; VidNest orange `#F26B1D`. Orange marks the primary
+  download action and active navigation. Dark mode uses a separate navy surface
+  ramp while retaining the same orange accent.
+- **Type:** IBM Plex Sans Arabic as the single family, self-hosted on both
+  surfaces. Title 28, body 16, secondary 13; URL text remains explicitly LTR.
+- **Layout:** 8-point spacing; 16-point content cards; 28-point primary button
+  radius; safe-area-aware floating three-tab app navigation. Site content stays
+  mobile-first and RTL, aligned to the inline start edge.
+- **Principle:** Make the product's actual task—paste, choose, save—the
+  memorable feature. Keep the surrounding UI quiet, without gradients or
+  decorative card repetition. Use rounded Material Symbols in Flutter and
+  preserve the site's lightweight vector icon treatment.
+
+```text
+App (RTL)                         Website (RTL)
+┌───────────────────────┐         ┌──────────────────────────────────┐
+│ settings       logo   │         │ logo                    navigation│
+│ link field       Paste│         │ headline + Download  │ phone demo │
+│ [Download]           │         ├──────────────────────────────────┤
+│ preview / quality    │         │ platforms                         │
+│ platform chips       │         │ four benefits                     │
+│ recent downloads     │         │ paste → quality → save            │
+│ Home Downloads Library│         │ FAQ / privacy / contact           │
+└───────────────────────┘         └──────────────────────────────────┘
+```
+
+#### Review against the brief
+
+The palette, type scale, corner radii, navigation count, and screen sections
+follow the user's explicit values rather than the previous design defaults.
+The phone mockup is the one visual signature; cards remain limited to useful
+content groups. Dark mode is a separate palette because the brief requires it
+but specifies only light-mode hex values. Real media metadata and thumbnails
+must come from available local files; missing files or metadata get a neutral
+fallback instead of invented values.

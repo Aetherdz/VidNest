@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppRadius {
-  static const double sm = 12.0;
-  static const double md = 20.0;
+  static const double sm = 16.0;
+  static const double md = 16.0;
   static const double lg = 28.0;
   static const double pill = 999.0;
 
@@ -19,8 +19,11 @@ abstract final class AppRadius {
   static const BorderRadius radiusPill = BorderRadius.all(radiusPillVal);
 
   // Shapes
-  static const RoundedRectangleBorder shapeSm = RoundedRectangleBorder(borderRadius: radiusSm);
-  static const RoundedRectangleBorder shapeMd = RoundedRectangleBorder(borderRadius: radiusMd);
-  static const RoundedRectangleBorder shapeLg = RoundedRectangleBorder(borderRadius: radiusLg);
+  static const RoundedRectangleBorder shapeSm =
+      RoundedRectangleBorder(borderRadius: radiusSm);
+  static const RoundedRectangleBorder shapeMd =
+      RoundedRectangleBorder(borderRadius: radiusMd);
+  static const RoundedRectangleBorder shapeLg =
+      RoundedRectangleBorder(borderRadius: radiusLg);
   static const StadiumBorder shapePill = StadiumBorder();
 }

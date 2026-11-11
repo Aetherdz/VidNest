@@ -20,7 +20,7 @@ class MediaFormat {
   final String? directUrl;
 
   String get formattedSize {
-    if (filesize == null || filesize! <= 0) return hasVideo ? '42 MB' : '5 MB';
+    if (filesize == null || filesize! <= 0) return 'غير معروف';
     final bytes = filesize!;
     if (bytes >= 1024 * 1024 * 1024) {
       return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
@@ -62,7 +62,9 @@ class MediaItem {
   final String? selectedFormatId;
 
   MediaFormat? get selectedFormat {
-    if (selectedFormatId == null) return formats.isNotEmpty ? formats.first : null;
+    if (selectedFormatId == null) {
+      return formats.isNotEmpty ? formats.first : null;
+    }
     return formats.firstWhere(
       (f) => f.id == selectedFormatId,
       orElse: () => formats.first,
@@ -70,7 +72,7 @@ class MediaItem {
   }
 
   String get formattedDuration {
-    if (duration == null || duration! <= 0) return '03:15';
+    if (duration == null || duration! <= 0) return '—';
     final m = duration! ~/ 60;
     final s = duration! % 60;
     final mm = m.toString().padLeft(2, '0');

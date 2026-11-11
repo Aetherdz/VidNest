@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/responsive_container.dart';
@@ -19,7 +20,8 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الإعدادات', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('الإعدادات',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28)),
       ),
       body: SafeArea(
         child: ResponsiveContainer(
@@ -40,30 +42,43 @@ class SettingsScreen extends ConsumerWidget {
                     RadioListTile<ThemeMode>(
                       value: ThemeMode.system,
                       groupValue: settings.themeMode,
-                      title: const Text('تلقائي حسب النظام', style: TextStyle(fontSize: 14)),
+                      title: const Text('تلقائي حسب النظام',
+                          style: TextStyle(fontSize: 16)),
                       activeColor: colors.primary,
                       onChanged: (mode) {
-                        if (mode != null) ref.read(settingsProvider.notifier).setThemeMode(mode);
+                        if (mode != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setThemeMode(mode);
+                        }
                       },
                     ),
                     Divider(height: 1, color: colors.border),
                     RadioListTile<ThemeMode>(
                       value: ThemeMode.light,
                       groupValue: settings.themeMode,
-                      title: const Text('نهاري (Sand & Light)', style: TextStyle(fontSize: 14)),
+                      title: const Text('فاتح', style: TextStyle(fontSize: 16)),
                       activeColor: colors.primary,
                       onChanged: (mode) {
-                        if (mode != null) ref.read(settingsProvider.notifier).setThemeMode(mode);
+                        if (mode != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setThemeMode(mode);
+                        }
                       },
                     ),
                     Divider(height: 1, color: colors.border),
                     RadioListTile<ThemeMode>(
                       value: ThemeMode.dark,
                       groupValue: settings.themeMode,
-                      title: const Text('ليلي (Deep Obsidian)', style: TextStyle(fontSize: 14)),
+                      title: const Text('داكن', style: TextStyle(fontSize: 16)),
                       activeColor: colors.primary,
                       onChanged: (mode) {
-                        if (mode != null) ref.read(settingsProvider.notifier).setThemeMode(mode);
+                        if (mode != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setThemeMode(mode);
+                        }
                       },
                     ),
                   ],
@@ -85,20 +100,30 @@ class SettingsScreen extends ConsumerWidget {
                     RadioListTile<String>(
                       value: 'ar',
                       groupValue: settings.locale.languageCode,
-                      title: const Text('العربية (RTL)', style: TextStyle(fontSize: 14)),
+                      title: const Text('العربية (RTL)',
+                          style: TextStyle(fontSize: 16)),
                       activeColor: colors.primary,
                       onChanged: (lang) {
-                        if (lang != null) ref.read(settingsProvider.notifier).setLocale(Locale(lang));
+                        if (lang != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setLocale(Locale(lang));
+                        }
                       },
                     ),
                     Divider(height: 1, color: colors.border),
                     RadioListTile<String>(
                       value: 'en',
                       groupValue: settings.locale.languageCode,
-                      title: const Text('English (LTR)', style: TextStyle(fontSize: 14)),
+                      title: const Text('English (LTR)',
+                          style: TextStyle(fontSize: 16)),
                       activeColor: colors.primary,
                       onChanged: (lang) {
-                        if (lang != null) ref.read(settingsProvider.notifier).setLocale(Locale(lang));
+                        if (lang != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .setLocale(Locale(lang));
+                        }
                       },
                     ),
                   ],
@@ -119,36 +144,52 @@ class SettingsScreen extends ConsumerWidget {
                   children: [
                     SwitchListTile(
                       value: settings.wifiOnly,
-                      title: const Text('التنزيل عبر Wi-Fi فقط', style: TextStyle(fontSize: 14)),
-                      subtitle: Text('تجنب استهلاك باقة البيانات المتنقلة', style: TextStyle(color: colors.textSecondary, fontSize: 12)),
+                      title: const Text('التنزيل عبر Wi-Fi فقط',
+                          style: TextStyle(fontSize: 16)),
+                      subtitle: Text('تجنب استهلاك باقة البيانات المتنقلة',
+                          style: TextStyle(
+                              color: colors.textSecondary, fontSize: 13)),
                       activeThumbColor: colors.primary,
-                      onChanged: (val) => ref.read(settingsProvider.notifier).toggleWifiOnly(val),
+                      onChanged: (val) => ref
+                          .read(settingsProvider.notifier)
+                          .toggleWifiOnly(val),
                     ),
                     Divider(height: 1, color: colors.border),
                     ListTile(
                       title: Text(
                         'مسح سجل التنزيلات بالكامل',
-                        style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
                       ),
-                      leading: Icon(Icons.delete_outline_rounded, color: Theme.of(context).colorScheme.error),
+                      leading: Icon(AppIcons.delete,
+                          color: Theme.of(context).colorScheme.error),
                       onTap: () {
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
                             title: const Text('تأكيد المسح'),
-                            content: const Text('هل أنت متأكد من رغبتك في مسح سجل التنزيلات بالكامل؟'),
+                            content: const Text(
+                                'هل أنت متأكد من رغبتك في مسح سجل التنزيلات بالكامل؟'),
                             shape: AppRadius.shapeMd,
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(ctx),
-                                child: Text('إلغاء', style: TextStyle(color: colors.textSecondary)),
+                                child: Text('إلغاء',
+                                    style:
+                                        TextStyle(color: colors.textSecondary)),
                               ),
                               FilledButton(
                                 onPressed: () {
-                                  ref.read(downloadRepositoryProvider).clearHistory();
+                                  ref
+                                      .read(downloadRepositoryProvider)
+                                      .clearHistory();
                                   Navigator.pop(ctx);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('تم مسح سجل التنزيلات بنجاح')),
+                                    const SnackBar(
+                                        content:
+                                            Text('تم مسح سجل التنزيلات بنجاح')),
                                   );
                                 },
                                 child: const Text('مسح'),
@@ -184,11 +225,13 @@ class SettingsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               'VidNest v4.0.0',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                             Text(
-                              'Sand & Terracotta Studio Edition',
-                              style: TextStyle(fontSize: 11, color: Colors.grey),
+                              'تحميل بسيط، آمن، واضح',
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.grey),
                             ),
                           ],
                         ),
@@ -197,12 +240,18 @@ class SettingsScreen extends ConsumerWidget {
                     AppSpacing.gapMd,
                     Text(
                       'أداة تنزيل وسائط سريعة وهادئة وخاصة تدعم أكثر من 1,800 موقع عالمي، مصممة بأعلى معايير الخصوصية والأناقة، بدون إعلانات وبدون تعقب.',
-                      style: TextStyle(color: colors.textSecondary, fontSize: 12, height: 1.5),
+                      style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 13,
+                          height: 1.5),
                     ),
                     AppSpacing.gapSm,
                     Text(
                       'تصميم وهندسة: Atheerium (zaikabdou)',
-                      style: TextStyle(color: colors.primaryDark, fontSize: 11, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -222,7 +271,7 @@ class SettingsScreen extends ConsumerWidget {
         title,
         style: TextStyle(
           color: context.colors.text,
-          fontSize: 13,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
       ),

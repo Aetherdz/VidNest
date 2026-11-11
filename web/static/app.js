@@ -8,7 +8,21 @@ const copy = {
     designerCredit: "by Atheerium",
     statusPill: "+1,800 موقع · بدون إعلانات",
     eyebrow: "أداة الوسائط الهادئة",
-    headline: "ماذا تريد أن تحمّل اليوم؟",
+    headline: "حمّل ما تحب، واحتفظ به بسهولة.",
+    heroCta: "ابدأ التنزيل",
+    heroNote: "بدون حساب · بدون إعلانات · مع احترام خصوصيتك",
+    phonePreviewLabel: "معاينة واجهة تطبيق VidNest",
+    phoneKicker: "الصق، اختر، احفظ",
+    phoneTitle: "ماذا تريد أن تحمّل اليوم؟",
+    phonePaste: "لصق",
+    phoneDownload: "تنزيل",
+    phonePreview: "معاينة الفيديو",
+    phoneQuality: "أفضل جودة · 1080p",
+    phoneHome: "الرئيسية",
+    phoneDownloads: "التنزيلات",
+    phoneLibrary: "المكتبة",
+    footerPrivacy: "معلومات الخصوصية",
+    footerContact: "تواصل معنا",
     intro: "الصق رابط فيديو أو مقطع صوتي، استعرض خيارات الدقة فورًا، ثم احفظ الملف مباشرة في جهازك دون إعلانات وبأعلى جودة.",
     urlLabel: "رابط الفيديو أو الصوت",
     urlPlaceholder: "https://...",
@@ -45,8 +59,8 @@ const copy = {
     step3Title: "احفظ واستمتع",
     step3Desc: "نزّل الملف لجهازك واستمتع بالمشاهدة والاستماع في أي وقت وبدون انترنت.",
     featuresHeading: "لماذا تختار VidNest؟",
-    feat1Title: "سرعة استخراج فائقة",
-    feat1Desc: "معالجة فورية وتوليد روابط التنزيل المباشرة في أقل من ثانية.",
+    feat1Title: "سرعة وجودة أوضح",
+    feat1Desc: "استخراج سريع ودمج أفضل تدفق فيديو وصوت متاح عند دعم المصدر.",
     feat2Title: "خصوصية وأمان تام",
     feat2Desc: "بدون تسجيل حساب، بدون ملفات تعريف ارتباط للتعقب، وخالٍ من الإعلانات تمامًا.",
     feat3Title: "+1,800 موقع مدعوم",
@@ -89,7 +103,21 @@ const copy = {
     designerCredit: "by Atheerium",
     statusPill: "1,800+ Sites · Zero Ads",
     eyebrow: "Quiet Media Instrument",
-    headline: "Keep what matters.",
+    headline: "Save what you love.",
+    heroCta: "Start your download",
+    heroNote: "No account · No ads · Privacy respected",
+    phonePreviewLabel: "VidNest app preview",
+    phoneKicker: "Paste, choose, save",
+    phoneTitle: "What would you like to download?",
+    phonePaste: "Paste",
+    phoneDownload: "Download",
+    phonePreview: "Video preview",
+    phoneQuality: "Best quality · 1080p",
+    phoneHome: "Home",
+    phoneDownloads: "Downloads",
+    phoneLibrary: "Library",
+    footerPrivacy: "Privacy information",
+    footerContact: "Contact us",
     intro: "Paste a video or audio link, inspect available qualities instantly, and download the format that fits your device in one clean click.",
     urlLabel: "Video or audio link",
     urlPlaceholder: "https://...",
@@ -126,13 +154,14 @@ const copy = {
     step3Title: "Save & enjoy",
     step3Desc: "Download directly to your device and enjoy offline playback with zero ads.",
     featuresHeading: "Why VidNest?",
-    feat1Title: "Ultra-fast extraction",
-    feat1Desc: "Instant processing and stream extraction delivered in under a second.",
+    feat1Title: "Fast, source-matched quality",
+    feat1Desc: "Quick extraction and merging of the best available video and audio when the source supports it.",
     feat2Title: "Quiet & private",
+    feat2Desc: "No account, no tracking profiles, and no advertisements.",
     feat3Title: "1,800+ supported sites",
     feat3Desc: "Universal coverage across major video networks, social media, and podcasts.",
-    feat4Title: "Smart FFmpeg multiplexing",
-    feat4Desc: "Automatic merging of top video resolution with the highest bitrate audio channel.",
+    feat4Title: "Smart audio and video merging",
+    feat4Desc: "Automatically combines the highest available video resolution with the best available audio stream using FFmpeg.",
     apkTitle: "Get VidNest for Android",
     apkDesc: "A complete mobile companion with background playback, picture-in-picture, and an offline media library.",
     apkCta: "Download Official APK",
@@ -163,25 +192,6 @@ const copy = {
     countText: (n) => `${n} qualities available`,
   },
 };
-
-const GRADIENTS = [
-  ["#C2410C", "#EA580C"],
-  ["#0F172A", "#1E3A8A"],
-  ["#9A3412", "#D97706"],
-  ["#1E293B", "#0369A1"],
-  ["#0F172A", "#059669"],
-  ["#7C2D12", "#B45309"],
-];
-
-function getGradient(seedText) {
-  let hash = 0;
-  const str = String(seedText || "VidNest");
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
-  }
-  const pair = GRADIENTS[hash % GRADIENTS.length];
-  return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
-}
 
 // DOM References
 const $ = (id) => document.getElementById(id);
@@ -830,7 +840,7 @@ function renderFormats(result) {
 
   const thumbEl = $("preview-thumbnail");
   if (thumbEl) {
-    thumbEl.style.setProperty("background", getGradient(result.title));
+    thumbEl.style.removeProperty("background");
   }
 
   const thumbImg = $("preview-thumb-img");
@@ -1012,7 +1022,6 @@ function createMediaRow(item, isActiveDownloading = false, stageText = "") {
 
   const thumb = document.createElement("div");
   thumb.className = "media-thumb";
-  thumb.style.setProperty("background", getGradient(item.title));
   if (item.thumbnail) {
     const tImg = document.createElement("img");
     tImg.className = "media-thumb-img";
@@ -1197,7 +1206,6 @@ function renderLibrary() {
 
     const thumb = document.createElement("div");
     thumb.className = "tile-thumb";
-    thumb.style.setProperty("background", getGradient(item.title));
     thumb.append(createSvgIcon("play"));
 
     if (item.duration) {
@@ -1490,12 +1498,23 @@ if (themeToggleButton) {
     const currentTheme = document.documentElement.getAttribute("data-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const nextTheme = currentTheme === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", nextTheme);
+    updateThemeColor(nextTheme);
     try {
       localStorage.setItem("vidnest-theme", nextTheme);
     } catch {
       /* storage fallback */
     }
   });
+}
+
+function updateThemeColor(activeTheme) {
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) {
+    themeMeta.setAttribute(
+      "content",
+      activeTheme === "dark" ? "#101828" : "#FFFFFF"
+    );
+  }
 }
 
 function applyLanguage() {
@@ -1508,6 +1527,12 @@ function applyLanguage() {
     if (typeof val === "string") {
       el.textContent = val;
     }
+  });
+
+  document.querySelectorAll("[data-aria-label]").forEach((el) => {
+    const key = el.dataset.ariaLabel;
+    const val = t(key);
+    if (typeof val === "string") el.setAttribute("aria-label", val);
   });
 
   if (languageButton) languageButton.textContent = t("switch");
@@ -1713,6 +1738,7 @@ if ("IntersectionObserver" in window) {
 
 // Initial setup
 document.documentElement.setAttribute("data-theme", theme);
+updateThemeColor(theme);
 applyLanguage();
 updateInspect();
 setView("home");

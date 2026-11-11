@@ -62,9 +62,9 @@ class _VidNestLogoPainter extends CustomPainter {
     final h = size.height;
     final r = w * 0.28;
 
-    // 1. Deep Obsidian Card
+    // 1. VidNest navy mark
     final bgPaint = Paint()
-      ..color = const Color(0xFF0B0F19)
+      ..color = const Color(0xFF101828)
       ..style = PaintingStyle.fill;
     final bgRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, w, h),
@@ -72,13 +72,9 @@ class _VidNestLogoPainter extends CustomPainter {
     );
     canvas.drawRRect(bgRRect, bgPaint);
 
-    // 2. Terracotta Border
+    // 2. Orange outline
     final borderPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFFB923C), Color(0xFFC2410C)],
-      ).createShader(Rect.fromLTWH(0, 0, w, h))
+      ..color = const Color(0xFFF26B1D)
       ..style = PaintingStyle.stroke
       ..strokeWidth = w * 0.035;
     final borderRRect = RRect.fromRectAndRadius(
@@ -87,9 +83,9 @@ class _VidNestLogoPainter extends CustomPainter {
     );
     canvas.drawRRect(borderRRect, borderPaint);
 
-    // 3. Architectural 'V' in Sand (#FAF7F2)
+    // 3. White nest mark
     final vPaint = Paint()
-      ..color = const Color(0xFFFAF7F2)
+      ..color = const Color(0xFFFFFFFF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = w * 0.075
       ..strokeCap = StrokeCap.round
@@ -101,13 +97,9 @@ class _VidNestLogoPainter extends CustomPainter {
       ..lineTo(w * 0.72, h * 0.36);
     canvas.drawPath(vPath, vPaint);
 
-    // 4. Play-Prism Facet in Terracotta (#FB923C -> #C2410C)
+    // 4. Orange play symbol
     final prismPaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFFB923C), Color(0xFFC2410C)],
-      ).createShader(Rect.fromLTWH(w * 0.42, h * 0.28, w * 0.20, h * 0.20))
+      ..color = const Color(0xFFF26B1D)
       ..style = PaintingStyle.fill;
 
     final prismPath = Path()
@@ -117,9 +109,9 @@ class _VidNestLogoPainter extends CustomPainter {
       ..close();
     canvas.drawPath(prismPath, prismPaint);
 
-    // 5. Downward Download Chevron Accent
+    // 5. Orange download chevron
     final chevPaint = Paint()
-      ..color = const Color(0xFFFB923C)
+      ..color = const Color(0xFFF26B1D)
       ..style = PaintingStyle.stroke
       ..strokeWidth = w * 0.045
       ..strokeCap = StrokeCap.round

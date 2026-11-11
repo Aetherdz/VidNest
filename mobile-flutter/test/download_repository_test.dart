@@ -29,7 +29,11 @@ void main() {
         extractor: 'YouTube',
         formats: [],
       );
-      const format = MediaFormat(id: '1080p', quality: '1080p', ext: 'mp4', filesize: 50 * 1024 * 1024);
+      const format = MediaFormat(
+          id: '1080p',
+          quality: '1080p',
+          ext: 'mp4',
+          filesize: 50 * 1024 * 1024);
 
       final task = repo.startDownload(media, format);
       expect(task.status, DownloadStatus.downloading);
@@ -50,10 +54,12 @@ void main() {
 
       final task = repo.startDownload(media, format);
       repo.pauseTask(task.id);
-      expect(repo.allTasks.firstWhere((t) => t.id == task.id).status, DownloadStatus.paused);
+      expect(repo.allTasks.firstWhere((t) => t.id == task.id).status,
+          DownloadStatus.paused);
 
       repo.resumeTask(task.id);
-      expect(repo.allTasks.firstWhere((t) => t.id == task.id).status, DownloadStatus.downloading);
+      expect(repo.allTasks.firstWhere((t) => t.id == task.id).status,
+          DownloadStatus.downloading);
     });
 
     test('cancelTask removes task from list', () {
@@ -78,6 +84,23 @@ void main() {
       expect(repo.allTasks.any((t) => t.isCompleted), isTrue);
       repo.clearHistory();
       expect(repo.allTasks.any((t) => t.isCompleted), isFalse);
+    });
+
+    test('renameTask trims title and ignores empty replacements', () {
+      repo.renameTask('init_1', '  renamed media  ');
+      expect(
+          repo.allTasks.firstWhere((task) => task.id == 'init_1').media.title,
+          'renamed media');
+
+      repo.renameTask('init_1', '   ');
+      expect(
+          repo.allTasks.firstWhere((task) => task.id == 'init_1').media.title,
+          'renamed media');
+    });
+
+    test('unknown media size stays unknown instead of guessing a value', () {
+      const format = MediaFormat(id: 'unknown', quality: 'unknown', ext: 'mp4');
+      expect(format.formattedSize, 'غير معروف');
     });
   });
 }

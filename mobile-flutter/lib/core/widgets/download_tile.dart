@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/download_task.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_icons.dart';
 import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
@@ -45,26 +46,20 @@ class DownloadTile extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Media Thumbnail / Gradient Badge
+              // Media type fallback until a real file thumbnail is available.
               Container(
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      colors.primary.withValues(alpha: 0.85),
-                      colors.primaryDark,
-                    ],
-                  ),
+                  color: colors.surfaceSubtle,
                   borderRadius: AppRadius.radiusSm,
                 ),
                 child: Center(
                   child: Icon(
-                    task.format.hasVideo ? Icons.play_arrow_rounded : Icons.graphic_eq_rounded,
-                    color: Colors.white,
+                    task.format.hasVideo ? AppIcons.play : AppIcons.audio,
+                    color: colors.primary,
                     size: 28,
+                    textDirection: TextDirection.ltr,
                   ),
                 ),
               ),
@@ -81,7 +76,7 @@ class DownloadTile extends StatelessWidget {
                       style: TextStyle(
                         color: colors.text,
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -92,31 +87,33 @@ class DownloadTile extends StatelessWidget {
                         Text(
                           task.media.extractor,
                           style: TextStyle(
-                            color: colors.primary,
+                            color: colors.textSecondary,
                             fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                         Text(
                           '·',
-                          style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                              color: colors.textSecondary, fontSize: 13),
                         ),
                         Text(
                           task.format.quality,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                         Text(
                           '·',
-                          style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                          style: TextStyle(
+                              color: colors.textSecondary, fontSize: 13),
                         ),
                         Text(
                           task.sizeSummary,
                           style: TextStyle(
                             color: colors.textSecondary,
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                       ],
@@ -144,37 +141,40 @@ class DownloadTile extends StatelessWidget {
               children: [
                 Text(
                   '${task.percentText} ${task.speedText.isNotEmpty ? '· ${task.speedText}' : ''}',
-                  style: TextStyle(color: colors.textSecondary, fontSize: 11),
+                  style: TextStyle(color: colors.textSecondary, fontSize: 13),
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (task.status == DownloadStatus.downloading && onPause != null)
+                    if (task.status == DownloadStatus.downloading &&
+                        onPause != null)
                       IconButton(
-                        icon: const Icon(Icons.pause_rounded, size: 18),
+                        icon: const Icon(AppIcons.pause, size: 20),
                         onPressed: onPause,
                         tooltip: 'إيقاف مؤقت',
-                        visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
                       ),
-                    if (task.status == DownloadStatus.paused && onResume != null)
+                    if (task.status == DownloadStatus.paused &&
+                        onResume != null)
                       IconButton(
-                        icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                        icon: const Icon(AppIcons.play,
+                            size: 20, textDirection: TextDirection.ltr),
                         onPressed: onResume,
                         tooltip: 'استئناف',
-                        visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
                       ),
                     if (onCancel != null)
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, size: 18),
+                        icon: const Icon(AppIcons.close, size: 20),
                         onPressed: onCancel,
                         tooltip: 'إلغاء',
-                        visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                        constraints:
+                            const BoxConstraints(minWidth: 48, minHeight: 48),
                       ),
                   ],
                 ),
@@ -189,23 +189,28 @@ class DownloadTile extends StatelessWidget {
               children: [
                 if (onShare != null)
                   TextButton.icon(
-                    icon: Icon(Icons.share_rounded, size: 16, color: colors.textSecondary),
-                    label: Text('مشاركة', style: TextStyle(color: colors.text, fontSize: 12)),
+                    icon: Icon(AppIcons.share,
+                        size: 18, color: colors.textSecondary),
+                    label: Text('مشاركة',
+                        style: TextStyle(color: colors.text, fontSize: 13)),
                     onPressed: onShare,
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-                      minimumSize: const Size(0, 32),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                      minimumSize: const Size(48, 48),
                     ),
                   ),
                 AppSpacing.gapSm,
                 if (onOpen != null)
                   FilledButton.icon(
-                    icon: const Icon(Icons.play_arrow_rounded, size: 16),
-                    label: const Text('تشغيل', style: TextStyle(fontSize: 12)),
+                    icon: const Icon(AppIcons.play,
+                        size: 18, textDirection: TextDirection.ltr),
+                    label: const Text('تشغيل', style: TextStyle(fontSize: 13)),
                     onPressed: onOpen,
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-                      minimumSize: const Size(0, 32),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                      minimumSize: const Size(48, 48),
                     ),
                   ),
               ],
@@ -220,7 +225,9 @@ class DownloadTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     task.errorMessage ?? 'تعذّر إكمال التنزيل',
-                    style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 11),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 13),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -230,13 +237,16 @@ class DownloadTile extends StatelessWidget {
                   children: [
                     if (onRetry != null)
                       TextButton.icon(
-                        icon: Icon(Icons.refresh_rounded, size: 16, color: colors.primary),
-                        label: Text('إعادة', style: TextStyle(color: colors.primary, fontSize: 12)),
+                        icon: Icon(AppIcons.retry,
+                            size: 18, color: colors.primary),
+                        label: Text('إعادة',
+                            style: TextStyle(color: colors.text, fontSize: 13)),
                         onPressed: onRetry,
                       ),
                     if (onDelete != null)
                       IconButton(
-                        icon: Icon(Icons.delete_outline_rounded, size: 18, color: colors.textSecondary),
+                        icon: Icon(AppIcons.delete,
+                            size: 20, color: colors.textSecondary),
                         onPressed: onDelete,
                         tooltip: 'حذف',
                       ),

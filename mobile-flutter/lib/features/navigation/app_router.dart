@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_radius.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/responsive_container.dart';
 import '../downloads/downloads_screen.dart';
 import '../home/home_screen.dart';
@@ -73,41 +76,110 @@ class ScaffoldWithNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: colors.border, width: 1)),
-        ),
-        child: ResponsiveContainer(
-          child: NavigationBar(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: _onDestinationSelected,
-            backgroundColor: colors.surface,
-            indicatorColor: colors.primaryTint,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'الرئيسية',
+      bottomNavigationBar: navigationShell.currentIndex == 3
+          ? null
+          : Padding(
+              padding: EdgeInsets.fromLTRB(
+                  16, AppSpacing.sm, 16, bottomInset + AppSpacing.sm),
+              child: ResponsiveContainer(
+                child: Container(
+                  height: 64,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: colors.surface,
+                    borderRadius: AppRadius.radiusPill,
+                    border: Border.all(color: colors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colors.text.withValues(alpha: 0.08),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      _NavItem(
+                        label: 'الرئيسية',
+                        icon: AppIcons.home,
+                        selected: navigationShell.currentIndex == 0,
+                        onTap: () => _onDestinationSelected(0),
+                      ),
+                      _NavItem(
+                        label: 'التنزيلات',
+                        icon: AppIcons.download,
+                        selected: navigationShell.currentIndex == 1,
+                        onTap: () => _onDestinationSelected(1),
+                      ),
+                      _NavItem(
+                        label: 'المكتبة',
+                        icon: AppIcons.library,
+                        selected: navigationShell.currentIndex == 2,
+                        onTap: () => _onDestinationSelected(2),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.download_outlined),
-                selectedIcon: Icon(Icons.download_rounded),
-                label: 'التنزيلات',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.video_library_outlined),
-                selectedIcon: Icon(Icons.video_library_rounded),
-                label: 'المكتبة',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_rounded),
-                label: 'الإعدادات',
-              ),
-            ],
+            ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final foreground = selected ? colors.text : colors.textSecondary;
+
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: label,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadius.radiusPill,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOut,
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              color: selected ? colors.primary : Colors.transparent,
+              borderRadius: AppRadius.radiusPill,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 21, color: foreground),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: foreground,
+                    fontSize: 12,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

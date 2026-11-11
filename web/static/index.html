@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0F172A">
+  <meta name="theme-color" content="#FFFFFF">
   <meta name="vidnest-csrf" content="__VIDNEST_CSRF_TOKEN__">
   <meta name="vidnest-api" content="https://vidnest-web.onrender.com">
-  <meta name="description" content="أداة تنزيل وسائط سريعة وهادئة وخاصة تدعم أكثر من 1,800 موقع عالمي، بتصميم Sand & Terracotta Studio وبدون إعلانات.">
+  <meta name="description" content="نزّل الفيديو والصوت من منصاتك المفضلة بخطوات واضحة، دون إعلانات أو تتبع. VidNest يحافظ على الخصوصية ويدعم أكثر من 1,800 موقع.">
   <meta name="keywords" content="تنزيل فيديو, يوتيوب, تيك توك, انستغرام, فيسبوك, Atheerium, VidNest">
   <meta name="author" content="Atheerium">
   <link rel="canonical" href="/">
@@ -14,13 +14,14 @@
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="alternate icon" type="image/png" href="/static/icon-192.png">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
-  <link rel="preload" href="/static/fonts/readex-pro-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/ibm-plex-arabic-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/ibm-plex-arabic-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="VidNest — Sand & Terracotta Studio v4 | Atheerium">
-  <meta property="og:description" content="تنزيل فوري لأكثر من 1,800 موقع عالمي بأعلى جودة وبدون إعلانات. تصميم Atheerium.">
+  <meta property="og:title" content="VidNest — تنزيل بسيط وواضح | Atheerium">
+  <meta property="og:description" content="الصق الرابط، اختر الجودة، واحفظ ملفاتك بسهولة. بدون إعلانات أو تتبع. تصميم Atheerium.">
 
-  <title>VidNest — Sand & Terracotta Studio v4 | Atheerium</title>
+  <title>VidNest — تنزيل بسيط وواضح | Atheerium</title>
 
   <script type="application/ld+json">
   {
@@ -97,17 +98,11 @@
       <a class="brand" href="/" aria-label="VidNest">
         <span class="brand-logo-wrap">
           <svg class="brand-logo" viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
-            <defs>
-              <linearGradient id="bl-terra" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FB923C" />
-                <stop offset="100%" stop-color="#C2410C" />
-              </linearGradient>
-            </defs>
-            <rect width="40" height="40" rx="11" fill="#0B0F19"/>
-            <rect x="1" y="1" width="38" height="38" rx="10" fill="none" stroke="#FB923C" stroke-opacity="0.45" stroke-width="1.2"/>
-            <path d="M11.5 14.5L20 28.5L28.5 14.5" fill="none" stroke="#FAF7F2" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z" fill="url(#bl-terra)"/>
-            <path d="M17 23L20 26L23 23" fill="none" stroke="url(#bl-terra)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect width="40" height="40" rx="11" fill="#101828"/>
+            <rect x="1" y="1" width="38" height="38" rx="10" fill="none" stroke="#F26B1D" stroke-opacity="0.9" stroke-width="1.2"/>
+            <path d="M11.5 14.5L20 28.5L28.5 14.5" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.5 11.5L24.5 15.5L17.5 19.5V11.5Z" fill="#F26B1D"/>
+            <path d="M17 23L20 26L23 23" fill="none" stroke="#F26B1D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </span>
         <span class="brand-text">VidNest</span>
@@ -135,12 +130,48 @@
       <!-- VIEW 1: HOME -->
       <section id="view-home" class="view active" aria-labelledby="home-headline">
         <div class="hero-section">
-          <p class="eyebrow">
-            <span class="eyebrow-line" aria-hidden="true"></span>
-            <span data-copy="eyebrow">أداة الوسائط الهادئة</span>
-          </p>
-          <h1 id="home-headline" data-copy="headline">ماذا تريد أن تحمّل اليوم؟</h1>
-          <p class="intro" data-copy="intro">الصق رابط فيديو أو مقطع صوتي، استعرض خيارات الدقة فورًا، ثم احفظ الملف مباشرة في جهازك دون إعلانات وبأعلى جودة.</p>
+          <div class="hero-layout">
+            <div class="hero-copy">
+              <p class="eyebrow">
+                <span class="eyebrow-line" aria-hidden="true"></span>
+                <span data-copy="eyebrow">أداة الوسائط الهادئة</span>
+              </p>
+              <h1 id="home-headline" data-copy="headline">حمّل ما تحب، واحتفظ به بسهولة.</h1>
+              <p class="intro" data-copy="intro">الصق رابط فيديو أو مقطع صوتي، استعرض خيارات الدقة فورًا، ثم احفظ الملف مباشرة في جهازك دون إعلانات وبأعلى جودة.</p>
+              <a class="hero-download-cta" href="#url">
+                <svg class="icon" aria-hidden="true"><use href="#i-down"/></svg>
+                <span data-copy="heroCta">ابدأ التنزيل</span>
+              </a>
+              <p class="hero-note" data-copy="heroNote">بدون حساب · بدون إعلانات · مع احترام خصوصيتك</p>
+            </div>
+
+            <aside class="phone-mockup" data-aria-label="phonePreviewLabel" aria-label="معاينة واجهة تطبيق VidNest">
+              <div class="phone-frame">
+                <div class="phone-status"><span>9:41</span><span class="phone-status-dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+                <div class="phone-appbar">
+                  <span class="phone-mark" aria-hidden="true"><svg class="icon"><use href="#i-play"/></svg></span>
+                  <strong>VidNest</strong>
+                  <svg class="phone-settings icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+                </div>
+                <div class="phone-screen-content">
+                  <span class="phone-kicker" data-copy="phoneKicker">الصق، اختر، احفظ</span>
+                  <strong class="phone-title" data-copy="phoneTitle">ماذا تريد أن تحمّل اليوم؟</strong>
+                  <div class="phone-url"><span dir="ltr">https://youtu.be/…</span><span class="phone-paste" data-copy="phonePaste">لصق</span></div>
+                  <div class="phone-download"><span data-copy="phoneDownload">تنزيل</span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></div>
+                  <div class="phone-preview">
+                    <div class="phone-preview-image"><svg class="icon"><use href="#i-play"/></svg><span>02:18</span></div>
+                    <strong data-copy="phonePreview">معاينة الفيديو</strong>
+                    <span data-copy="phoneQuality">أفضل جودة · 1080p</span>
+                  </div>
+                </div>
+                <div class="phone-bottom-nav" aria-hidden="true">
+                  <span class="active"><svg class="icon"><use href="#i-home"/></svg><span data-copy="phoneHome">الرئيسية</span></span>
+                  <span><svg class="icon"><use href="#i-down"/></svg><span data-copy="phoneDownloads">التنزيلات</span></span>
+                  <span><svg class="icon"><use href="#i-lib"/></svg><span data-copy="phoneLibrary">المكتبة</span></span>
+                </div>
+              </div>
+            </aside>
+          </div>
 
           <form id="download-form" class="url-form" novalidate>
             <div class="input-container">
@@ -329,10 +360,10 @@
           </section>
 
           <!-- FAQ Accordion -->
-          <section class="faq-section" aria-labelledby="faq-heading">
+          <section class="faq-section" id="faq-section" aria-labelledby="faq-heading">
             <h2 id="faq-heading" class="section-heading" data-copy="faqHeading">الأسئلة الشائعة</h2>
             <div class="faq-accordion">
-              <details class="faq-item">
+              <details class="faq-item" id="faq-privacy">
                 <summary class="faq-question">
                   <span data-copy="faq1Q">كيف يضمن VidNest خصوصية المستخدم؟</span>
                   <svg class="faq-chevron" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chevron"/></svg>
@@ -414,8 +445,11 @@
           <a class="designer-link" href="https://atheerium.com" target="_blank" rel="noopener">Atheerium</a>
         </div>
         <div>
-          <span>Sand &amp; Terracotta Studio v4 · </span>
-          <a class="footer-link" href="/static/fonts/OFL-ReadexPro.txt" target="_blank">Readex Pro (OFL)</a>
+          <a class="footer-link" href="/#faq-privacy" data-copy="footerPrivacy">معلومات الخصوصية</a>
+          <span> · </span>
+          <a class="footer-link" href="https://github.com/Aetherdz/VidNest/issues" target="_blank" rel="noopener" data-copy="footerContact">تواصل معنا</a>
+          <span> · </span>
+          <a class="footer-link" href="/static/fonts/OFL-IBM-Plex-Sans-Arabic.txt" target="_blank" rel="noopener">IBM Plex Sans Arabic (OFL)</a>
           <span> · </span>
           <a class="footer-link" href="/llms.txt">llms.txt</a>
         </div>

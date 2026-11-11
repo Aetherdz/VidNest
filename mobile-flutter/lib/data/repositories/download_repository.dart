@@ -33,7 +33,11 @@ class DownloadRepository {
           duration: 212,
           formats: [],
         ),
-        format: const MediaFormat(id: '1080p', quality: '1080p', ext: 'mp4', filesize: 72 * 1024 * 1024),
+        format: const MediaFormat(
+            id: '1080p',
+            quality: '1080p',
+            ext: 'mp4',
+            filesize: 72 * 1024 * 1024),
         status: DownloadStatus.completed,
         progress: 1.0,
         downloadedBytes: 72 * 1024 * 1024,
@@ -52,7 +56,11 @@ class DownloadRepository {
           duration: 52,
           formats: [],
         ),
-        format: const MediaFormat(id: '720p', quality: '720p', ext: 'mp4', filesize: 18 * 1024 * 1024),
+        format: const MediaFormat(
+            id: '720p',
+            quality: '720p',
+            ext: 'mp4',
+            filesize: 18 * 1024 * 1024),
         status: DownloadStatus.completed,
         progress: 1.0,
         downloadedBytes: 18 * 1024 * 1024,
@@ -71,7 +79,11 @@ class DownloadRepository {
           duration: 18,
           formats: [],
         ),
-        format: const MediaFormat(id: '1080p', quality: '1080p', ext: 'mp4', filesize: 9 * 1024 * 1024),
+        format: const MediaFormat(
+            id: '1080p',
+            quality: '1080p',
+            ext: 'mp4',
+            filesize: 9 * 1024 * 1024),
         status: DownloadStatus.completed,
         progress: 1.0,
         downloadedBytes: 9 * 1024 * 1024,
@@ -101,9 +113,14 @@ class DownloadRepository {
             progress: newProg,
             downloadedBytes: downloaded,
             totalBytes: total,
-            speedText: isDone ? '' : '${(1.8 + rng.nextDouble() * 1.5).toStringAsFixed(1)} MB/s',
-            status: isDone ? DownloadStatus.completed : DownloadStatus.downloading,
-            filePath: isDone ? '/storage/downloads/${t.media.id}.${t.format.ext}' : null,
+            speedText: isDone
+                ? ''
+                : '${(1.8 + rng.nextDouble() * 1.5).toStringAsFixed(1)} MB/s',
+            status:
+                isDone ? DownloadStatus.completed : DownloadStatus.downloading,
+            filePath: isDone
+                ? '/storage/downloads/${t.media.id}.${t.format.ext}'
+                : null,
           );
         }
       }
@@ -176,6 +193,17 @@ class DownloadRepository {
 
   void deleteTask(String id) {
     cancelTask(id);
+  }
+
+  void renameTask(String id, String title) {
+    final normalizedTitle = title.trim();
+    if (normalizedTitle.isEmpty) return;
+    final index = _tasks.indexWhere((task) => task.id == id);
+    if (index == -1) return;
+    _tasks[index] = _tasks[index].copyWith(
+      media: _tasks[index].media.copyWith(title: normalizedTitle),
+    );
+    _notify();
   }
 
   void clearHistory() {

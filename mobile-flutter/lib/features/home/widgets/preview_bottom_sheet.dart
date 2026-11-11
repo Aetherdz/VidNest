@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_icons.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/app_button.dart';
@@ -20,7 +21,15 @@ class PreviewBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final selectedFormat = media.selectedFormat ?? media.formats.first;
+    final selectedMedia = ref.watch(mediaAnalysisProvider).media ?? media;
+    final choices = _qualityChoices(selectedMedia.formats);
+    if (choices.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final selectedFormat =
+        choices.any((format) => format.id == selectedMedia.selectedFormat?.id)
+            ? selectedMedia.selectedFormat!
+            : choices.first;
 
     return Container(
       decoration: BoxDecoration(
@@ -53,13 +62,14 @@ class PreviewBottomSheet extends ConsumerWidget {
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [colors.primary, colors.primaryDark],
-                  ),
+                  color: colors.surfaceSubtle,
                   borderRadius: AppRadius.radiusSm,
                 ),
-                child: const Center(
-                  child: Icon(Icons.play_arrow_rounded, color: Colors.white, size: 28),
+                child: Center(
+                  child: Icon(AppIcons.play,
+                      color: colors.primary,
+                      size: 28,
+                      textDirection: TextDirection.ltr),
                 ),
               ),
               AppSpacing.gapMd,
@@ -68,7 +78,7 @@ class PreviewBottomSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      media.title,
+                      selectedMedia.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -80,8 +90,9 @@ class PreviewBottomSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${media.extractor} · ${media.uploader} · ${media.formattedDuration}',
-                      style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                      '${selectedMedia.extractor} · ${selectedMedia.uploader} · ${selectedMedia.formattedDuration}',
+                      style:
+                          TextStyle(color: colors.textSecondary, fontSize: 12),
                     ),
                   ],
                 ),
@@ -106,22 +117,27 @@ class PreviewBottomSheet extends ConsumerWidget {
             child: ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: media.formats.length,
+              itemCount: choices.length,
               separatorBuilder: (_, __) => const SizedBox(height: 6),
               itemBuilder: (context, index) {
-                final format = media.formats[index];
+                final format = choices[index];
                 final isSelected = format.id == selectedFormat.id;
 
                 return InkWell(
                   onTap: () {
-                    ref.read(mediaAnalysisProvider.notifier).selectFormat(format.id);
+                    ref
+                        .read(mediaAnalysisProvider.notifier)
+                        .selectFormat(format.id);
                   },
                   borderRadius: AppRadius.radiusSm,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? colors.primaryTint : colors.surfaceSubtle,
+                      color: isSelected
+                          ? colors.primaryTint
+                          : colors.surfaceSubtle,
                       borderRadius: AppRadius.radiusSm,
                       border: Border.all(
                         color: isSelected ? colors.primary : colors.border,
@@ -131,32 +147,44 @@ class PreviewBottomSheet extends ConsumerWidget {
                     child: Row(
                       children: [
                         Icon(
-                          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                          isSelected
+                              ? AppIcons.radioSelected
+                              : AppIcons.radioUnselected,
                           size: 18,
-                          color: isSelected ? colors.primary : colors.textSecondary,
+                          color: isSelected
+                              ? colors.primary
+                              : colors.textSecondary,
                         ),
                         AppSpacing.gapMd,
                         Expanded(
                           child: Text(
-                            format.label,
+                            _qualityLabel(format, index),
                             style: TextStyle(
-                              color: isSelected ? colors.primaryDark : colors.text,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              color: colors.text,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
                               fontSize: 13,
                             ),
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isSelected ? colors.primary.withValues(alpha: 0.15) : colors.surface,
+                            color: isSelected
+                                ? colors.primary.withValues(alpha: 0.15)
+                                : colors.surface,
                             borderRadius: AppRadius.radiusPill,
-                            border: Border.all(color: colors.border, width: 0.8),
+                            border:
+                                Border.all(color: colors.border, width: 0.8),
                           ),
                           child: Text(
                             format.formattedSize,
                             style: TextStyle(
-                              color: isSelected ? colors.primaryDark : colors.textSecondary,
+                              color: isSelected
+                                  ? colors.text
+                                  : colors.textSecondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -173,11 +201,13 @@ class PreviewBottomSheet extends ConsumerWidget {
 
           // Start Download Button
           AppButton(
-            text: 'ابدأ التنزيل الآن',
-            icon: const Icon(Icons.download_rounded, color: Colors.white, size: 20),
+            text: 'محاكاة التنزيل',
+            icon: Icon(AppIcons.download, color: colors.text, size: 20),
             isExpanded: true,
             onPressed: () {
-              ref.read(downloadRepositoryProvider).startDownload(media, selectedFormat);
+              ref
+                  .read(downloadRepositoryProvider)
+                  .startDownload(selectedMedia, selectedFormat);
               ref.read(mediaAnalysisProvider.notifier).clear();
               onDownloadStarted();
             },
@@ -186,4 +216,22 @@ class PreviewBottomSheet extends ConsumerWidget {
       ),
     );
   }
+}
+
+List<MediaFormat> _qualityChoices(List<MediaFormat> formats) {
+  if (formats.isEmpty) return const [];
+  final video = formats.where((format) => format.hasVideo).toList()
+    ..sort((a, b) => (b.height ?? 0).compareTo(a.height ?? 0));
+  final audio = formats.where((format) => !format.hasVideo).toList();
+  final choices = <MediaFormat>[];
+  if (video.isNotEmpty) choices.add(video.first);
+  if (video.length > 1) choices.add(video[1]);
+  if (audio.isNotEmpty) choices.add(audio.first);
+  return choices.isEmpty ? [formats.first] : choices;
+}
+
+String _qualityLabel(MediaFormat format, int index) {
+  if (!format.hasVideo) return 'صوت فقط · ${format.ext.toUpperCase()}';
+  final label = index == 0 ? 'أفضل جودة' : 'جودة متوسطة';
+  return '$label · ${format.quality}';
 }

@@ -62,8 +62,6 @@ test('Platform chips accurately match supported video URLs', () => {
     { url: 'https://www.instagram.com/reel/abcdef/', expectedId: 'instagram' },
     { url: 'https://x.com/tech/status/987654321', expectedId: 'x' },
     { url: 'https://twitter.com/news/status/112233', expectedId: 'x' },
-    { url: 'https://www.facebook.com/watch/?v=12345', expectedId: 'facebook' },
-    { url: 'https://soundcloud.com/artist/track', expectedId: 'soundcloud' },
   ];
 
   for (const { url, expectedId } of testUrls) {

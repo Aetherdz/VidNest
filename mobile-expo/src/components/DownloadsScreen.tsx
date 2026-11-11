@@ -1,12 +1,14 @@
 import React from 'react';
 import {
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { CheckIcon, PlayIcon } from './Icons.tsx';
+import { CheckIcon, PlayIcon, PlatformIcon } from './Icons.tsx';
 import { tokens, radii, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
 import type { ActiveDownloadItem } from '../hooks/useDownloader.ts';
@@ -44,6 +46,20 @@ export default function DownloadsScreen({
         {downloads.map((item, idx) => {
           const isComplete = item.progress >= 100;
           const badgeText = idx % 2 === 0 ? '4K' : 'HD';
+          const srcLower = (item.source || '').toLowerCase();
+          const platId = srcLower.includes('tiktok')
+            ? 'tiktok'
+            : srcLower.includes('youtu')
+            ? 'youtube'
+            : srcLower.includes('insta')
+            ? 'instagram'
+            : srcLower.includes('x') || srcLower.includes('twit')
+            ? 'x'
+            : srcLower.includes('sound')
+            ? 'soundcloud'
+            : srcLower.includes('face') || srcLower.includes('fb')
+            ? 'facebook'
+            : 'youtube';
 
           return (
             <TouchableOpacity
@@ -58,11 +74,9 @@ export default function DownloadsScreen({
                 },
               ]}
             >
-              {/* Crafted Dark Carbon Media Thumbnail */}
+              {/* Crafted Media Thumbnail with Platform Vector Badge */}
               <View style={styles.thumb}>
-                <View style={styles.thumbPlayCircle}>
-                  <PlayIcon size={13} color="#FFFFFF" />
-                </View>
+                <PlatformIcon id={platId} size={30} />
                 <View style={styles.thumbTagBadge}>
                   <Text style={styles.thumbTagText}>{badgeText}</Text>
                 </View>
@@ -130,9 +144,9 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     width: '100%',
     alignSelf: 'center',
-    paddingTop: 18,
+    paddingTop: 16,
     paddingHorizontal: 20,
-    paddingBottom: 110,
+    paddingBottom: 130,
   },
   topRow: {
     flexDirection: 'row',

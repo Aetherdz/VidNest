@@ -496,6 +496,51 @@ h1 {
   font-weight: 500;
   transition: all var(--dur-fast) var(--ease-spring);
   user-select: none;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--primary);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chip-featured {
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface-subtle);
+  border-color: var(--outline-strong);
+}
+
+.chip-toggle {
+  background: transparent;
+  border-style: dashed;
+  color: var(--primary);
+}
+
+.chip-toggle:hover {
+  background: var(--primary-soft);
+}
+
+.extra-platforms-drawer {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  animation: fadeInChips 0.25s var(--ease-spring);
+}
+
+.extra-platforms-drawer[hidden] {
+  display: none !important;
+}
+
+@keyframes fadeInChips {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .chip-icon {

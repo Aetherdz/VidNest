@@ -96,7 +96,7 @@ const INITIAL_LIBRARY: LibraryItem[] = [
   { id: 'lib-3', title: 'غروب على الشاطئ', duration: '00:15', gradientIndex: 3, source: 'Instagram', timestamp: 3 },
   { id: 'lib-4', title: 'مقابلة مع مصمم', duration: '12:07', gradientIndex: 4, source: 'YouTube', timestamp: 4 },
   { id: 'lib-5', title: 'دليل التصوير الليلي', duration: '08:20', gradientIndex: 2, source: 'YouTube', timestamp: 5 },
-  { id: 'lib-6', title: 'ألحان الصحراء', duration: '04:11', gradientIndex: 5, source: 'SoundCloud', timestamp: 6 },
+  { id: 'lib-6', title: 'موجز تقنيات الذكاء الاصطناعي', duration: '01:45', gradientIndex: 5, source: 'X', timestamp: 6 },
 ];
 
 function detectPlatform(url: string): string {

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   I18nManager,
+  Platform,
   SafeAreaView,
+  StatusBar as RNStatusBar,
   StyleSheet,
   Text,
   View,
@@ -189,6 +191,7 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight || 28) + 12 : 0,
   },
   screenContainer: {
     flex: 1,

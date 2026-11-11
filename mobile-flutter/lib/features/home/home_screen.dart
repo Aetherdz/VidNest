@@ -98,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 AppSpacing.gapMd,
                 // Hero Header
                 Text(
-                  'أداة الوسائط الهادئة v4',
+                  'أداة الوسائط الهادئة',
                   style: TextStyle(
                     color: colors.primary,
                     fontWeight: FontWeight.w600,
@@ -183,7 +183,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Wrap(
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
-                  children: SupportedPlatform.values.map((plat) {
+                  children: SupportedPlatform.values.take(4).map((plat) {
                     final isSel = _selectedPlatform == plat;
                     return PlatformChip(
                       platform: plat,

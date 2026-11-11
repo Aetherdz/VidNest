@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { HomeIcon, DownloadIcon, LibraryIcon } from './Icons.tsx';
 import { tokens, fonts, type ThemeMode } from '../theme/tokens.ts';
 
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 16,
+    bottom: Platform.OS === 'android' ? 24 : 16,
     zIndex: 10,
     maxWidth: 532,
     width: '100%',

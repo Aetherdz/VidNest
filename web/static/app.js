@@ -1449,6 +1449,7 @@ if (pasteButton) {
 }
 
 document.querySelectorAll(".chip").forEach((chip) => {
+  if (chip.id === "more-platforms-btn") return;
   chip.addEventListener("click", () => {
     if (!input) return;
     const url = chip.dataset.url;
@@ -1460,6 +1461,29 @@ document.querySelectorAll(".chip").forEach((chip) => {
     }
   });
 });
+
+const morePlatformsBtn = document.getElementById("more-platforms-btn");
+const extraPlatformsDrawer = document.getElementById("extra-platforms");
+if (morePlatformsBtn && extraPlatformsDrawer) {
+  morePlatformsBtn.addEventListener("click", () => {
+    const isHidden = extraPlatformsDrawer.hasAttribute("hidden");
+    if (isHidden) {
+      extraPlatformsDrawer.removeAttribute("hidden");
+      morePlatformsBtn.setAttribute("aria-expanded", "true");
+      morePlatformsBtn.innerHTML = `
+        <svg class="chip-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>إخفاء</span>
+      `;
+    } else {
+      extraPlatformsDrawer.setAttribute("hidden", "");
+      morePlatformsBtn.setAttribute("aria-expanded", "false");
+      morePlatformsBtn.innerHTML = `
+        <svg class="chip-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>+1,800 المزيد</span>
+      `;
+    }
+  });
+}
 
 if (themeToggleButton) {
   themeToggleButton.addEventListener("click", () => {

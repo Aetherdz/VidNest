@@ -63,6 +63,27 @@ PYTHONPATH=web:. python3 -m unittest discover -s web/tests -p 'test_*.py' -v
 # 2. Mobile Expo & Design System Verification (11 tests)
 node --test mobile-expo/__tests__/*.test.mjs
 
-# 3. Expo App Development Launcher
+# 3. Flutter Tests
+cd mobile-flutter && flutter test
+
+# 4. Expo App Development Launcher
 ./tools/run_expo.sh
 ```
+
+---
+
+## 5. OpenCode Models Execution Pattern (Async Nohup)
+
+When delegating tasks to OpenCode models (`luna 6`, `luna 6 fast`, `deepseek v4.1 flash`), execute them in the background via `nohup` or async subprocess:
+
+```bash
+# GPT-6 Luna
+nohup opencode run -m openai/gpt-6-luna "اكتب تعليماتك هنا" > .team/result-luna.md 2>&1 &
+
+# GPT-6 Luna Fast
+nohup opencode run -m openai/gpt-6-luna-fast "اكتب تعليماتك هنا" > .team/result-light.md 2>&1 &
+
+# DeepSeek V4.1 Flash
+nohup opencode run -m opencode/deepseek-v4.1-flash-free "اكتب تعليماتك هنا" > .team/result-main.md 2>&1 &
+```
+

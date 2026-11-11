@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
+  Platform,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -202,9 +204,9 @@ export default function HomeScreen({
         )}
       </TouchableOpacity>
 
-      {/* Platform Chips */}
+      {/* Top 4 Most Popular Platform Chips */}
       <View style={styles.chipsContainer}>
-        {c.platforms.map((platform) => {
+        {c.platforms.slice(0, 4).map((platform) => {
           const isSelected = matchingPlatformId === platform.id;
           return (
             <TouchableOpacity
@@ -223,7 +225,7 @@ export default function HomeScreen({
             >
               <PlatformIcon
                 id={platform.id}
-                size={15}
+                size={22}
                 color={isSelected ? t.onPrimary : platform.color}
               />
               <Text
@@ -439,9 +441,9 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     width: '100%',
     alignSelf: 'center',
-    paddingTop: 18,
+    paddingTop: 16,
     paddingHorizontal: 20,
-    paddingBottom: 110,
+    paddingBottom: 130,
   },
   topRow: {
     flexDirection: 'row',

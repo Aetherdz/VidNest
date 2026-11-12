@@ -4,20 +4,40 @@ import 'package:vidnest/data/models/media_item.dart';
 import 'package:vidnest/data/repositories/download_repository.dart';
 
 void main() {
+  DownloadTask completedTask(String id) => DownloadTask(
+        id: id,
+        media: MediaItem(
+          id: 'media_$id',
+          url: 'https://example.com/$id',
+          title: 'Task $id',
+          uploader: 'Tester',
+          extractor: 'YouTube',
+          formats: const [],
+        ),
+        format: const MediaFormat(id: '720p', quality: '720p', ext: 'mp4'),
+        status: DownloadStatus.completed,
+        progress: 1.0,
+        downloadedBytes: 1024,
+        totalBytes: 1024,
+        filePath: '/tmp/$id.mp4',
+        createdAt: DateTime.now(),
+      );
+
   group('DownloadRepository Tests', () {
     late DownloadRepository repo;
 
     setUp(() {
-      repo = DownloadRepository();
+      repo = DownloadRepository(initialTasks: [completedTask('seed_1')]);
     });
 
     tearDown(() {
       repo.dispose();
     });
 
-    test('initializes with seed tasks in completed state', () {
-      expect(repo.allTasks.length, greaterThanOrEqualTo(3));
-      expect(repo.allTasks.every((t) => t.isCompleted), isTrue);
+    test('starts empty when no tasks are injected', () {
+      final fresh = DownloadRepository();
+      addTearDown(fresh.dispose);
+      expect(fresh.allTasks, isEmpty);
     });
 
     test('startDownload creates an active downloading task', () {
@@ -87,14 +107,14 @@ void main() {
     });
 
     test('renameTask trims title and ignores empty replacements', () {
-      repo.renameTask('init_1', '  renamed media  ');
+      repo.renameTask('seed_1', '  renamed media  ');
       expect(
-          repo.allTasks.firstWhere((task) => task.id == 'init_1').media.title,
+          repo.allTasks.firstWhere((task) => task.id == 'seed_1').media.title,
           'renamed media');
 
-      repo.renameTask('init_1', '   ');
+      repo.renameTask('seed_1', '   ');
       expect(
-          repo.allTasks.firstWhere((task) => task.id == 'init_1').media.title,
+          repo.allTasks.firstWhere((task) => task.id == 'seed_1').media.title,
           'renamed media');
     });
 

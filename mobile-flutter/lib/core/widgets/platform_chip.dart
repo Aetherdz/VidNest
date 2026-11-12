@@ -5,22 +5,20 @@ import '../theme/app_radius.dart';
 import '../theme/app_spacing.dart';
 
 enum SupportedPlatform {
-  youtube('YouTube', 'https://www.youtube.com/watch?v=aqz-KE-bpKQ',
-      AppIcons.youtube),
-  tiktok('TikTok', 'https://www.tiktok.com/@tiktok/video/7106594312292453675',
-      AppIcons.music),
-  instagram(
-      'Instagram', 'https://www.instagram.com/reel/C321/', AppIcons.camera),
-  x('X', 'https://x.com/jack/status/20', AppIcons.alternateEmail),
-  soundcloud(
-      'SoundCloud', 'https://soundcloud.com/artist/track', AppIcons.audio),
-  facebook(
-      'Facebook', 'https://www.facebook.com/watch/?v=123', AppIcons.groups);
+  youtube('YouTube', 'https://www.youtube.com', AppIcons.youtube),
+  tiktok('TikTok', 'https://www.tiktok.com', AppIcons.music),
+  instagram('Instagram', 'https://www.instagram.com', AppIcons.camera),
+  x('X', 'https://x.com', AppIcons.alternateEmail),
+  soundcloud('SoundCloud', 'https://soundcloud.com', AppIcons.audio),
+  facebook('Facebook', 'https://www.facebook.com', AppIcons.groups);
 
-  const SupportedPlatform(this.label, this.sampleUrl, this.icon);
+  const SupportedPlatform(this.label, this.siteUrl, this.icon);
 
   final String label;
-  final String sampleUrl;
+
+  /// Platform home page. Chips open it so the user copies a real link;
+  /// they never inject a made-up one.
+  final String siteUrl;
   final IconData icon;
 }
 

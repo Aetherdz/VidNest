@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_icons.dart';
@@ -217,12 +218,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: PlatformChip(
                           platform: plat,
                           isSelected: isSel,
-                          onTap: () {
+                          onTap: () async {
                             setState(() {
                               _selectedPlatform = plat;
-                              _urlController.text = plat.sampleUrl;
                             });
-                            _analyzeUrl(plat.sampleUrl);
+                            final uri = Uri.parse(plat.siteUrl);
+                            await launchUrl(uri,
+                                mode: LaunchMode.externalApplication);
                           },
                         ),
                       );

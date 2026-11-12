@@ -4,8 +4,10 @@ import '../models/download_task.dart';
 import '../models/media_item.dart';
 
 class DownloadRepository {
-  DownloadRepository() {
-    _initInitialData();
+  /// Production starts empty: the queue only ever shows real user downloads.
+  /// Tests may inject tasks through [initialTasks].
+  DownloadRepository({List<DownloadTask> initialTasks = const []}) {
+    _tasks.addAll(initialTasks);
     _startProgressSimulator();
   }
 
@@ -18,80 +20,6 @@ class DownloadRepository {
 
   void _notify() {
     _tasksController.add(List.unmodifiable(_tasks));
-  }
-
-  void _initInitialData() {
-    _tasks.addAll([
-      DownloadTask(
-        id: 'init_1',
-        media: const MediaItem(
-          id: 'm1',
-          url: 'https://youtube.com/watch?v=atlas',
-          title: 'رحلة في جبال الأطلس المغربية',
-          uploader: 'Atheerium Nature',
-          extractor: 'YouTube',
-          duration: 212,
-          formats: [],
-        ),
-        format: const MediaFormat(
-            id: '1080p',
-            quality: '1080p',
-            ext: 'mp4',
-            filesize: 72 * 1024 * 1024),
-        status: DownloadStatus.completed,
-        progress: 1.0,
-        downloadedBytes: 72 * 1024 * 1024,
-        totalBytes: 72 * 1024 * 1024,
-        filePath: '/storage/downloads/atlas_1080p.mp4',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
-      ),
-      DownloadTask(
-        id: 'init_2',
-        media: const MediaItem(
-          id: 'm2',
-          url: 'https://tiktok.com/@chef/video/1',
-          title: 'طريقة إعداد كسكسو مغاربي أصيل في 5 دقائق',
-          uploader: 'فن الطبخ المغاربي',
-          extractor: 'TikTok',
-          duration: 52,
-          formats: [],
-        ),
-        format: const MediaFormat(
-            id: '720p',
-            quality: '720p',
-            ext: 'mp4',
-            filesize: 18 * 1024 * 1024),
-        status: DownloadStatus.completed,
-        progress: 1.0,
-        downloadedBytes: 18 * 1024 * 1024,
-        totalBytes: 18 * 1024 * 1024,
-        filePath: '/storage/downloads/couscous_720p.mp4',
-        createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      ),
-      DownloadTask(
-        id: 'init_3',
-        media: const MediaItem(
-          id: 'm3',
-          url: 'https://instagram.com/reel/desert',
-          title: 'غروب الشمس الساحر فوق الكثبان الرملية',
-          uploader: '@sahara_tours',
-          extractor: 'Instagram',
-          duration: 18,
-          formats: [],
-        ),
-        format: const MediaFormat(
-            id: '1080p',
-            quality: '1080p',
-            ext: 'mp4',
-            filesize: 9 * 1024 * 1024),
-        status: DownloadStatus.completed,
-        progress: 1.0,
-        downloadedBytes: 9 * 1024 * 1024,
-        totalBytes: 9 * 1024 * 1024,
-        filePath: '/storage/downloads/sahara_sunset.mp4',
-        createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-      ),
-    ]);
   }
 
   void _startProgressSimulator() {

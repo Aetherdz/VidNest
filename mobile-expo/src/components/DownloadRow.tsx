@@ -74,16 +74,12 @@ export default function DownloadRow({ item, themeMode, onPlay, onOpen, onRemove 
           </View>
         </View>
 
-        {!isDone && !isError && (
+        {/* The server does not stream progress, so an active row shows a
+            spinner instead of a bar with an invented percentage. */}
+        {!isDone && !isError && item.progress != null && (
           <View style={[styles.track, { backgroundColor: t.surfaceAlt }]}>
             <View
-              style={[
-                styles.fill,
-                {
-                  backgroundColor: t.accent,
-                  width: item.progress == null ? '35%' : `${item.progress}%`,
-                },
-              ]}
+              style={[styles.fill, { backgroundColor: t.accent, width: `${item.progress}%` }]}
             />
           </View>
         )}

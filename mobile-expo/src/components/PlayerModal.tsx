@@ -154,9 +154,16 @@ export default function PlayerModal({ visible, item, themeMode, onClose, onOpen,
             </TouchableOpacity>
           </View>
 
-          {source ? (
-            <PlayerSurface source={source} kind={kind} themeMode={themeMode} />
-          ) : (
+          {/* Mount the player only while open: closing unmounts it, which stops
+              playback instead of leaving audio running behind a hidden modal. */}
+          {visible && source ? (
+            <PlayerSurface
+              key={source}
+              source={source}
+              kind={kind}
+              themeMode={themeMode}
+            />
+          ) : !source ? (
             <View style={[styles.noSource, { backgroundColor: t.surfaceAlt, borderColor: t.line }]}>
               {kind === 'audio' ? (
                 <AudioIcon size={26} color={t.muted} />
@@ -165,7 +172,7 @@ export default function PlayerModal({ visible, item, themeMode, onClose, onOpen,
               )}
               <Text style={[styles.noSourceText, { color: t.muted }]}>{c.playerNoSource}</Text>
             </View>
-          )}
+          ) : null}
 
           <View style={styles.actions}>
             <TouchableOpacity

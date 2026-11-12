@@ -2,7 +2,7 @@
   "expo": {
     "name": "VidNest",
     "slug": "vidnest",
-    "version": "4.0.1",
+    "version": "4.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "com.atheerium.vidnest",
-      "versionCode": 2,
+      "versionCode": 3,
       "supportsRTL": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

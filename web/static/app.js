@@ -1458,15 +1458,12 @@ if (pasteButton) {
 
 document.querySelectorAll(".chip").forEach((chip) => {
   if (chip.id === "more-platforms-btn") return;
+  // Chips are shortcuts, not examples: they focus the field and say what to paste.
   chip.addEventListener("click", () => {
     if (!input) return;
-    const url = chip.dataset.url;
-    if (url) {
-      input.value = url;
-      updateInspect();
-      input.focus();
-      inspectFormats(url);
-    }
+    const name = (chip.textContent || "").trim();
+    input.focus();
+    setMessage(name ? `الصق رابط ${name} في الحقل أعلاه.` : "الصق الرابط في الحقل أعلاه.");
   });
 });
 

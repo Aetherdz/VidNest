@@ -367,6 +367,52 @@ export function LibraryIcon({ size = 22, color = '#525860' }: IconProps) {
   );
 }
 
+export function SearchIcon({ size = 18, color = '#525860' }: IconProps) {
+  if (isWeb) {
+    return React.createElement(
+      'svg',
+      {
+        width: size,
+        height: size,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: color,
+        strokeWidth: '2',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        'aria-hidden': 'true',
+      },
+      React.createElement('circle', { cx: '11', cy: '11', r: '7' }),
+      React.createElement('line', { x1: '20', y1: '20', x2: '16.2', y2: '16.2' }),
+    );
+  }
+  const stroke = Math.max(2, Math.round(size * 0.08));
+  return (
+    <View style={[styles.center, { width: size, height: size }]}>
+      <View
+        style={{
+          width: size * 0.68,
+          height: size * 0.68,
+          borderRadius: size * 0.34,
+          borderWidth: stroke,
+          borderColor: color,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          width: stroke,
+          height: size * 0.3,
+          backgroundColor: color,
+          transform: [{ rotate: '-45deg' }],
+          bottom: size * 0.04,
+          left: size * 0.08,
+        }}
+      />
+    </View>
+  );
+}
+
 export function PasteIcon({ size = 20, color = '#0D7A5F' }: IconProps) {
   if (isWeb) {
     return React.createElement(
@@ -516,6 +562,29 @@ export function ShareIcon({ size = 18, color = '#525860' }: IconProps) {
     );
   }
   return <DownloadIcon size={size} color={color} />;
+}
+
+export function OpenIcon({ size = 18, color = '#525860' }: IconProps) {
+  if (isWeb) {
+    return React.createElement(
+      'svg',
+      {
+        width: size,
+        height: size,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: color,
+        strokeWidth: '2',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        'aria-hidden': 'true',
+      },
+      React.createElement('path', { d: 'M14 4h6v6' }),
+      React.createElement('path', { d: 'M20 4l-8.5 8.5' }),
+      React.createElement('path', { d: 'M19 14v4.5A1.5 1.5 0 0 1 17.5 20h-11A1.5 1.5 0 0 1 5 18.5v-11A1.5 1.5 0 0 1 6.5 6H11' }),
+    );
+  }
+  return <ShareIcon size={size} color={color} />;
 }
 
 export function VideoIcon({ size = 16, color = '#525860' }: IconProps) {

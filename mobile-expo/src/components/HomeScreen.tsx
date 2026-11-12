@@ -22,9 +22,11 @@ import {
   CheckIcon,
   PlatformIcon,
 } from './Icons.tsx';
-import { tokens, radii, gradients, fonts, type ThemeMode } from '../theme/tokens.ts';
+import { tokens, radii, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
 import type { ActiveDownloadItem, PreviewData } from '../hooks/useDownloader.ts';
+import DownloadRow from './DownloadRow.tsx';
+import EmptyState from './EmptyState.tsx';
 
 type Props = {
   themeMode: ThemeMode;
@@ -39,6 +41,10 @@ type Props = {
   onStartDownload: () => void;
   recentDownloads: ActiveDownloadItem[];
   onToggleTheme: () => void;
+  onPlay: (item: ActiveDownloadItem) => void;
+  onOpen: (item: ActiveDownloadItem) => void;
+  onRemove: (id: string) => void;
+  onGoDownloads: () => void;
 };
 
 export default function HomeScreen({
@@ -54,6 +60,10 @@ export default function HomeScreen({
   onStartDownload,
   recentDownloads,
   onToggleTheme,
+  onPlay,
+  onOpen,
+  onRemove,
+  onGoDownloads,
 }: Props) {
   const t = tokens[themeMode];
   const c = copy.ar;
@@ -65,8 +75,8 @@ export default function HomeScreen({
     p.match.some((keyword) => url.toLowerCase().includes(keyword)),
   )?.id;
 
-  const handleChipPress = (sampleUrl: string) => {
-    onUrlChange(sampleUrl);
+  const openPlatform = (platformUrl: string) => {
+    Linking.openURL(platformUrl).catch(() => {});
   };
 
   const openAtheerium = () => {
@@ -135,7 +145,6 @@ export default function HomeScreen({
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
-          dir="rtl"
           textAlign="right"
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -178,7 +187,9 @@ export default function HomeScreen({
         style={[
           styles.downloadButton,
           {
-            backgroundColor: canAnalyze ? t.primary : t.surfaceAlt,
+            backgroundColor: canAnalyze ? t.primary : 'transparent',
+            borderWidth: canAnalyze ? 0 : 1,
+            borderColor: t.line,
           },
         ]}
         accessibilityRole="button"
@@ -204,7 +215,7 @@ export default function HomeScreen({
         )}
       </TouchableOpacity>
 
-      {/* Top 4 Most Popular Platform Chips */}
+      {/* Platform shortcuts: open the platform to copy a link, never inject one */}
       <View style={styles.chipsContainer}>
         {c.platforms.slice(0, 4).map((platform) => {
           const isSelected = matchingPlatformId === platform.id;
@@ -212,9 +223,10 @@ export default function HomeScreen({
             <TouchableOpacity
               key={platform.id}
               activeOpacity={0.7}
-              onPress={() => handleChipPress(platform.sample)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
+              onPress={() => openPlatform(platform.url)}
+              accessibilityRole="link"
+              accessibilityHint={c.platformHint}
+              accessibilityLabel={`${platform.name} — ${c.platformHint}`}
               style={[
                 styles.chip,
                 {
@@ -255,30 +267,16 @@ export default function HomeScreen({
             },
           ]}
         >
-          {/* 16:9 Thumbnail preview with play icon & duration */}
-          <View
-            style={[
-              styles.previewThumbnail,
-              {
-                backgroundColor: gradients[preview.gradientIndex % gradients.length][0],
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.playOverlay,
-                {
-                  backgroundColor: gradients[preview.gradientIndex % gradients.length][1],
-                  opacity: 0.45,
-                },
-              ]}
-            />
-            <View style={styles.playIconWrapper}>
-              <PlayIcon size={28} color="#FFFFFF" />
+          {/* Media header: neutral surface, real duration only when the server reports it */}
+          <View style={[styles.previewThumbnail, { backgroundColor: t.surfaceAlt, borderColor: t.line }]}>
+            <View style={[styles.playIconWrapper, { backgroundColor: t.surface, borderColor: t.line }]}>
+              <PlayIcon size={24} color={t.muted} />
             </View>
-            <View style={styles.durationBadge}>
-              <Text style={styles.durationText}>{preview.duration}</Text>
-            </View>
+            {preview.duration ? (
+              <View style={styles.durationBadge}>
+                <Text style={styles.durationText}>{preview.duration}</Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Title and Source */}
@@ -351,73 +349,41 @@ export default function HomeScreen({
       )}
 
       {/* Recent Downloads Section */}
-      <Text style={[styles.sectionTitle, { color: t.ink }]}>{c.recentTitle}</Text>
-      <View style={styles.recentList}>
-        {recentDownloads.slice(0, 2).map((item, idx) => {
-          const isComplete = item.progress >= 100;
-          const badgeText = idx === 0 ? '4K' : 'HD';
-
-          return (
-            <View
-              key={item.id}
-              style={[
-                styles.recentRow,
-                {
-                  backgroundColor: t.surface,
-                  borderColor: t.line,
-                },
-              ]}
-            >
-              <View style={styles.recentThumb}>
-                <View style={styles.thumbPlayCircle}>
-                  <PlayIcon size={13} color="#FFFFFF" />
-                </View>
-                <View style={styles.thumbTagBadge}>
-                  <Text style={styles.thumbTagText}>{badgeText}</Text>
-                </View>
-              </View>
-              <View style={styles.recentMid}>
-                <Text style={[styles.recentItemTitle, { color: t.ink }]} numberOfLines={1}>
-                  {item.title}
-                </Text>
-                <Text style={[styles.recentSubtitle, { color: t.muted }]}>
-                  {item.source} · {item.sizeFormatted}
-                </Text>
-                {!isComplete && (
-                  <View style={[styles.progressBarBg, { backgroundColor: t.surfaceAlt }]}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${item.progress}%`,
-                          backgroundColor: t.accent,
-                        },
-                      ]}
-                    />
-                  </View>
-                )}
-              </View>
-
-              <View
-                style={[
-                  styles.statusBadge,
-                  {
-                    backgroundColor: isComplete ? t.mintBg : t.accentLight,
-                  },
-                ]}
-              >
-                {isComplete ? (
-                  <CheckIcon size={18} color={t.accentText} />
-                ) : (
-                  <Text style={[styles.progressBadgeText, { color: t.accentText }]}>
-                    {item.progress}%
-                  </Text>
-                )}
-              </View>
-            </View>
-          );
-        })}
+      <View style={styles.sectionHeader}>
+        <Text style={[styles.sectionTitle, { color: t.ink }]}>{c.recentTitle}</Text>
+        {recentDownloads.length > 0 ? (
+          <TouchableOpacity
+            onPress={onGoDownloads}
+            accessibilityRole="button"
+            accessibilityLabel={c.tabDownloads}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.sectionLink, { color: t.accentText }]}>{c.tabDownloads}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
+
+      {recentDownloads.length === 0 ? (
+        <EmptyState
+          themeMode={themeMode}
+          icon={<DownloadIcon size={24} color={t.muted} />}
+          title={c.emptyRecent}
+          body={c.emptyDownloadsBody}
+        />
+      ) : (
+        <View style={styles.recentList}>
+          {recentDownloads.slice(0, 3).map((item) => (
+            <DownloadRow
+              key={item.id}
+              item={item}
+              themeMode={themeMode}
+              onPlay={onPlay}
+              onOpen={onOpen}
+              onRemove={onRemove}
+            />
+          ))}
+        </View>
+      )}
 
       {/* Credit & Backlink */}
       <TouchableOpacity
@@ -555,6 +521,7 @@ const styles = StyleSheet.create({
   previewThumbnail: {
     aspectRatio: 16 / 9,
     borderRadius: 20,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -567,7 +534,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -641,13 +608,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontFamily: fonts.bold,
     fontSize: 18,
     fontWeight: '700',
     textAlign: 'right',
-    marginBottom: 12,
-    marginTop: 8,
+  },
+  sectionLink: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    fontWeight: '600',
   },
   recentList: {
     gap: 10,

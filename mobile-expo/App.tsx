@@ -43,6 +43,7 @@ import BottomNav, { type TabKey } from './src/components/BottomNav.tsx';
 import HomeScreen from './src/components/HomeScreen.tsx';
 import DownloadsScreen from './src/components/DownloadsScreen.tsx';
 import LibraryScreen from './src/components/LibraryScreen.tsx';
+import PlayerModal, { type PlayableItem } from './src/components/PlayerModal.tsx';
 
 const DEFAULT_BASE_URL =
   process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://vidnest-web.onrender.com';
@@ -60,6 +61,7 @@ export default function App() {
     systemColorScheme === 'dark' ? 'dark' : 'light',
   );
   const [activeTab, setActiveTab] = useState<TabKey>('home');
+  const [playerItem, setPlayerItem] = useState<PlayableItem | null>(null);
 
   useEffect(() => {
     if (systemColorScheme === 'dark' || systemColorScheme === 'light') {
@@ -106,6 +108,8 @@ export default function App() {
     selectQualityOption,
     startDownload,
     shareItem,
+    openItem,
+    removeItem,
   } = useDownloader(DEFAULT_BASE_URL);
 
   if (!fontsLoaded) {
@@ -117,6 +121,24 @@ export default function App() {
     if (res) {
       setActiveTab('downloads');
     }
+  };
+
+  const handlePlay = (item: {
+    title: string;
+    source?: string;
+    url?: string;
+    file?: string;
+    kind?: 'video' | 'audio';
+    duration?: string;
+  }) => {
+    setPlayerItem({
+      title: item.title,
+      source: item.source,
+      url: item.url,
+      file: item.file,
+      kind: item.kind,
+      duration: item.duration,
+    });
   };
 
   return (
@@ -139,6 +161,10 @@ export default function App() {
             onStartDownload={handleStartDownloadFromHome}
             recentDownloads={downloads}
             onToggleTheme={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
+            onPlay={handlePlay}
+            onOpen={openItem}
+            onRemove={removeItem}
+            onGoDownloads={() => setActiveTab('downloads')}
           />
         )}
 
@@ -146,7 +172,10 @@ export default function App() {
           <DownloadsScreen
             themeMode={themeMode}
             downloads={downloads}
-            onShareItem={shareItem}
+            onPlay={handlePlay}
+            onOpen={openItem}
+            onRemove={removeItem}
+            onGoHome={() => setActiveTab('home')}
           />
         )}
 
@@ -154,7 +183,9 @@ export default function App() {
           <LibraryScreen
             themeMode={themeMode}
             items={library}
-            onOpenItem={shareItem}
+            onPlay={handlePlay}
+            onOpen={openItem}
+            onGoHome={() => setActiveTab('home')}
           />
         )}
       </View>
@@ -177,6 +208,15 @@ export default function App() {
           </View>
         </View>
       )}
+
+      <PlayerModal
+        visible={playerItem !== null}
+        item={playerItem}
+        themeMode={themeMode}
+        onClose={() => setPlayerItem(null)}
+        onOpen={openItem}
+        onShare={shareItem}
+      />
 
       {/* Bottom Floating Pill Navigation */}
       <BottomNav

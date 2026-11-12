@@ -1,367 +1,341 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { PlayIcon, PlatformIcon, LibraryIcon } from './Icons.tsx';
+import {
+  AudioIcon,
+  LibraryIcon,
+  OpenIcon,
+  PlayIcon,
+  SearchIcon,
+  VideoIcon,
+} from './Icons.tsx';
 import { tokens, radii, fonts, type ThemeMode } from '../theme/tokens.ts';
 import { copy } from '../i18n/copy.ts';
-import type { LibraryItem } from '../hooks/useDownloader.ts';
+import type { LibraryItem, MediaKind } from '../hooks/useDownloader.ts';
+import EmptyState from './EmptyState.tsx';
 
 type Props = {
   themeMode: ThemeMode;
   items: LibraryItem[];
-  onOpenItem: (item: LibraryItem) => void;
+  onPlay: (item: LibraryItem) => void;
+  onOpen: (item: LibraryItem) => void;
+  onGoHome: () => void;
 };
 
-const PLATFORM_THEMES = {
-  youtube: {
-    bgStart: '#2A080C',
-    bgEnd: '#120406',
-    accent: '#FF0000',
-    quality: '4K',
-    glow: 'rgba(255, 0, 0, 0.28)',
-  },
-  tiktok: {
-    bgStart: '#041B22',
-    bgEnd: '#070D14',
-    accent: '#00F2FE',
-    quality: 'HD',
-    glow: 'rgba(0, 242, 254, 0.22)',
-  },
-  instagram: {
-    bgStart: '#2C0A28',
-    bgEnd: '#110314',
-    accent: '#E1306C',
-    quality: '4K',
-    glow: 'rgba(225, 48, 108, 0.25)',
-  },
-  x: {
-    bgStart: '#0D1628',
-    bgEnd: '#060A12',
-    accent: '#38BDF8',
-    quality: 'HD',
-    glow: 'rgba(56, 189, 248, 0.20)',
-  },
-} as const;
+type Filter = 'all' | MediaKind;
 
-export default function LibraryScreen({
-  themeMode,
-  items,
-  onOpenItem,
-}: Props) {
+export default function LibraryScreen({ themeMode, items, onPlay, onOpen, onGoHome }: Props) {
   const t = tokens[themeMode];
   const c = copy.ar;
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<Filter>('all');
+
+  const visible = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    return items.filter((item) => {
+      if (filter !== 'all' && item.kind !== filter) return false;
+      if (!term) return true;
+      return `${item.title} ${item.source}`.toLowerCase().includes(term);
+    });
+  }, [items, query, filter]);
+
+  const filters: { key: Filter; label: string }[] = [
+    { key: 'all', label: 'الكل' },
+    { key: 'video', label: 'فيديو' },
+    { key: 'audio', label: 'صوت' },
+  ];
 
   return (
     <ScrollView
       style={[styles.container, { backgroundColor: t.bg }]}
-      contentContainerStyle={styles.contentContainer}
+      contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
-      {/* Top Header */}
-      <View style={styles.topRow}>
+      <View style={styles.header}>
         <Text style={[styles.title, { color: t.ink }]}>{c.tabLibrary}</Text>
+        {items.length > 0 ? (
+          <Text style={[styles.count, { color: t.muted }]}>{items.length}</Text>
+        ) : null}
       </View>
 
-      {/* 2-Column Grid */}
-      <View style={styles.grid}>
-        {items.map((item, index) => {
-          const srcLower = (item.source || '').toLowerCase();
-          const platId: 'youtube' | 'tiktok' | 'instagram' | 'x' = srcLower.includes('tiktok')
-            ? 'tiktok'
-            : srcLower.includes('youtu')
-            ? 'youtube'
-            : srcLower.includes('insta')
-            ? 'instagram'
-            : srcLower.includes('x') || srcLower.includes('twit')
-            ? 'x'
-            : (index % 4 === 0 ? 'youtube' : index % 4 === 1 ? 'tiktok' : index % 4 === 2 ? 'instagram' : 'x');
+      {items.length > 0 ? (
+        <>
+          <View style={[styles.searchBox, { backgroundColor: t.surface, borderColor: t.line }]}>
+            <SearchIcon size={18} color={t.muted} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="ابحث في مكتبتك"
+              placeholderTextColor={t.muted}
+              style={[styles.searchInput, { color: t.ink }]}
+              accessibilityLabel="بحث في المكتبة"
+              returnKeyType="search"
+            />
+          </View>
 
-          const theme = PLATFORM_THEMES[platId];
-          const badgeLabel = index % 2 === 0 ? '4K' : 'HD';
-
-          return (
-            <TouchableOpacity
-              key={item.id}
-              activeOpacity={0.8}
-              onPress={() => onOpenItem(item)}
-              style={styles.tile}
-              accessibilityRole="button"
-              accessibilityLabel={`${item.title} - ${item.duration}`}
-            >
-              {/* Crafted Cinematic Platform Media Card */}
-              <View
-                style={[
-                  styles.thumbnail,
-                  {
-                    backgroundColor: theme.bgEnd,
-                    borderColor: t.line,
-                  },
-                ]}
-              >
-                {/* Dual-tone gradient glow */}
-                <View
+          <View style={styles.filters} accessibilityRole="tablist">
+            {filters.map((entry) => {
+              const active = filter === entry.key;
+              return (
+                <TouchableOpacity
+                  key={entry.key}
+                  onPress={() => setFilter(entry.key)}
                   style={[
-                    styles.gradientOverlay,
+                    styles.filterChip,
                     {
-                      backgroundColor: theme.bgStart,
-                      opacity: 0.85,
+                      backgroundColor: active ? t.primary : 'transparent',
+                      borderColor: active ? t.primary : t.line,
                     },
                   ]}
-                />
-                <View
-                  style={[
-                    styles.ambientGlow,
-                    {
-                      backgroundColor: theme.glow,
-                    },
-                  ]}
-                />
-
-                {/* Platform Logo Watermark in Corner */}
-                <View style={styles.watermarkWrapper}>
-                  <PlatformIcon id={platId} size={64} />
-                </View>
-
-                {/* Top Quality Badge */}
-                <View
-                  style={[
-                    styles.qualityBadge,
-                    badgeLabel === '4K' ? styles.quality4K : styles.qualityHD,
-                  ]}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
+                  activeOpacity={0.85}
                 >
                   <Text
                     style={[
-                      styles.qualityBadgeText,
-                      { color: badgeLabel === '4K' ? '#FBBF24' : '#38BDF8' },
+                      styles.filterLabel,
+                      { color: active ? t.onPrimary : t.muted },
                     ]}
                   >
-                    {badgeLabel}
+                    {entry.label}
                   </Text>
-                </View>
-
-                {/* Top Platform Badge */}
-                <View style={styles.platformBadge}>
-                  <PlatformIcon id={platId} size={20} />
-                </View>
-
-                {/* Center Glassmorphic Play Button */}
-                <View style={styles.playButtonWrapper}>
-                  <PlayIcon size={24} color="#FFFFFF" />
-                </View>
-
-                {/* Duration Badge */}
-                <View style={styles.durationBadge}>
-                  <Text style={styles.durationText}>{item.duration}</Text>
-                </View>
-              </View>
-
-              {/* Title & Source under thumbnail */}
-              <Text style={[styles.tileTitle, { color: t.ink }]} numberOfLines={2}>
-                {item.title}
-              </Text>
-              <View style={styles.tileFooter}>
-                <PlatformIcon id={platId} size={14} />
-                <Text style={[styles.tileSource, { color: t.muted }]}>
-                  {item.source} · {badgeLabel}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-
-        {items.length === 0 && (
-          <View style={[styles.emptyBox, { backgroundColor: t.surface, borderColor: t.line }]}>
-            <View style={[styles.emptyIconCircle, { backgroundColor: t.surfaceAlt }]}>
-              <LibraryIcon size={34} color={t.muted} />
-            </View>
-            <Text style={[styles.emptyTitle, { color: t.ink }]}>مكتبتك هادئة وخالية</Text>
-            <Text style={[styles.emptySubtitle, { color: t.muted }]}>
-              مقاطع الفيديو التي تكتمل تنزيلاتها ستظهر هنا مرتبة وجاهزة للتشغيل في أي وقت دون إنترنت.
-            </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        )}
-      </View>
+        </>
+      ) : null}
+
+      {items.length === 0 ? (
+        <EmptyState
+          themeMode={themeMode}
+          icon={<LibraryIcon size={26} color={t.muted} />}
+          title={c.emptyLibraryTitle}
+          body={c.emptyLibraryBody}
+          actionLabel={c.goHome}
+          onAction={onGoHome}
+        />
+      ) : visible.length === 0 ? (
+        <EmptyState
+          themeMode={themeMode}
+          icon={<SearchIcon size={26} color={t.muted} />}
+          title="لا نتائج مطابقة"
+          body="جرّب كلمة أخرى أو أعد التصفية إلى الكل."
+        />
+      ) : (
+        <View style={styles.grid}>
+          {visible.map((item) => (
+            <View
+              key={item.id}
+              style={[styles.card, { backgroundColor: t.surface, borderColor: t.line }]}
+            >
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => onPlay(item)}
+                style={[styles.preview, { backgroundColor: t.surfaceAlt }]}
+                accessibilityRole="button"
+                accessibilityLabel={`${c.play}: ${item.title}`}
+              >
+                {item.kind === 'audio' ? (
+                  <AudioIcon size={24} color={t.muted} />
+                ) : (
+                  <VideoIcon size={24} color={t.muted} />
+                )}
+                {item.duration ? (
+                  <View style={styles.durationBadge}>
+                    <Text style={styles.durationText}>{item.duration}</Text>
+                  </View>
+                ) : null}
+              </TouchableOpacity>
+
+              <View style={styles.cardBody}>
+                <Text style={[styles.cardTitle, { color: t.ink }]} numberOfLines={2}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.cardMeta, { color: t.muted }]} numberOfLines={1}>
+                  {[item.source, item.sizeFormatted].filter(Boolean).join(' · ')}
+                </Text>
+
+                <View style={styles.cardActions}>
+                  <TouchableOpacity
+                    onPress={() => onPlay(item)}
+                    style={[styles.playButton, { backgroundColor: t.accentLight }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${c.play}: ${item.title}`}
+                    activeOpacity={0.85}
+                  >
+                    <PlayIcon size={14} color={t.accentText} />
+                    <Text style={[styles.playLabel, { color: t.accentText }]}>{c.play}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => onOpen(item)}
+                    style={[styles.openButton, { borderColor: t.line }]}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${c.open}: ${item.title}`}
+                    activeOpacity={0.85}
+                  >
+                    <OpenIcon size={14} color={t.ink} />
+                    <Text style={[styles.openLabel, { color: t.ink }]}>{c.open}</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    maxWidth: 560,
+  container: { flex: 1 },
+  content: {
+    maxWidth: 720,
     width: '100%',
     alignSelf: 'center',
     paddingTop: 16,
     paddingHorizontal: 20,
     paddingBottom: 130,
+    gap: 14,
   },
-  topRow: {
+  header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
   },
   title: {
     fontFamily: fonts.bold,
     fontSize: 26,
     fontWeight: '700',
     textAlign: 'right',
-    letterSpacing: 0,
+  },
+  count: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 48,
+    paddingHorizontal: 14,
+    borderRadius: radii.chip,
+    borderWidth: 1,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    textAlign: 'right',
+    outlineStyle: 'none',
+  } as object,
+  filters: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  filterChip: {
+    minHeight: 36,
+    paddingHorizontal: 16,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterLabel: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    fontWeight: '600',
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 14,
-    justifyContent: 'space-between',
+    gap: 12,
   },
-  tile: {
-    width: '47.5%',
-    minHeight: 48,
-    marginBottom: 10,
-  },
-  thumbnail: {
-    aspectRatio: 1 / 1.05,
-    borderRadius: radii.chip,
+  card: {
+    flexGrow: 1,
+    flexBasis: 240,
+    maxWidth: 340,
+    borderRadius: radii.card,
     borderWidth: 1,
     overflow: 'hidden',
-    position: 'relative',
+  },
+  preview: {
+    aspectRatio: 16 / 9,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  ambientGlow: {
-    position: 'absolute',
-    width: '90%',
-    height: '90%',
-    borderRadius: 40,
-    opacity: 0.6,
-  },
-  watermarkWrapper: {
-    position: 'absolute',
-    bottom: -10,
-    left: -10,
-    opacity: 0.14,
-    transform: [{ rotate: '12deg' }],
-  },
-  qualityBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    borderWidth: 1,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-    zIndex: 2,
-  },
-  quality4K: {
-    backgroundColor: 'rgba(245, 158, 11, 0.22)',
-    borderColor: 'rgba(245, 158, 11, 0.55)',
-  },
-  qualityHD: {
-    backgroundColor: 'rgba(6, 182, 212, 0.22)',
-    borderColor: 'rgba(6, 182, 212, 0.55)',
-  },
-  qualityBadgeText: {
-    fontFamily: fonts.bold,
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  platformBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  playButtonWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.38)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
   },
   durationBadge: {
     position: 'absolute',
-    right: 8,
     bottom: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.72)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    zIndex: 2,
+    left: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: 'rgba(11,15,25,0.72)',
   },
   durationText: {
     fontFamily: fonts.semibold,
-    color: '#FFFFFF',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
-  tileTitle: {
+  cardBody: {
+    padding: 12,
+    gap: 6,
+  },
+  cardTitle: {
     fontFamily: fonts.semibold,
     fontSize: 14,
     fontWeight: '600',
-    marginTop: 8,
-    textAlign: 'right',
     lineHeight: 21,
+    textAlign: 'right',
   },
-  tileFooter: {
+  cardMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  cardActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginTop: 4,
   },
-  tileSource: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  emptyBox: {
-    width: '100%',
-    paddingVertical: 36,
-    paddingHorizontal: 24,
-    borderRadius: radii.card,
-    borderWidth: 1,
+  playButton: {
+    flex: 1,
+    minHeight: 38,
+    borderRadius: radii.pill,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
-    gap: 8,
+    gap: 6,
   },
-  emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  emptyTitle: {
+  playLabel: {
     fontFamily: fonts.bold,
-    fontSize: 17,
+    fontSize: 12,
     fontWeight: '700',
-    textAlign: 'center',
   },
-  emptySubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: 'center',
-    maxWidth: 320,
+  openButton: {
+    flex: 1,
+    minHeight: 38,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  openLabel: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - 'README.md'
-      - 'docs/**'
+    paths:
+      - 'mobile-expo/**'
+      - '.github/workflows/build-apk.yml'
   workflow_dispatch:
 
 permissions:

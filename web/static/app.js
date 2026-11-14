@@ -7,6 +7,8 @@ const copy = {
     switch: "EN",
     designerCredit: "by Atheerium",
     statusPill: "+1,800 موقع · بدون إعلانات",
+    morePlatforms: "+1,800 المزيد",
+    hidePlatforms: "إخفاء",
     eyebrow: "أداة الوسائط الهادئة",
     headline: "حمّل ما تحب، واحتفظ به بسهولة.",
     heroCta: "ابدأ التنزيل",
@@ -39,7 +41,7 @@ const copy = {
     noFilteredFormats: "لا تتوفر خيارات مطابقة لهذا التصنيف.",
     download: "ابدأ التنزيل",
     downloading: "جارٍ التنزيل…",
-    formatFootnote: "الجودات المعروضة مستخرجة مباشرة من المصدر الأصلي بدون ضغط إضافي.",
+    formatFootnote: "الجودات المعروضة من المصدر نفسه، بالجودة الأصلية ودون إعادة ضغط.",
     recentDownloads: "آخر التنزيلات",
     viewAll: "عرض الكل",
     downloadsTitle: "التنزيلات",
@@ -60,34 +62,34 @@ const copy = {
     step3Desc: "نزّل الملف لجهازك واستمتع بالمشاهدة والاستماع في أي وقت وبدون انترنت.",
     featuresHeading: "لماذا تختار VidNest؟",
     feat1Title: "سرعة وجودة أوضح",
-    feat1Desc: "استخراج سريع ودمج أفضل تدفق فيديو وصوت متاح عند دعم المصدر.",
+    feat1Desc: "روابط جاهزة خلال ثوانٍ، بالصورة والصوت الأصليين ومن دون انتظار.",
     feat2Title: "خصوصية وأمان تام",
     feat2Desc: "بدون تسجيل حساب، بدون ملفات تعريف ارتباط للتعقب، وخالٍ من الإعلانات تمامًا.",
     feat3Title: "+1,800 موقع مدعوم",
     feat3Desc: "تغطية عالمية تشمل كبرى منصات الفيديو وشبكات التواصل وبودكاست الصوت.",
     feat4Title: "دمج ذكي للصوت والفيديو",
-    feat4Desc: "دمج تلقائي لأعلى دقة تصوير مع أفضل دفق صوتي متاح من خلال خوارزميات FFmpeg.",
+    feat4Desc: "نجمع أفضل صورة مع أفضل صوت تلقائيًا في ملف واحد، من دون خطوات إضافية.",
     apkTitle: "حمّل تطبيق VidNest للأندرويد",
     apkDesc: "تجربة أصيلة ومتكاملة على جهازك المحمول، مع مشغل وسائط مدمج وتشغيل في الخلفية ومكتبة منظمة.",
-    apkCta: "تنزيل حزمة APK الرسمية",
+    apkCta: "تنزيل التطبيق للأندرويد",
     faqHeading: "الأسئلة الشائعة",
     faq1Q: "كيف يضمن VidNest خصوصية المستخدم؟",
     faq1A: "لا يقوم VidNest بتسجيل بياناتك الشخصية أو بناء ملفات تتبع، وتُمسح الملفات المؤقتة تلقائيًا بعد اكتمال التنزيل.",
     faq2Q: "هل الخدمة مجانية تمامًا وبدون إعلانات؟",
     faq2A: "نعم، VidNest أداة مفتوحة ومجانية تمامًا وبدون أي إعلانات أو نوافذ منبثقة أو أدوات تتبع تجارية.",
     faq3Q: "هل يدعم تنزيل الفيديوهات بدقة 4K؟",
-    faq3A: "نعم، للمصادر التي تدعم دقة 4K، يدمج محرك VidNest تدفق الفيديو الفائق مع أفضل جودة صوت عبر خوادم آمنة.",
+    faq3A: "نعم، للمصادر التي تدعم 4K نجمع أعلى دقة صورة مع أفضل جودة صوت في ملف واحد.",
     audioOnly: "صوت فقط",
     hasAudio: "صوت مضمّن",
-    videoOnly: "فيديو — سيُدمج مع أفضل صوت",
+    videoOnly: "فيديو — سيُضاف أفضل صوت متاح",
     empty: "يُرجى إدخال رابط فيديو أو صوت أولًا.",
     pasteDenied: "تعذّر الوصول إلى الحافظة تلقائيًا. يُرجى لصق الرابط يدويًا.",
     genericError: "تعذّر إكمال الطلب. تحقق من صحة الرابط وحاول مجددًا.",
     noFormats: "لم يعرض هذا الرابط جودات قابلة للتنزيل. تأكد من أن الرابط عام ومتاح.",
     successToast: "أُضيف إلى التنزيلات",
-    analyzingStage: "جارٍ فحص الرابط والاتصال بالمصدر…",
-    downloadingStage: "جارٍ استخراج وتنزيل تدفق الوسائط…",
-    finalizingStage: "جارٍ المعالجة النهائية والدمج…",
+    analyzingStage: "جارٍ التحقق من الرابط…",
+    downloadingStage: "جارٍ تنزيل الملف من المصدر…",
+    finalizingStage: "جارٍ تجهيز الملف النهائي…",
     completeStage: "اكتمل التنزيل بنجاح",
     errorStage: "فشل التنزيل",
     emptyDownloads: "لا توجد تنزيلات حتى الآن.",
@@ -102,6 +104,8 @@ const copy = {
     switch: "عربي",
     designerCredit: "by Atheerium",
     statusPill: "1,800+ Sites · Zero Ads",
+    morePlatforms: "1,800+ more",
+    hidePlatforms: "Hide",
     eyebrow: "Quiet Media Instrument",
     headline: "Save what you love.",
     heroCta: "Start your download",
@@ -134,7 +138,7 @@ const copy = {
     noFilteredFormats: "No formats match this filter.",
     download: "Start download",
     downloading: "Downloading…",
-    formatFootnote: "Qualities are extracted directly from the original source with zero added compression.",
+    formatFootnote: "Every quality comes straight from the source, with no extra compression.",
     recentDownloads: "Recent downloads",
     viewAll: "View all",
     downloadsTitle: "Downloads",
@@ -154,35 +158,35 @@ const copy = {
     step3Title: "Save & enjoy",
     step3Desc: "Download directly to your device and enjoy offline playback with zero ads.",
     featuresHeading: "Why VidNest?",
-    feat1Title: "Fast, source-matched quality",
-    feat1Desc: "Quick extraction and merging of the best available video and audio when the source supports it.",
+    feat1Title: "Fast, natural quality",
+    feat1Desc: "Ready links in seconds, with the original picture and sound.",
     feat2Title: "Quiet & private",
     feat2Desc: "No account, no tracking profiles, and no advertisements.",
     feat3Title: "1,800+ supported sites",
     feat3Desc: "Universal coverage across major video networks, social media, and podcasts.",
     feat4Title: "Smart audio and video merging",
-    feat4Desc: "Automatically combines the highest available video resolution with the best available audio stream using FFmpeg.",
+    feat4Desc: "We pair the best picture with the best sound automatically, in one file.",
     apkTitle: "Get VidNest for Android",
     apkDesc: "A complete mobile companion with background playback, picture-in-picture, and an offline media library.",
-    apkCta: "Download Official APK",
+    apkCta: "Download the Android app",
     faqHeading: "Frequently Asked Questions",
     faq1Q: "How does VidNest ensure user privacy?",
     faq1A: "VidNest does not log personal activity or build user profiles. Temporary files are removed automatically.",
     faq2Q: "Is VidNest completely free and ad-free?",
     faq2A: "Yes. VidNest is open-source, completely free, and contains zero advertisements or commercial trackers.",
     faq3Q: "Does VidNest support 4K video downloads?",
-    faq3A: "Yes. When sources offer 4K streams, VidNest pairs high-resolution video with best audio automatically.",
+    faq3A: "Yes. When a source offers 4K, we pair it with the best available audio in one file.",
     audioOnly: "Audio only",
     hasAudio: "Audio included",
-    videoOnly: "Video — best audio will be merged",
+    videoOnly: "Video — best available audio will be added",
     empty: "Please enter a video or audio link first.",
     pasteDenied: "Clipboard access was denied. Please paste the link manually.",
     genericError: "The request failed. Please verify the link and try again.",
     noFormats: "No downloadable formats were found for this link. Ensure the link is public.",
     successToast: "Added to downloads",
-    analyzingStage: "Analyzing link and connecting to host…",
-    downloadingStage: "Extracting and downloading media stream…",
-    finalizingStage: "Finalizing and merging media…",
+    analyzingStage: "Checking the link…",
+    downloadingStage: "Downloading your file…",
+    finalizingStage: "Finishing your file…",
     completeStage: "Download complete",
     errorStage: "Download failed",
     emptyDownloads: "No downloads yet.",
@@ -1469,24 +1473,29 @@ document.querySelectorAll(".chip").forEach((chip) => {
 
 const morePlatformsBtn = document.getElementById("more-platforms-btn");
 const extraPlatformsDrawer = document.getElementById("extra-platforms");
+
+function syncMorePlatformsLabel() {
+  if (!morePlatformsBtn || !extraPlatformsDrawer) return;
+  const expanded = !extraPlatformsDrawer.hasAttribute("hidden");
+  const icon = expanded
+    ? '<path d="M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+    : '<path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>';
+  morePlatformsBtn.innerHTML = `
+    <svg class="chip-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/>${icon}</svg>
+    <span>${expanded ? t("hidePlatforms") : t("morePlatforms")}</span>
+  `;
+}
+
 if (morePlatformsBtn && extraPlatformsDrawer) {
   morePlatformsBtn.addEventListener("click", () => {
-    const isHidden = extraPlatformsDrawer.hasAttribute("hidden");
-    if (isHidden) {
+    if (extraPlatformsDrawer.hasAttribute("hidden")) {
       extraPlatformsDrawer.removeAttribute("hidden");
       morePlatformsBtn.setAttribute("aria-expanded", "true");
-      morePlatformsBtn.innerHTML = `
-        <svg class="chip-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>إخفاء</span>
-      `;
     } else {
       extraPlatformsDrawer.setAttribute("hidden", "");
       morePlatformsBtn.setAttribute("aria-expanded", "false");
-      morePlatformsBtn.innerHTML = `
-        <svg class="chip-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>+1,800 المزيد</span>
-      `;
     }
+    syncMorePlatformsLabel();
   });
 }
 
@@ -1509,7 +1518,7 @@ function updateThemeColor(activeTheme) {
   if (themeMeta) {
     themeMeta.setAttribute(
       "content",
-      activeTheme === "dark" ? "#101828" : "#FFFFFF"
+      activeTheme === "dark" ? "#1A1613" : "#FCF8F1"
     );
   }
 }
@@ -1533,6 +1542,7 @@ function applyLanguage() {
   });
 
   if (languageButton) languageButton.textContent = t("switch");
+  syncMorePlatformsLabel();
   if (input) input.setAttribute("placeholder", t("urlPlaceholder"));
 
   renderHomeRecent();

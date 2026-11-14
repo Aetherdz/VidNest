@@ -335,6 +335,200 @@ async function probeDirectMediaUrl(rawUrl) {
   }
 }
 
+const INSTAGRAM_CRAWLER_AGENTS = [
+  "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+  "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+  "Twitterbot/1.0",
+];
+
+function extractInstagramShortcode(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || ""));
+    const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    if (host !== "instagram.com" && host !== "instagr.am") return "";
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (parts.length >= 2 && ["p", "reel", "reels", "tv"].includes(parts[0])) {
+      return /^[A-Za-z0-9_-]{5,20}$/.test(parts[1]) ? parts[1] : "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function extractBalancedArray(text, key) {
+  const blocks = [];
+  let from = 0;
+  for (;;) {
+    const at = text.indexOf(`"${key}":[`, from);
+    if (at === -1) return blocks;
+    const start = text.indexOf("[", at);
+    let depth = 0;
+    for (let i = start; i < text.length; i += 1) {
+      if (text[i] === "[") depth += 1;
+      else if (text[i] === "]") {
+        depth -= 1;
+        if (depth === 0) {
+          blocks.push(text.slice(start, i + 1));
+          from = i + 1;
+          break;
+        }
+      }
+    }
+    if (from <= at) return blocks;
+  }
+}
+
+function instagramVideoHeight(url) {
+  try {
+    const efg = new URL(url).searchParams.get("efg");
+    if (!efg) return null;
+    const tag = String(JSON.parse(Buffer.from(efg, "base64").toString("utf8")).vencode_tag || "");
+    const match = tag.match(/\.(\d{3,4})\./);
+    return match ? Number(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeInstagramTitle(html) {
+  const og = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']*)["']/i)
+    || html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:title["']/i);
+  const raw = og ? og[1] : "";
+  const decoded = raw
+    .replace(/&quot;/g, '"').replace(/&#039;|&apos;/g, "'")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  const split = decoded.match(/^(.*?)\s+on Instagram:\s*"?([\s\S]*?)"?$/);
+  if (split) return { uploader: split[1].trim(), title: split[2].trim() || split[1].trim() };
+  return { uploader: "", title: decoded.trim() };
+}
+
+function parseInstagramMedia(html, shortcode) {
+  const { uploader, title } = decodeInstagramTitle(html);
+  const thumbnailMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']*)["']/i)
+    || html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:image["']/i);
+  const thumbnail = thumbnailMatch ? thumbnailMatch[1].replace(/&amp;/g, "&") : null;
+  const durationMatch = html.match(/"video_duration":(\d+(?:\.\d+)?)/);
+
+  const formats = [];
+  const seen = new Set();
+  const heightCounts = new Map();
+  for (const block of extractBalancedArray(html, "video_versions")) {
+    let versions;
+    try {
+      versions = JSON.parse(block.replace(/\\\//g, "/"));
+    } catch {
+      continue;
+    }
+    if (!Array.isArray(versions)) continue;
+    for (const version of versions) {
+      const url = typeof version?.url === "string" ? version.url.replace(/\\u0026/g, "&") : "";
+      if (!/^https:\/\//.test(url) || seen.has(url)) continue;
+      seen.add(url);
+      const height = instagramVideoHeight(url) || null;
+      if (height) heightCounts.set(height, (heightCounts.get(height) || 0) + 1);
+      formats.push({
+        id: `ig-v${formats.length + 1}`,
+        ext: "mp4",
+        quality: height ? `${height}p` : "HD",
+        height,
+        width: null,
+        filesize: null,
+        hasVideo: true,
+        hasAudio: true,
+        format: `${height ? `${height}p` : "HD"} (MP4)`,
+        directUrl: url,
+      });
+    }
+  }
+
+  if (formats.length === 0) {
+    const images = [];
+    for (const block of extractBalancedArray(html, "candidates")) {
+      try {
+        const candidates = JSON.parse(block.replace(/\\\//g, "/"));
+        if (Array.isArray(candidates)) images.push(...candidates);
+      } catch {
+        /* ignore malformed candidate blocks */
+      }
+    }
+    const display = html.match(/"display_url":"([^"]+)"/);
+    const urls = images
+      .filter((c) => typeof c?.url === "string" && /^https:\/\//.test(c.url))
+      .sort((a, b) => (b.width || 0) - (a.width || 0))
+      .map((c) => ({ url: c.url.replace(/\\\//g, "/"), width: c.width, height: c.height }));
+    if (display) urls.push({ url: display[1].replace(/\\\//g, "/"), width: null, height: null });
+    const unique = [];
+    for (const item of urls) {
+      if (!unique.some((entry) => entry.url === item.url)) unique.push(item);
+      if (unique.length >= 1) break;
+    }
+    if (unique.length === 0) return null;
+    return {
+      probeId: `ig-${shortcode}`,
+      title: title || "Instagram media",
+      uploader: uploader || "Instagram",
+      extractor: "Instagram",
+      duration: null,
+      thumbnail,
+      formats: [
+        {
+          id: "ig-image",
+          ext: "jpg",
+          quality: unique[0].width ? `${unique[0].width}px` : "Original",
+          height: unique[0].height || null,
+          width: unique[0].width || null,
+          filesize: null,
+          hasVideo: false,
+          hasAudio: false,
+          format: "Image (JPG)",
+          directUrl: unique[0].url,
+        },
+      ],
+    };
+  }
+
+  formats.sort((a, b) => (b.height || 0) - (a.height || 0));
+  return {
+    probeId: `ig-${shortcode}`,
+    title: title || "Instagram video",
+    uploader: uploader || "Instagram",
+    extractor: "Instagram",
+    duration: durationMatch ? Math.round(Number(durationMatch[1])) : null,
+    thumbnail,
+    formats,
+  };
+}
+
+async function probeInstagram(rawUrl) {
+  const shortcode = extractInstagramShortcode(rawUrl);
+  if (!shortcode) return null;
+  let imageFallback = null;
+  for (const agent of INSTAGRAM_CRAWLER_AGENTS) {
+    try {
+      const res = await fetchWithTimeout(`https://www.instagram.com/reel/${shortcode}/`, {
+        headers: {
+          "User-Agent": agent,
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+        redirect: "follow",
+      }, 9000);
+      if (!res.ok) continue;
+      const html = await res.text();
+      const parsed = parseInstagramMedia(html, shortcode);
+      if (!parsed) continue;
+      // A video should win over a still frame, so keep the image result as a fallback
+      // and let the remaining agents try to surface the playable stream.
+      if (parsed.formats.some((format) => format.hasVideo && format.ext === "mp4")) return parsed;
+      if (!imageFallback) imageFallback = parsed;
+    } catch {
+      /* try the next crawler agent */
+    }
+  }
+  return imageFallback;
+}
+
 function isInstagramUrl(rawUrl) {
   try {
     const host = new URL(String(rawUrl || "")).hostname.toLowerCase();
@@ -351,6 +545,7 @@ function annotateUpstreamError(data, rawUrl) {
   let code = "";
   if (/not supported/i.test(message)) code = "server_outdated";
   else if (/login|log in|cookies|authentication|private|empty media|could not inspect/i.test(message)) code = "needs_login";
+  else if (/abort|timed? ?out|timeout|ETIMEDOUT/i.test(message)) code = "unavailable";
   // Instagram answers anonymous probes with an empty or generic failure; it needs a session.
   if (!code && isInstagramUrl(rawUrl)) code = "needs_login";
   if (!code) return payload;
@@ -360,6 +555,10 @@ function annotateUpstreamError(data, rawUrl) {
 async function probeDirectPlatformFallback(rawUrl) {
   const directMedia = await probeDirectMediaUrl(rawUrl);
   if (directMedia) return directMedia;
+  if (extractInstagramShortcode(rawUrl)) {
+    const instagram = await probeInstagram(rawUrl);
+    if (instagram) return instagram;
+  }
   if (isTikTokUrl(rawUrl)) {
     const tk = await probeTikTokFallback(rawUrl);
     if (tk) return tk;
@@ -701,6 +900,12 @@ module.exports = async function handler(req, res) {
       const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
       const direct = await probeDirectPlatformFallback(body.url);
       if (direct) return res.status(200).json(direct);
+      if (isInstagramUrl(body.url)) {
+        return res.status(400).json({
+          error: "Instagram did not return a downloadable file for this link. Make sure the post is public.",
+          code: "unavailable",
+        });
+      }
 
       const upstream = await postRender("/api/formats", body);
       const data = await upstream.json().catch(() => ({ error: "Invalid upstream response" }));
@@ -716,6 +921,8 @@ module.exports = async function handler(req, res) {
         probePrefix.startsWith("tiktok-") ||
         probePrefix.startsWith("x-") ||
         probePrefix.startsWith("direct-") ||
+        probePrefix.startsWith("ig-") ||
+        Boolean(extractInstagramShortcode(body.url)) ||
         extractYouTubeVideoId(body.url) ||
         isTikTokUrl(body.url) ||
         extractTwitterStatusId(body.url)
@@ -747,6 +954,12 @@ module.exports = async function handler(req, res) {
             formatId: chosen.id,
           });
         }
+      }
+      if (isInstagramUrl(body.url)) {
+        return res.status(400).json({
+          error: "Instagram did not return a downloadable file for this link. Make sure the post is public.",
+          code: "unavailable",
+        });
       }
       const direct = await postRender("/api/quick-download", body);
       if (direct.status !== 404) {
@@ -784,8 +997,10 @@ module.exports = async function handler(req, res) {
 
     return res.status(404).json({ error: "Not found" });
   } catch (err) {
-    return res
-      .status(502)
-      .json(annotateUpstreamError({ error: err instanceof Error ? err.message : "Upstream proxy error" }));
+    const message = err instanceof Error ? err.message : "Upstream proxy error";
+    const friendly = /abort|timed? ?out|ETIMEDOUT/i.test(message)
+      ? "The source took too long to answer. Please try again."
+      : message;
+    return res.status(502).json(annotateUpstreamError({ error: friendly }));
   }
 };

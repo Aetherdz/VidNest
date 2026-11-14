@@ -1,5 +1,12 @@
 # VidNest
 
+## Pages
+- [Home](https://vidnest-six.vercel.app/): paste a link, pick a quality, save the file.
+- [About VidNest](https://vidnest-six.vercel.app/#about): what the tool does and why it is free.
+- [FAQ](https://vidnest-six.vercel.app/#faq-section): privacy, pricing and 4K answers.
+- [Sitemap](https://vidnest-six.vercel.app/sitemap.xml) and [structured summary](https://vidnest-six.vercel.app/ai/summary.json).
+
+
 > VidNest is a quiet, ad-free media extraction and playback ecosystem designed by Atheerium (https://atheerium.com). It enables users to download and organize public media from 1,800+ supported video and audio platforms across web, mobile Expo, and Telegram bot clients.
 
 ## Overview & Philosophy

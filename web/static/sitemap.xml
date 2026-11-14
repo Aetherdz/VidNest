@@ -2,12 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://vidnest-web.onrender.com/</loc>
+    <loc>https://vidnest-six.vercel.app/</loc>
     <lastmod>2026-11-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://vidnest-web.onrender.com/?lang=ar" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://vidnest-web.onrender.com/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://vidnest-web.onrender.com/" />
+    <xhtml:link rel="alternate" hreflang="ar" href="https://vidnest-six.vercel.app/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vidnest-six.vercel.app/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vidnest-six.vercel.app/" />
   </url>
 </urlset>

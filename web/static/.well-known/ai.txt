@@ -1,0 +1,20 @@
+# ai.txt — AI crawler guidance for VidNest
+# https://vidnest-six.vercel.app
+
+User-Agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /ai/
+Disallow: /api/
+Disallow: /files/
+
+# Machine-readable summaries
+Summary: https://vidnest-six.vercel.app/ai/summary.json
+FAQ: https://vidnest-six.vercel.app/ai/faq.json
+Service: https://vidnest-six.vercel.app/ai/service.json
+Guide: https://vidnest-six.vercel.app/llms.txt
+Sitemap: https://vidnest-six.vercel.app/sitemap.xml
+
+# Attribution
+Site: VidNest — https://vidnest-six.vercel.app
+Author: Atheerium — https://atheerium.com

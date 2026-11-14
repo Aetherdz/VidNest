@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="ar">
+  <title>VidNest</title>
+  <subtitle>تنزيل بسيط وواضح للفيديو والصوت، بدون إعلانات.</subtitle>
+  <link href="https://vidnest-six.vercel.app/feed.xml" rel="self"/>
+  <link href="https://vidnest-six.vercel.app/"/>
+  <id>https://vidnest-six.vercel.app/</id>
+  <updated>2026-11-14T00:00:00Z</updated>
+  <author><name>Atheerium</name><uri>https://atheerium.com</uri></author>
+  <entry>
+    <title>واجهة جديدة أهدأ وأوضح</title>
+    <link href="https://vidnest-six.vercel.app/"/>
+    <id>https://vidnest-six.vercel.app/#2026-11-14</id>
+    <updated>2026-11-14T00:00:00Z</updated>
+    <summary>تصميم جديد بألوان دافئة وخط أوضح، مع نفس السرعة ونفس الخصوصية: بدون حساب وبدون إعلانات.</summary>
+  </entry>
+</feed>

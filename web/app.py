@@ -436,6 +436,33 @@ def llms_txt():
     )
 
 
+@app.get("/feed.xml")
+def feed_xml():
+    return _static_text(
+        "feed.xml",
+        "application/atom+xml",
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<feed xmlns="http://www.w3.org/2005/Atom"><title>VidNest</title></feed>',
+    )
+
+
+@app.get("/ai/<path:name>")
+def ai_resource(name: str):
+    """Serves machine-readable summaries used by AI answer engines."""
+    if not name.endswith(".json") or "/" in name or name.startswith("."):
+        abort(404)
+    return _static_text(f"ai/{name}", "application/json")
+
+
+@app.get("/.well-known/ai.txt")
+def well_known_ai_txt():
+    return _static_text(
+        ".well-known/ai.txt",
+        "text/plain",
+        "User-agent: *\nAllow: /\n",
+    )
+
+
 @app.get("/manifest.webmanifest")
 def manifest_webmanifest():
     return _static_text(

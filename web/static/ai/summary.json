@@ -1,0 +1,26 @@
+{
+  "name": "VidNest",
+  "url": "https://vidnest-six.vercel.app/",
+  "description": "أداة بسيطة لحفظ الفيديو والصوت من أكثر من 1,800 موقع، بدون إعلانات أو تتبع.",
+  "description_en": "A simple tool for saving video and audio from 1,800+ sites, with no ads and no tracking.",
+  "language": [
+    "ar",
+    "en"
+  ],
+  "author": {
+    "name": "Atheerium",
+    "url": "https://atheerium.com"
+  },
+  "sameAs": [
+    "https://github.com/Aetherdz/VidNest"
+  ],
+  "pricing": "free",
+  "updated": "2026-11-14",
+  "pages": {
+    "home": "https://vidnest-six.vercel.app/",
+    "about": "https://vidnest-six.vercel.app/#about",
+    "faq": "https://vidnest-six.vercel.app/#faq-section",
+    "llms": "https://vidnest-six.vercel.app/llms.txt",
+    "sitemap": "https://vidnest-six.vercel.app/sitemap.xml"
+  }
+}

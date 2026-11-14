@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#FCF8F1">
   <meta name="vidnest-csrf" content="__VIDNEST_CSRF_TOKEN__">
-  <meta name="vidnest-api" content="https://vidnest-web.onrender.com">
+  <meta name="vidnest-api" content="https://vidnest-six.vercel.app">
   <meta name="description" content="نزّل الفيديو والصوت من منصاتك المفضلة بخطوات واضحة، دون إعلانات أو تتبع. VidNest يحافظ على الخصوصية ويدعم أكثر من 1,800 موقع.">
   <meta name="keywords" content="تنزيل فيديو, يوتيوب, تيك توك, انستغرام, فيسبوك, Atheerium, VidNest">
   <meta name="author" content="Atheerium">
-  <link rel="canonical" href="https://vidnest-web.onrender.com/">
+  <link rel="canonical" href="https://vidnest-six.vercel.app/">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="alternate icon" type="image/png" href="/static/icon-192.png">
@@ -17,19 +17,20 @@
   <link rel="preload" href="/static/fonts/readex-pro-arabic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/static/fonts/readex-pro-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 
-  <link rel="alternate" hreflang="ar" href="https://vidnest-web.onrender.com/?lang=ar">
-  <link rel="alternate" hreflang="en" href="https://vidnest-web.onrender.com/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://vidnest-web.onrender.com/">
+  <link rel="alternate" type="application/rss+xml" title="VidNest" href="/feed.xml">
+  <link rel="alternate" hreflang="ar" href="https://vidnest-six.vercel.app/?lang=ar">
+  <link rel="alternate" hreflang="en" href="https://vidnest-six.vercel.app/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://vidnest-six.vercel.app/">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="VidNest">
-  <meta property="og:url" content="https://vidnest-web.onrender.com/">
+  <meta property="og:url" content="https://vidnest-six.vercel.app/">
   <meta property="og:locale" content="ar_AR">
   <meta property="og:locale:alternate" content="en_US">
-  <meta property="og:image" content="https://vidnest-web.onrender.com/static/icon-512.png">
+  <meta property="og:image" content="https://vidnest-six.vercel.app/static/icon-512.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="VidNest — تنزيل بسيط وواضح | Atheerium">
-  <meta name="twitter:image" content="https://vidnest-web.onrender.com/static/icon-512.png">
+  <meta name="twitter:image" content="https://vidnest-six.vercel.app/static/icon-512.png">
   <meta property="og:title" content="VidNest — تنزيل بسيط وواضح | Atheerium">
   <meta property="og:description" content="الصق الرابط، اختر الجودة، واحفظ ملفاتك بسهولة. بدون إعلانات أو تتبع. تصميم Atheerium.">
 
@@ -40,15 +41,49 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebSite",
+        "@id": "https://vidnest-six.vercel.app/#website",
+        "url": "https://vidnest-six.vercel.app/",
+        "name": "VidNest",
+        "inLanguage": ["ar", "en"],
+        "publisher": { "@id": "https://vidnest-six.vercel.app/#org" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://vidnest-six.vercel.app/#org",
+        "name": "Atheerium",
+        "url": "https://atheerium.com",
+        "logo": "https://vidnest-six.vercel.app/static/icon-512.png",
+        "sameAs": [
+          "https://atheerium.com",
+          "https://github.com/Aetherdz/VidNest"
+        ]
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://vidnest-six.vercel.app/#page",
+        "url": "https://vidnest-six.vercel.app/",
+        "name": "VidNest — تنزيل بسيط وواضح",
+        "description": "نزّل الفيديو والصوت من منصاتك المفضلة بخطوات واضحة، دون إعلانات أو تتبع. أكثر من 1,800 موقع مدعوم.",
+        "datePublished": "2026-01-12",
+        "dateModified": "2026-11-14",
+        "isPartOf": { "@id": "https://vidnest-six.vercel.app/#website" },
+        "about": { "@id": "https://vidnest-six.vercel.app/#app" }
+      },
+      {
         "@type": "SoftwareApplication",
+        "@id": "https://vidnest-six.vercel.app/#app",
         "name": "VidNest",
         "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Web, Android, iOS",
+        "operatingSystem": "Web, Android",
+        "url": "https://vidnest-six.vercel.app/",
+        "description": "أداة بسيطة لحفظ الفيديو والصوت من أكثر من 1,800 موقع، بدون إعلانات أو تتبع.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "author": { "@type": "Organization", "name": "Atheerium", "url": "https://atheerium.com" }
+        "author": { "@id": "https://vidnest-six.vercel.app/#org" }
       },
       {
         "@type": "FAQPage",
+        "@id": "https://vidnest-six.vercel.app/#faq",
         "mainEntity": [
           {
             "@type": "Question",
@@ -257,7 +292,7 @@
             <!-- Preview Card -->
             <div class="preview-card">
               <div id="preview-thumbnail" class="preview-thumbnail" role="button" tabindex="0" aria-label="معاينة المقطع">
-                <img id="preview-thumb-img" class="preview-thumb-img" alt="" referrerpolicy="no-referrer" hidden />
+                <img id="preview-thumb-img" class="preview-thumb-img" alt="معاينة الفيديو" referrerpolicy="no-referrer" hidden />
                 <svg class="preview-play-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"/></svg>
                 <span id="preview-duration" class="preview-duration">--:--</span>
               </div>
@@ -325,7 +360,7 @@
           </section>
 
           <!-- Features Grid -->
-          <section class="features-section" aria-labelledby="features-heading">
+          <section class="features-section" id="about" aria-labelledby="features-heading">
             <h2 id="features-heading" class="section-heading" data-copy="featuresHeading">لماذا تختار VidNest؟</h2>
             <div class="features-grid">
               <div class="feature-card">
@@ -457,6 +492,8 @@
           <a class="designer-link" href="https://atheerium.com" target="_blank" rel="noopener">Atheerium</a>
         </div>
         <div>
+          <a class="footer-link" href="/#about" data-copy="footerAbout">عن VidNest</a>
+          <span> · </span>
           <a class="footer-link" href="/#faq-privacy" data-copy="footerPrivacy">معلومات الخصوصية</a>
           <span> · </span>
           <a class="footer-link" href="https://github.com/Aetherdz/VidNest/issues" target="_blank" rel="noopener" data-copy="footerContact">تواصل معنا</a>

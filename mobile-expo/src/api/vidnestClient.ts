@@ -414,7 +414,13 @@ export class VidNestClient {
       );
       try {
         return await Promise.any(candidates);
-      } catch {
+      } catch (error) {
+        // Keep the server's explanation when one of the probes carried it.
+        const nested = (error as { errors?: unknown })?.errors;
+        const coded = Array.isArray(nested)
+          ? nested.find((entry) => entry && typeof (entry as { code?: string }).code === "string" && (entry as { code?: string }).code)
+          : null;
+        if (coded) throw coded;
         throw new Error("No downloadable formats were found.");
       }
     }

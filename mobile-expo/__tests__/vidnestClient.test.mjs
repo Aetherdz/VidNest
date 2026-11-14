@@ -166,3 +166,15 @@ test('server error codes survive into the thrown error so the UI can explain the
     (error) => error.code === 'server_outdated' && /not supported/.test(error.message),
   );
 });
+
+test('probeFormats surfaces the server reason code instead of a generic failure', async () => {
+  const mockFetch = async (url) => {
+    if (url.endsWith('/api/session')) return new Response(JSON.stringify({ csrfToken: 'csrf-probe' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Could not inspect this link.', code: 'needs_login' }), { status: 502, headers: { 'content-type': 'application/json' } });
+  };
+  const client = new VidNestClient('https://api.example.test/', mockFetch);
+  await assert.rejects(
+    () => client.probeFormats('https://www.instagram.com/reel/abc/'),
+    (error) => error.code === 'needs_login',
+  );
+});

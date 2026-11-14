@@ -92,6 +92,7 @@ const copy = {
     noFormats: "لم يعرض هذا الرابط جودات قابلة للتنزيل. تأكد من أن الرابط عام ومتاح.",
     needsLogin: "هذا الرابط يحتاج حسابًا مسجّلًا للدخول (منشور خاص أو محمي). جرّب رابطًا عامًا آخر.",
     serverUnavailable: "هذا الموقع غير متاح مؤقتًا. جرّب منصة أخرى أو الصق رابط ملف مباشر ينتهي بـ mp4 أو mp3.",
+    unavailable: "لم نعثر على ملف قابل للتنزيل في هذا الرابط. تأكد أن المنشور عام ويحتوي فيديو أو صورة.",
     successToast: "أُضيف إلى التنزيلات",
     analyzingStage: "جارٍ التحقق من الرابط…",
     downloadingStage: "جارٍ تنزيل الملف من المصدر…",
@@ -195,6 +196,7 @@ const copy = {
     noFormats: "No downloadable formats were found for this link. Ensure the link is public.",
     needsLogin: "This link requires a signed-in account (private or protected post). Try a public link instead.",
     serverUnavailable: "This site is temporarily unavailable. Try another platform or paste a direct media file link such as mp4 or mp3.",
+    unavailable: "No downloadable file was found at this link. Make sure the post is public and contains a video or photo.",
     successToast: "Added to downloads",
     analyzingStage: "Checking the link…",
     downloadingStage: "Downloading your file…",
@@ -673,6 +675,7 @@ function describeError(error) {
   const code = error && typeof error === "object" ? error.code : "";
   if (code === "needs_login") return t("needsLogin");
   if (code === "server_outdated") return t("serverUnavailable");
+  if (code === "unavailable") return t("unavailable");
   return fallback;
 }
 

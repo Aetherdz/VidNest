@@ -147,6 +147,7 @@ function describeError(error: unknown): string {
   const code = error && typeof error === "object" ? (error as { code?: string }).code : "";
   if (code === "needs_login") return copy.ar.errorNeedsLogin;
   if (code === "server_outdated") return copy.ar.errorServerOutdated;
+  if (code === "unavailable") return copy.ar.errorUnavailable;
   return error instanceof Error ? error.message : copy.ar.errorNetwork;
 }
 

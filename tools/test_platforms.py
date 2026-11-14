@@ -37,7 +37,7 @@ class TestPlatformUrlValidation(unittest.TestCase):
     PLATFORM_SAMPLE_URLS = {
         "YouTube": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
         "TikTok": "https://www.tiktok.com/@tiktok/video/7106594312292453678",
-        "Instagram": "https://www.instagram.com/reel/C8r_Bv3M-Q0/",
+        "Instagram": "https://www.instagram.com/p/CpiBBfCvGEW/",
         "Facebook": "https://www.facebook.com/watch/?v=10153231379946729",
         "X": "https://x.com/Twitter/status/1234567890",
         "Vimeo": "https://vimeo.com/76979871",
@@ -134,7 +134,7 @@ class TestYtDlpExtractionProbes(unittest.TestCase):
                 resp = client.post(
                     "/api/formats",
                     base_url=base_url,
-                    json={"url": "https://www.instagram.com/reel/C8r_Bv3M-Q0/"},
+                    json={"url": "https://www.instagram.com/p/CpiBBfCvGEW/"},
                     headers={"Origin": base_url, "X-VidNest-CSRF": webapp.csrf_token},
                 )
                 self.assertEqual(resp.status_code, 502)

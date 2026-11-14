@@ -1527,9 +1527,31 @@ a { color: inherit; }
   line-height: 1.75;
 }
 
+.apk-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  justify-self: start;
+}
+
+.apk-version {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 12.5px;
+}
+
+.apk-release-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent-soft);
+}
+
+.apk-release-link:hover { text-decoration-color: var(--accent); }
+
 .apk-cta-btn {
   display: inline-flex;
-  justify-self: start;
   width: fit-content;
   align-items: center;
   justify-content: center;
@@ -1751,11 +1773,10 @@ a { color: inherit; }
 
   .apk-content p { grid-column: 1; grid-row: 2; }
 
-  .apk-cta-btn {
+  .apk-actions {
     grid-column: 2;
     grid-row: 1 / span 2;
     align-self: end;
-    justify-self: start;
   }
 
   .preview-card { grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); }
@@ -1837,6 +1858,8 @@ a { color: inherit; }
   .apk-content { gap: 16px; }
 
   .apk-cta-btn { width: 100%; }
+
+  .apk-actions { width: 100%; align-items: stretch; }
 }
 
 @media (max-width: 368px) {

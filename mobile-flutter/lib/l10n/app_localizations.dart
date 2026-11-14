@@ -7,6 +7,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_ar.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
 
 // ignore_for_file: type=lint
 
@@ -95,7 +96,8 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('ar'),
-    Locale('en')
+    Locale('en'),
+    Locale('fr')
   ];
 
   /// No description provided for @appName.
@@ -409,6 +411,474 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Quality'**
   String get chooseQuality;
+
+  /// No description provided for @languageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get languageTitle;
+
+  /// No description provided for @languageStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get languageStart;
+
+  /// No description provided for @languageUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This language is not available yet.'**
+  String get languageUnsupported;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search to download'**
+  String get searchHint;
+
+  /// No description provided for @clipboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The link you copied'**
+  String get clipboardTitle;
+
+  /// No description provided for @sectionTrending.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular searches'**
+  String get sectionTrending;
+
+  /// No description provided for @sectionSites.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse sites'**
+  String get sectionSites;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @sitesAllHint.
+  ///
+  /// In en, this message translates to:
+  /// **'VidNest supports more than 1,800 sites.'**
+  String get sitesAllHint;
+
+  /// No description provided for @navDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get navDownload;
+
+  /// No description provided for @navPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get navPlay;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @playTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to play'**
+  String get playTitle;
+
+  /// No description provided for @playEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed downloads will appear here.'**
+  String get playEmpty;
+
+  /// No description provided for @sheetMusic.
+  ///
+  /// In en, this message translates to:
+  /// **'Music'**
+  String get sheetMusic;
+
+  /// No description provided for @sheetVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get sheetVideo;
+
+  /// No description provided for @audioClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Download classic MP3'**
+  String get audioClassic;
+
+  /// No description provided for @videoMp4.
+  ///
+  /// In en, this message translates to:
+  /// **'MP4'**
+  String get videoMp4;
+
+  /// No description provided for @permissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to all files'**
+  String get permissionTitle;
+
+  /// No description provided for @permissionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow access to storage'**
+  String get permissionSubtitle;
+
+  /// No description provided for @permissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get permissionAllow;
+
+  /// No description provided for @permissionCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get permissionCancel;
+
+  /// No description provided for @downloadStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Download started'**
+  String get downloadStarted;
+
+  /// No description provided for @linkNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a supported media link.'**
+  String get linkNotSupported;
+
+  /// No description provided for @permissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage access was not granted.'**
+  String get permissionDenied;
+
+  /// No description provided for @showAction.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get showAction;
+
+  /// No description provided for @trendingToto.
+  ///
+  /// In en, this message translates to:
+  /// **'toto'**
+  String get trendingToto;
+
+  /// No description provided for @trendingGnawi.
+  ///
+  /// In en, this message translates to:
+  /// **'Gnawi'**
+  String get trendingGnawi;
+
+  /// No description provided for @trendingBaqarah.
+  ///
+  /// In en, this message translates to:
+  /// **'سورة البقرة'**
+  String get trendingBaqarah;
+
+  /// No description provided for @trendingLFerda.
+  ///
+  /// In en, this message translates to:
+  /// **'LFerda'**
+  String get trendingLFerda;
+
+  /// No description provided for @siteTikTok.
+  ///
+  /// In en, this message translates to:
+  /// **'TikTok'**
+  String get siteTikTok;
+
+  /// No description provided for @siteFacebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook'**
+  String get siteFacebook;
+
+  /// No description provided for @siteInstagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get siteInstagram;
+
+  /// No description provided for @siteYouTube.
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get siteYouTube;
+
+  /// No description provided for @langArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'العربية'**
+  String get langArabic;
+
+  /// No description provided for @langFrench.
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get langFrench;
+
+  /// No description provided for @langEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English (US)'**
+  String get langEnglish;
+
+  /// No description provided for @langAfrikaans.
+  ///
+  /// In en, this message translates to:
+  /// **'Afrikaans'**
+  String get langAfrikaans;
+
+  /// No description provided for @langAzerbaijani.
+  ///
+  /// In en, this message translates to:
+  /// **'Azərbaycan'**
+  String get langAzerbaijani;
+
+  /// No description provided for @langIndonesian.
+  ///
+  /// In en, this message translates to:
+  /// **'Bahasa Indonesia'**
+  String get langIndonesian;
+
+  /// No description provided for @langMalay.
+  ///
+  /// In en, this message translates to:
+  /// **'Bahasa Malaysia'**
+  String get langMalay;
+
+  /// No description provided for @langBosnian.
+  ///
+  /// In en, this message translates to:
+  /// **'Bosanski'**
+  String get langBosnian;
+
+  /// No description provided for @langCatalan.
+  ///
+  /// In en, this message translates to:
+  /// **'Català'**
+  String get langCatalan;
+
+  /// No description provided for @langCzech.
+  ///
+  /// In en, this message translates to:
+  /// **'Čeština'**
+  String get langCzech;
+
+  /// No description provided for @langDanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Dansk'**
+  String get langDanish;
+
+  /// No description provided for @langGerman.
+  ///
+  /// In en, this message translates to:
+  /// **'Deutsch'**
+  String get langGerman;
+
+  /// No description provided for @langEstonian.
+  ///
+  /// In en, this message translates to:
+  /// **'Eesti'**
+  String get langEstonian;
+
+  /// No description provided for @langSpanish.
+  ///
+  /// In en, this message translates to:
+  /// **'Español'**
+  String get langSpanish;
+
+  /// No description provided for @langPersian.
+  ///
+  /// In en, this message translates to:
+  /// **'فارسی'**
+  String get langPersian;
+
+  /// No description provided for @langFinnish.
+  ///
+  /// In en, this message translates to:
+  /// **'Suomi'**
+  String get langFinnish;
+
+  /// No description provided for @langFilipino.
+  ///
+  /// In en, this message translates to:
+  /// **'Filipino'**
+  String get langFilipino;
+
+  /// No description provided for @langGalician.
+  ///
+  /// In en, this message translates to:
+  /// **'Galego'**
+  String get langGalician;
+
+  /// No description provided for @langGreek.
+  ///
+  /// In en, this message translates to:
+  /// **'Ελληνικά'**
+  String get langGreek;
+
+  /// No description provided for @langHebrew.
+  ///
+  /// In en, this message translates to:
+  /// **'עברית'**
+  String get langHebrew;
+
+  /// No description provided for @langHindi.
+  ///
+  /// In en, this message translates to:
+  /// **'हिन्दी'**
+  String get langHindi;
+
+  /// No description provided for @langCroatian.
+  ///
+  /// In en, this message translates to:
+  /// **'Hrvatski'**
+  String get langCroatian;
+
+  /// No description provided for @langHungarian.
+  ///
+  /// In en, this message translates to:
+  /// **'Magyar'**
+  String get langHungarian;
+
+  /// No description provided for @langIcelandic.
+  ///
+  /// In en, this message translates to:
+  /// **'Íslenska'**
+  String get langIcelandic;
+
+  /// No description provided for @langItalian.
+  ///
+  /// In en, this message translates to:
+  /// **'Italiano'**
+  String get langItalian;
+
+  /// No description provided for @langJapanese.
+  ///
+  /// In en, this message translates to:
+  /// **'日本語'**
+  String get langJapanese;
+
+  /// No description provided for @langKorean.
+  ///
+  /// In en, this message translates to:
+  /// **'한국어'**
+  String get langKorean;
+
+  /// No description provided for @langLithuanian.
+  ///
+  /// In en, this message translates to:
+  /// **'Lietuvių'**
+  String get langLithuanian;
+
+  /// No description provided for @langLatvian.
+  ///
+  /// In en, this message translates to:
+  /// **'Latviešu'**
+  String get langLatvian;
+
+  /// No description provided for @langDutch.
+  ///
+  /// In en, this message translates to:
+  /// **'Nederlands'**
+  String get langDutch;
+
+  /// No description provided for @langNorwegian.
+  ///
+  /// In en, this message translates to:
+  /// **'Norsk'**
+  String get langNorwegian;
+
+  /// No description provided for @langPolish.
+  ///
+  /// In en, this message translates to:
+  /// **'Polski'**
+  String get langPolish;
+
+  /// No description provided for @langPortuguese.
+  ///
+  /// In en, this message translates to:
+  /// **'Português'**
+  String get langPortuguese;
+
+  /// No description provided for @langRomanian.
+  ///
+  /// In en, this message translates to:
+  /// **'Română'**
+  String get langRomanian;
+
+  /// No description provided for @langRussian.
+  ///
+  /// In en, this message translates to:
+  /// **'Русский'**
+  String get langRussian;
+
+  /// No description provided for @langSerbian.
+  ///
+  /// In en, this message translates to:
+  /// **'Српски'**
+  String get langSerbian;
+
+  /// No description provided for @langSlovak.
+  ///
+  /// In en, this message translates to:
+  /// **'Slovenčina'**
+  String get langSlovak;
+
+  /// No description provided for @langSlovenian.
+  ///
+  /// In en, this message translates to:
+  /// **'Slovenščina'**
+  String get langSlovenian;
+
+  /// No description provided for @langSwedish.
+  ///
+  /// In en, this message translates to:
+  /// **'Svenska'**
+  String get langSwedish;
+
+  /// No description provided for @langThai.
+  ///
+  /// In en, this message translates to:
+  /// **'ไทย'**
+  String get langThai;
+
+  /// No description provided for @langTurkish.
+  ///
+  /// In en, this message translates to:
+  /// **'Türkçe'**
+  String get langTurkish;
+
+  /// No description provided for @langUkrainian.
+  ///
+  /// In en, this message translates to:
+  /// **'Українська'**
+  String get langUkrainian;
+
+  /// No description provided for @langVietnamese.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiếng Việt'**
+  String get langVietnamese;
+
+  /// No description provided for @langChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'中文'**
+  String get langChinese;
 }
 
 class _AppLocalizationsDelegate
@@ -422,7 +892,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+      <String>['ar', 'en', 'fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -435,6 +905,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsAr();
     case 'en':
       return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(

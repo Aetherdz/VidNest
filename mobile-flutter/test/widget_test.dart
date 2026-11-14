@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vidnest/main.dart';
 
 void main() {
-  testWidgets('VidNest App smoke test', (WidgetTester tester) async {
+  testWidgets('VidNest App opens on the language screen', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       const ProviderScope(
         child: VidNestApp(),
@@ -11,7 +13,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify app headline
-    expect(find.text('ماذا تريد أن تحمّل اليوم؟'), findsOneWidget);
+    expect(find.text('اختر لغتك'), findsOneWidget);
+    expect(find.text('ابدأ'), findsOneWidget);
   });
 }

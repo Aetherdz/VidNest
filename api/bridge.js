@@ -952,6 +952,7 @@ module.exports = async function handler(req, res) {
             file: chosen.directUrl,
             title: directFallback.title,
             formatId: chosen.id,
+            ext: chosen.ext,
           });
         }
       }
@@ -984,7 +985,7 @@ module.exports = async function handler(req, res) {
       if (!dlRes.ok) {
         return res.status(dlRes.status).json(annotateUpstreamError(dlData, body.url));
       }
-      return res.status(200).json({ ...dlData, formatId: chosen.id });
+      return res.status(200).json({ ...dlData, formatId: chosen.id, ext: chosen.ext });
     }
 
     if (rawEndpoint.startsWith("files/") && req.method === "GET") {

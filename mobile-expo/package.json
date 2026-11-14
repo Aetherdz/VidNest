@@ -1,6 +1,6 @@
 {
   "name": "vidnest-mobile-expo",
-  "version": "4.0.1",
+  "version": "4.3.0",
   "private": true,
   "type": "module",
   "main": "index.js",

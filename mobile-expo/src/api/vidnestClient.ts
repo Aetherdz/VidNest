@@ -1,6 +1,6 @@
 import { pickBestFormat, validatePublicHttpsUrl, type FormatOption } from "../utils/urlValidator.ts";
 
-export const DEFAULT_SERVER_URL = "https://vidnest-web.onrender.com";
+export const DEFAULT_SERVER_URL = "https://vidnest-six.vercel.app";
 
 export type ProbeResponse = { probeId: string; formats: FormatOption[]; title?: string; [key: string]: unknown };
 export type DownloadResponse = { file: string; title: string; url: string; [key: string]: unknown };
@@ -514,7 +514,9 @@ export class VidNestClient {
       return {
         ...direct,
         url: this.resolveFileUrl(direct.file),
-        chosenFormat: direct.formatId ? { id: direct.formatId, ext: this.fileExtension(direct.file) } : undefined,
+        chosenFormat: direct.formatId
+          ? { id: direct.formatId, ext: typeof direct.ext === "string" && direct.ext ? direct.ext : this.fileExtension(direct.file) }
+          : undefined,
       };
     } catch (err) {
       if ((isTikTokUrl(checked.normalized) || extractTwitterStatusId(checked.normalized)) && this.fetcher === fetch) {

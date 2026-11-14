@@ -46,7 +46,7 @@ import LibraryScreen from './src/components/LibraryScreen.tsx';
 import PlayerModal, { type PlayableItem } from './src/components/PlayerModal.tsx';
 
 const DEFAULT_BASE_URL =
-  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://vidnest-web.onrender.com';
+  process.env.EXPO_PUBLIC_VIDNEST_API_URL ?? 'https://vidnest-six.vercel.app';
 
 export default function App() {
   const [fontsLoaded] = useFonts({

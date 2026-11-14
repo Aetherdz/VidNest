@@ -107,7 +107,7 @@ jobs:
             - **Platform:** Android (API 26+)
             - **Framework:** React Native + Expo SDK 54, StyleX, TypeScript
             - **Design System:** Sand & Terracotta Studio v4 + Readex Pro by **Atheerium** (`zaikabdou`)
-            - **Backend:** Permanent Cloud API (`https://vidnest-web.onrender.com`)
+            - **Backend:** Permanent Cloud API (`https://vidnest-six.vercel.app`)
             - **Features:** 1,800+ media platforms, 4K UHD video, lossless audio (MP3/M4A), zero ads, zero trackers.
             
             Download `VidNest.apk` directly to install.

@@ -2,7 +2,7 @@
   "expo": {
     "name": "VidNest",
     "slug": "vidnest",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "icon": "./assets/icon.png",
@@ -20,7 +20,7 @@
     },
     "android": {
       "package": "com.atheerium.vidnest",
-      "versionCode": 4,
+      "versionCode": 5,
       "supportsRTL": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -29,8 +29,12 @@
       "intentFilters": [
         {
           "action": "SEND",
-          "category": ["DEFAULT"],
-          "data": { "mimeType": "text/plain" }
+          "category": [
+            "DEFAULT"
+          ],
+          "data": {
+            "mimeType": "text/plain"
+          }
         }
       ]
     },

@@ -265,7 +265,101 @@ async function probeTwitterFallback(rawUrl) {
   return null;
 }
 
+const DIRECT_MEDIA_EXTENSIONS = [
+  "mp4", "webm", "mov", "m4v", "mkv", "mp3", "m4a", "aac", "ogg", "opus", "wav", "flac",
+];
+
+function directMediaExtension(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || ""));
+    const match = parsed.pathname.toLowerCase().match(/\.([a-z0-9]{2,5})$/);
+    const ext = match ? match[1] : "";
+    return DIRECT_MEDIA_EXTENSIONS.includes(ext) ? ext : "";
+  } catch {
+    return "";
+  }
+}
+
+function directMediaTitle(rawUrl) {
+  try {
+    const parsed = new URL(String(rawUrl || ""));
+    const base = decodeURIComponent(parsed.pathname.split("/").filter(Boolean).pop() || "");
+    return base.replace(/\.[a-z0-9]{2,5}$/i, "").replace(/[-_]+/g, " ").trim().slice(0, 160) || "Media file";
+  } catch {
+    return "Media file";
+  }
+}
+
+async function probeDirectMediaUrl(rawUrl) {
+  const ext = directMediaExtension(rawUrl);
+  if (!ext) return null;
+  try {
+    const res = await fetchWithTimeout(rawUrl, {
+      method: "GET",
+      headers: { Range: "bytes=0-1", Accept: "*/*", "User-Agent": "Mozilla/5.0 (compatible; VidNest/4.2)" },
+    }, 7000);
+    if (!res.ok && res.status !== 206) return null;
+    const type = String(res.headers.get("content-type") || "").toLowerCase();
+    const isAudio = type.startsWith("audio/");
+    if (!isAudio && !type.startsWith("video/") && !/^(mp4|webm|mov|m4v|mkv)$/.test(ext)) return null;
+    const range = String(res.headers.get("content-range") || "");
+    const total = Number(range.split("/").pop());
+    const size = Number.isFinite(total) && total > 0 ? total : null;
+    const hasVideo = !isAudio && !/^(mp3|m4a|aac|ogg|opus|wav|flac)$/.test(ext);
+    const heightMatch = String(rawUrl).match(/(?:^|[^0-9])(\d{3,4})p(?:[^0-9]|$)/i);
+    const height = hasVideo && heightMatch ? Number(heightMatch[1]) : null;
+    return {
+      probeId: `direct-${ext}`,
+      title: directMediaTitle(rawUrl),
+      uploader: "Direct link",
+      extractor: "DirectMedia",
+      duration: null,
+      thumbnail: null,
+      formats: [
+        {
+          id: "direct",
+          ext,
+          quality: hasVideo ? (height ? `${height}p` : "Original") : "Audio",
+          height,
+          width: null,
+          filesize: size,
+          hasVideo,
+          hasAudio: true,
+          format: hasVideo ? `${height ? `${height}p` : "Original"} (${ext.toUpperCase()})` : `Audio (${ext.toUpperCase()})`,
+          directUrl: rawUrl,
+        },
+      ],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function isInstagramUrl(rawUrl) {
+  try {
+    const host = new URL(String(rawUrl || "")).hostname.toLowerCase();
+    return host === "instagram.com" || host.endsWith(".instagram.com") || host === "instagr.am";
+  } catch {
+    return false;
+  }
+}
+
+function annotateUpstreamError(data, rawUrl) {
+  const payload = data && typeof data === "object" ? data : {};
+  if (payload.code) return payload;
+  const message = String(payload.error || "");
+  let code = "";
+  if (/not supported/i.test(message)) code = "server_outdated";
+  else if (/login|log in|cookies|authentication|private|empty media|could not inspect/i.test(message)) code = "needs_login";
+  // Instagram answers anonymous probes with an empty or generic failure; it needs a session.
+  if (!code && isInstagramUrl(rawUrl)) code = "needs_login";
+  if (!code) return payload;
+  return { ...payload, code };
+}
+
 async function probeDirectPlatformFallback(rawUrl) {
+  const directMedia = await probeDirectMediaUrl(rawUrl);
+  if (directMedia) return directMedia;
   if (isTikTokUrl(rawUrl)) {
     const tk = await probeTikTokFallback(rawUrl);
     if (tk) return tk;
@@ -610,7 +704,7 @@ module.exports = async function handler(req, res) {
 
       const upstream = await postRender("/api/formats", body);
       const data = await upstream.json().catch(() => ({ error: "Invalid upstream response" }));
-      return res.status(upstream.status).json(data);
+      return res.status(upstream.status).json(annotateUpstreamError(data, body.url));
     }
 
     if (rawEndpoint === "api/download" && req.method === "POST") {
@@ -621,6 +715,7 @@ module.exports = async function handler(req, res) {
         probePrefix.startsWith("fed-") ||
         probePrefix.startsWith("tiktok-") ||
         probePrefix.startsWith("x-") ||
+        probePrefix.startsWith("direct-") ||
         extractYouTubeVideoId(body.url) ||
         isTikTokUrl(body.url) ||
         extractTwitterStatusId(body.url)
@@ -637,7 +732,7 @@ module.exports = async function handler(req, res) {
       }
       const upstream = await postRender("/api/download", body);
       const data = await upstream.json().catch(() => ({ error: "Invalid upstream response" }));
-      return res.status(upstream.status).json(data);
+      return res.status(upstream.status).json(annotateUpstreamError(data, body.url));
     }
 
     if (rawEndpoint === "api/quick-download" && req.method === "POST") {
@@ -656,12 +751,12 @@ module.exports = async function handler(req, res) {
       const direct = await postRender("/api/quick-download", body);
       if (direct.status !== 404) {
         const data = await direct.json().catch(() => ({ error: "Invalid upstream response" }));
-        return res.status(direct.status).json(data);
+        return res.status(direct.status).json(annotateUpstreamError(data, body.url));
       }
       const probeRes = await postRender("/api/formats", { url: body.url });
       const probeData = await probeRes.json().catch(() => ({}));
       if (!probeRes.ok) {
-        return res.status(probeRes.status).json(probeData);
+        return res.status(probeRes.status).json(annotateUpstreamError(probeData, body.url));
       }
       const chosen = pickBestFormat(probeData.formats, body.mode || "video");
       if (!chosen || !probeData.probeId) {
@@ -674,7 +769,7 @@ module.exports = async function handler(req, res) {
       });
       const dlData = await dlRes.json().catch(() => ({}));
       if (!dlRes.ok) {
-        return res.status(dlRes.status).json(dlData);
+        return res.status(dlRes.status).json(annotateUpstreamError(dlData, body.url));
       }
       return res.status(200).json({ ...dlData, formatId: chosen.id });
     }
@@ -689,6 +784,8 @@ module.exports = async function handler(req, res) {
 
     return res.status(404).json({ error: "Not found" });
   } catch (err) {
-    return res.status(502).json({ error: err instanceof Error ? err.message : "Upstream proxy error" });
+    return res
+      .status(502)
+      .json(annotateUpstreamError({ error: err instanceof Error ? err.message : "Upstream proxy error" }));
   }
 };

@@ -143,6 +143,13 @@ function safeFileName(file: string, fallbackExt: string): string {
   return `vidnest-${Date.now()}.${fallbackExt || "mp4"}`;
 }
 
+function describeError(error: unknown): string {
+  const code = error && typeof error === "object" ? (error as { code?: string }).code : "";
+  if (code === "needs_login") return copy.ar.errorNeedsLogin;
+  if (code === "server_outdated") return copy.ar.errorServerOutdated;
+  return error instanceof Error ? error.message : copy.ar.errorNetwork;
+}
+
 export function useDownloader(initialServerUrl: string) {
   const [serverUrl, setServerUrl] = useState(initialServerUrl);
   const [url, setUrl] = useState('');
@@ -227,8 +234,8 @@ export function useDownloader(initialServerUrl: string) {
         };
         setPreview(data);
         return data;
-      } catch {
-        setErrorMessage(copy.ar.errorAnalyze);
+      } catch (error) {
+        setErrorMessage(describeError(error));
         return null;
       } finally {
         setIsAnalyzing(false);
@@ -339,7 +346,7 @@ export function useDownloader(initialServerUrl: string) {
           ...prev.filter((entry) => entry.id !== id),
         ]);
       } catch (error) {
-        const message = error instanceof Error ? error.message : copy.ar.errorNetwork;
+        const message = describeError(error);
         setDownloads((prev) =>
           prev.map((entry) =>
             entry.id === id ? { ...entry, status: 'error', errorMessage: message } : entry,

@@ -367,7 +367,11 @@ export class VidNestClient {
       body: JSON.stringify(body),
     });
     const data = await response.json().catch(() => ({})) as Record<string, unknown>;
-    if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : `Request failed (${response.status}).`);
+    if (!response.ok) {
+      const error = new Error(typeof data.error === "string" ? data.error : `Request failed (${response.status}).`);
+      if (typeof data.code === "string") (error as Error & { code?: string }).code = data.code;
+      throw error;
+    }
     return data as T;
   }
 

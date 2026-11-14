@@ -90,6 +90,8 @@ const copy = {
     pasteDenied: "تعذّر الوصول إلى الحافظة تلقائيًا. يُرجى لصق الرابط يدويًا.",
     genericError: "تعذّر إكمال الطلب. تحقق من صحة الرابط وحاول مجددًا.",
     noFormats: "لم يعرض هذا الرابط جودات قابلة للتنزيل. تأكد من أن الرابط عام ومتاح.",
+    needsLogin: "هذا الرابط يحتاج حسابًا مسجّلًا للدخول (منشور خاص أو محمي). جرّب رابطًا عامًا آخر.",
+    serverUnavailable: "هذا الموقع غير متاح مؤقتًا. جرّب منصة أخرى أو الصق رابط ملف مباشر ينتهي بـ mp4 أو mp3.",
     successToast: "أُضيف إلى التنزيلات",
     analyzingStage: "جارٍ التحقق من الرابط…",
     downloadingStage: "جارٍ تنزيل الملف من المصدر…",
@@ -191,6 +193,8 @@ const copy = {
     pasteDenied: "Clipboard access was denied. Please paste the link manually.",
     genericError: "The request failed. Please verify the link and try again.",
     noFormats: "No downloadable formats were found for this link. Ensure the link is public.",
+    needsLogin: "This link requires a signed-in account (private or protected post). Try a public link instead.",
+    serverUnavailable: "This site is temporarily unavailable. Try another platform or paste a direct media file link such as mp4 or mp3.",
     successToast: "Added to downloads",
     analyzingStage: "Checking the link…",
     downloadingStage: "Downloading your file…",
@@ -655,6 +659,14 @@ async function ensureCsrfToken() {
 function buildFileUrl(fileName) {
   if (/^https?:\/\//i.test(fileName)) return fileName;
   return `${activeApiBase}/files/${encodeURIComponent(fileName)}`;
+}
+
+function describeError(error) {
+  const fallback = error instanceof Error ? error.message : t("genericError");
+  const code = error && typeof error === "object" ? error.code : "";
+  if (code === "needs_login") return t("needsLogin");
+  if (code === "server_outdated") return t("serverUnavailable");
+  return fallback;
 }
 
 function setMessage(textMsg, isError = false) {
@@ -1274,6 +1286,7 @@ async function postJson(path, body) {
         return result;
       }
       lastError = new Error(typeof result.error === "string" ? result.error : t("genericError"));
+      lastError.code = typeof result.code === "string" ? result.code : "";
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(t("genericError"));
     }
@@ -1395,7 +1408,7 @@ async function triggerDownloadExecution(payload, downloadTitle, downloadSource, 
     clearTimeout(stageTimer2);
     activeJob = null;
     renderDownloads();
-    const errMsg = error instanceof Error ? error.message : t("genericError");
+    const errMsg = describeError(error);
     setMessage(errMsg, true);
     showToast(errMsg);
   } finally {
@@ -1650,7 +1663,7 @@ async function inspectFormats(targetUrl) {
     requestInProgress = false;
     renderFormats(probe);
   } catch (error) {
-    setMessage(error instanceof Error ? error.message : t("genericError"), true);
+    setMessage(describeError(error), true);
   } finally {
     requestInProgress = false;
     if (downloadButton && selectedFormat) {

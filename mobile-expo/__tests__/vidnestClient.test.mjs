@@ -154,3 +154,15 @@ test('relative server file names still resolve against the API base', async () =
   const dl = await client.downloadFormat('https://vimeo.com/1', 'probe-2', 'v1');
   assert.equal(dl.url, 'https://api.example.test/files/a1b2c3.webm');
 });
+
+test('server error codes survive into the thrown error so the UI can explain the cause', async () => {
+  const mockFetch = async (url) => {
+    if (url.endsWith('/api/session')) return new Response(JSON.stringify({ csrfToken: 'csrf-err' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'This media site is not supported.', code: 'server_outdated' }), { status: 400, headers: { 'content-type': 'application/json' } });
+  };
+  const client = new VidNestClient('https://api.example.test/', mockFetch);
+  await assert.rejects(
+    () => client.downloadFormat('https://vimeo.com/1', 'probe-1', 'v1'),
+    (error) => error.code === 'server_outdated' && /not supported/.test(error.message),
+  );
+});

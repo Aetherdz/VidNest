@@ -661,6 +661,13 @@ function buildFileUrl(fileName) {
   return `${activeApiBase}/files/${encodeURIComponent(fileName)}`;
 }
 
+function pickError(error) {
+  if (error && error.name === "AggregateError" && Array.isArray(error.errors) && error.errors.length > 0) {
+    return error.errors.find((entry) => entry && entry.code) || error.errors[error.errors.length - 1] || error;
+  }
+  return error;
+}
+
 function describeError(error) {
   const fallback = error instanceof Error ? error.message : t("genericError");
   const code = error && typeof error === "object" ? error.code : "";
@@ -1663,7 +1670,7 @@ async function inspectFormats(targetUrl) {
     requestInProgress = false;
     renderFormats(probe);
   } catch (error) {
-    setMessage(describeError(error), true);
+    setMessage(describeError(pickError(error)), true);
   } finally {
     requestInProgress = false;
     if (downloadButton && selectedFormat) {

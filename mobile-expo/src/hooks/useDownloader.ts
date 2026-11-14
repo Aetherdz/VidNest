@@ -131,6 +131,18 @@ function buildOptions(formats: FormatOption[]): QualityOption[] {
   return options.slice(0, 6);
 }
 
+function safeFileName(file: string, fallbackExt: string): string {
+  try {
+    const path = /^https?:/i.test(file) ? new URL(file).pathname : file;
+    const base = decodeURIComponent(path.split("/").pop() ?? "");
+    const cleaned = base.replace(/[^A-Za-z0-9._-]/g, "-").replace(/^-+|-+$/g, "");
+    if (cleaned && /\.[A-Za-z0-9]{2,5}$/.test(cleaned)) return cleaned;
+  } catch {
+    /* fall through to the generated name */
+  }
+  return `vidnest-${Date.now()}.${fallbackExt || "mp4"}`;
+}
+
 export function useDownloader(initialServerUrl: string) {
   const [serverUrl, setServerUrl] = useState(initialServerUrl);
   const [url, setUrl] = useState('');
@@ -297,7 +309,7 @@ export function useDownloader(initialServerUrl: string) {
         let localUri = res.url;
         try {
           if (FileSystem?.cacheDirectory) {
-            const target = `${FileSystem.cacheDirectory}${encodeURIComponent(res.file)}`;
+            const target = `${FileSystem.cacheDirectory}${safeFileName(res.file, option.ext)}`;
             const downloaded = await FileSystem.downloadAsync(res.url, target);
             localUri = downloaded.uri;
           }

@@ -437,6 +437,21 @@ export class VidNestClient {
     }
   }
 
+  private resolveFileUrl(file: string): string {
+    if (/^https?:\/\//i.test(file)) return file;
+    return `${this.baseUrl}/files/${encodeURIComponent(file)}`;
+  }
+
+  private fileExtension(file: string): string {
+    try {
+      const path = /^https?:/i.test(file) ? new URL(file).pathname : file;
+      const ext = path.split(".").pop() ?? "";
+      return /^[a-z0-9]{2,5}$/i.test(ext) ? ext.toLowerCase() : "mp4";
+    } catch {
+      return "mp4";
+    }
+  }
+
   async downloadFormat(url: string, probeId: string, formatId: string): Promise<DownloadResponse> {
     const checked = validatePublicHttpsUrl(url);
     if (!checked.valid || !checked.normalized) throw new Error(checked.error ?? "Invalid URL.");
@@ -463,7 +478,7 @@ export class VidNestClient {
     }
     const result = await this.post<DownloadResponse>("/api/download", { url: checked.normalized, probeId, formatId });
     if (typeof result.file !== "string" || typeof result.title !== "string") throw new Error("The server returned an invalid download response.");
-    return { ...result, url: `${this.baseUrl}/files/${encodeURIComponent(result.file)}` };
+    return { ...result, url: this.resolveFileUrl(result.file) };
   }
 
   async download(url: string, probeId: string, formatId: string): Promise<DownloadResponse> { return this.downloadFormat(url, probeId, formatId); }
@@ -488,8 +503,8 @@ export class VidNestClient {
       const direct = await this.post<DownloadResponse & { formatId?: string }>("/api/quick-download", { url: checked.normalized, mode });
       return {
         ...direct,
-        url: `${this.baseUrl}/files/${encodeURIComponent(direct.file)}`,
-        chosenFormat: direct.formatId ? { id: direct.formatId, ext: direct.file.split(".").pop() ?? "mp4" } : undefined,
+        url: this.resolveFileUrl(direct.file),
+        chosenFormat: direct.formatId ? { id: direct.formatId, ext: this.fileExtension(direct.file) } : undefined,
       };
     } catch (err) {
       if ((isTikTokUrl(checked.normalized) || extractTwitterStatusId(checked.normalized)) && this.fetcher === fetch) {

@@ -125,3 +125,32 @@ test('VidNestClient falls back to TikTok direct stream when backend fails', asyn
   const dl = await client.downloadFormat('https://www.tiktok.com/@tiktok/video/7106594312292453675', probe.probeId, 'hd');
   assert.equal(dl.url, 'https://tikwm.com/video/hdplay.mp4');
 });
+
+test('absolute server file URLs are returned as-is, never prefixed by the API base', async () => {
+  const direct = 'https://cdn.example.test/video/720.mp4?expire=123&sig=abc';
+  const mockFetch = async (url) => {
+    if (url.endsWith('/api/session')) return new Response(JSON.stringify({ csrfToken: 'csrf-abs' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.endsWith('/api/download')) return new Response(JSON.stringify({ file: direct, title: 'Direct' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.endsWith('/api/quick-download')) return new Response(JSON.stringify({ file: direct, title: 'Direct', formatId: '136' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    throw new Error(`Unexpected URL ${url}`);
+  };
+  const client = new VidNestClient('https://api.example.test/', mockFetch);
+
+  const dl = await client.downloadFormat('https://youtube.com/watch?v=1', 'probe-1', '136');
+  assert.equal(dl.url, direct);
+
+  const quick = await client.quickDownload('https://youtube.com/watch?v=1', 720);
+  assert.equal(quick.url, direct);
+  assert.equal(quick.chosenFormat.ext, 'mp4');
+});
+
+test('relative server file names still resolve against the API base', async () => {
+  const mockFetch = async (url) => {
+    if (url.endsWith('/api/session')) return new Response(JSON.stringify({ csrfToken: 'csrf-rel' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    if (url.endsWith('/api/download')) return new Response(JSON.stringify({ file: 'a1b2c3.webm', title: 'Rel' }), { status: 200, headers: { 'content-type': 'application/json' } });
+    throw new Error(`Unexpected URL ${url}`);
+  };
+  const client = new VidNestClient('https://api.example.test/', mockFetch);
+  const dl = await client.downloadFormat('https://vimeo.com/1', 'probe-2', 'v1');
+  assert.equal(dl.url, 'https://api.example.test/files/a1b2c3.webm');
+});

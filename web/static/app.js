@@ -1628,7 +1628,7 @@ async function inspectFormats(targetUrl) {
       candidates.push(probeTwitterFromClient(url));
     }
     if (extractYouTubeVideoId(url)) {
-      candidates.push(probeYouTubeFromClient(url));
+      candidates.push(probeYouTubeFromClient(extractYouTubeVideoId(url)));
     }
     candidates.push(postJson("/api/formats", { url }));
 
